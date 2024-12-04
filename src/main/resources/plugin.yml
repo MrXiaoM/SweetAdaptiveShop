@@ -1,0 +1,11 @@
+name: SweetAdaptiveShop
+version: '${version}'
+main: top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop
+api-version: 1.13
+depend: [ Vault ]
+softdepend: [ PlaceholderAPI ]
+authors: [ MrXiaoM ]
+commands:
+  sweetadptiveshop:
+    description: 'The main command of SweetAdaptiveShop'
+    aliases: [ sashop, sas ]
