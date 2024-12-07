@@ -3,6 +3,8 @@ package top.mrxiaom.sweet.adaptiveshop;
 import org.jetbrains.annotations.NotNull;
 import top.mrxiaom.pluginbase.BukkitPlugin;
 import top.mrxiaom.pluginbase.EconomyHolder;
+import top.mrxiaom.sweet.adaptiveshop.database.BuyShopDatabase;
+import top.mrxiaom.sweet.adaptiveshop.database.OrderDatabase;
 
 public class SweetAdaptiveShop extends BukkitPlugin {
     public static SweetAdaptiveShop getInstance() {
@@ -24,11 +26,22 @@ public class SweetAdaptiveShop extends BukkitPlugin {
         return options.economy();
     }
 
+    private BuyShopDatabase buyShopDatabase;
+    private OrderDatabase orderDatabase;
+
+    public BuyShopDatabase getBuyShopDatabase() {
+        return buyShopDatabase;
+    }
+
+    public OrderDatabase getOrderDatabase() {
+        return orderDatabase;
+    }
 
     @Override
     protected void beforeEnable() {
         options.registerDatabase(
-                // 在这里添加数据库 (如果需要的话)
+                this.buyShopDatabase = new BuyShopDatabase(this),
+                this.orderDatabase = new OrderDatabase(this)
         );
     }
 
