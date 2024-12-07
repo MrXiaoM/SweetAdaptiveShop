@@ -3,7 +3,10 @@ version: '${version}'
 main: top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop
 api-version: 1.13
 depend: [ Vault ]
-softdepend: [ PlaceholderAPI ]
+softdepend:
+  - PlaceholderAPI
+  - MythicLib
+  - MythicMobs
 authors: [ MrXiaoM ]
 commands:
   sweetadptiveshop:

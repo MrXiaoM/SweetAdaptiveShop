@@ -1,10 +1,21 @@
 package top.mrxiaom.sweet.adaptiveshop;
         
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.BukkitPlugin;
 import top.mrxiaom.pluginbase.EconomyHolder;
 import top.mrxiaom.sweet.adaptiveshop.database.BuyShopDatabase;
 import top.mrxiaom.sweet.adaptiveshop.database.OrderDatabase;
+import top.mrxiaom.sweet.adaptiveshop.mythic.IMythic;
+import top.mrxiaom.sweet.adaptiveshop.mythic.Mythic4;
+import top.mrxiaom.sweet.adaptiveshop.mythic.Mythic5;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class SweetAdaptiveShop extends BukkitPlugin {
     public static SweetAdaptiveShop getInstance() {
@@ -26,6 +37,7 @@ public class SweetAdaptiveShop extends BukkitPlugin {
         return options.economy();
     }
 
+    private IMythic mythic;
     private BuyShopDatabase buyShopDatabase;
     private OrderDatabase orderDatabase;
 
@@ -37,8 +49,26 @@ public class SweetAdaptiveShop extends BukkitPlugin {
         return orderDatabase;
     }
 
+    @Nullable
+    public IMythic getMythic() {
+        return mythic;
+    }
+
     @Override
     protected void beforeEnable() {
+        Plugin mythicPlugin = Bukkit.getPluginManager().getPlugin("MythicMobs");
+        if (mythicPlugin != null) {
+            String ver = mythicPlugin.getDescription().getVersion();
+            if (ver.startsWith("5.")) {
+                mythic = new Mythic5();
+            } else if (ver.startsWith("4.")) {
+                mythic = new Mythic4();
+            } else {
+                mythic = null;
+            }
+        } else {
+            mythic = null;
+        }
         options.registerDatabase(
                 this.buyShopDatabase = new BuyShopDatabase(this),
                 this.orderDatabase = new OrderDatabase(this)
@@ -48,5 +78,20 @@ public class SweetAdaptiveShop extends BukkitPlugin {
     @Override
     protected void afterEnable() {
         getLogger().info("SweetAdaptiveShop 加载完毕");
+    }
+
+    public void saveResource(String path, File file) {
+        try (InputStream resource = getResource(path)) {
+            if (resource == null) return;
+            try (FileOutputStream output = new FileOutputStream(file)) {
+                int len;
+                byte[] buffer = new byte[1024];
+                while ((len = resource.read(buffer)) != -1) {
+                    output.write(buffer, 0, len);
+                }
+            }
+        } catch (IOException e) {
+            warn("保存资源文件 " + path + " 时出错", e);
+        }
     }
 }

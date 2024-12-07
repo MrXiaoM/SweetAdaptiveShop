@@ -1,0 +1,4 @@
+# 重定向路径
+path:
+  buy: ./buy
+  order: ./order

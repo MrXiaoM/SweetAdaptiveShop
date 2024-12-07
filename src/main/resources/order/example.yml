@@ -1,0 +1,36 @@
+# 保留用
+name: '订单名'
+# 图标，格式为 物品ID#cmd 或 mythic-mm物品
+icon: stone
+# 物品显示名
+display: '&e订单名'
+# 图标lore
+# 插件会把 needs 和 operation 所在行替换成相应格式
+lore:
+  - ''
+  - '  &f订单需求:'
+  - needs
+  - '  &8(物品放入背包自动算入进度)'
+  - ''
+  - '  &f报酬: &e100金币'
+  - ''
+  - operation
+operations:
+  apply: '&a左键&7 | &f提交订单'
+  cannot: '&c&m左键&7 | &f未满足需求'
+# 需求商品
+# 这里输入的不是原版物品ID，而是收购商品ID，格式为
+# <收购商品ID>:<数量> [是否计入动态值]
+# [是否计入动态值]不输入则为关闭
+needs:
+  # 要求64个小麦，提交后不计入动态值
+  - wheat:64
+  # 要求32个泥土，提交后计入动态值，仅作示例，默认配置没有泥土商品
+  #- dirt:32 true
+# 提交奖励
+# [console] 开头以管理员权限执行
+# [player] 开头以玩家权限执行
+# [message] 开头给玩家发送聊天提示
+# 支持 PAPI 变量
+rewards:
+  - '[console]money give %player_name% 100'

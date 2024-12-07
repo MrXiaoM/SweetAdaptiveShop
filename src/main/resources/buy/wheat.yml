@@ -1,0 +1,28 @@
+# 商品类型
+# vanilla 为原版, mythic 为mm物品
+type: vanilla
+material: WHEAT
+# mythic: ExampleItem
+
+# 价格设置
+price:
+  # 基础价格
+  base: 1.0
+  # 价格缩放设置
+  scale:
+    # 缩放范围百分比，默认配置为最低可以缩放到 1%
+    range: 1-100
+    when-dynamic-value:
+      # 动态值大于多少时开始缩放
+      large-than: 100
+      # 价格缩放公式，此处 value 为动态值变量减去 large-than 的值
+      # 此处为动态值大于 100 后，基础缩放为 100%，每增加1点动态值，缩放减少 1%
+      scale-formula: '1 - value / 100'
+# 动态值设置
+dynamic-value:
+  # 每向系统出售一个，动态值增加多少
+  add: 0.01
+  # 动态值重置周期，daily 每天4点，weekly 每周一4点，monthly 每月一号4点
+  routine: weekly
+  # 显示该数值的公式，value 为动态值变量
+  display-formula: value

@@ -17,6 +17,7 @@ repositories {
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
     maven("https://jitpack.io")
     maven("https://repo.rosewooddev.io/repository/public/")
+    maven("https://mvn.lumine.io/repository/maven/")
     maven("https://oss.sonatype.org/content/groups/public/")
 }
 
@@ -27,11 +28,17 @@ dependencies {
     compileOnly("net.milkbowl.vault:VaultAPI:1.7")
     compileOnly("me.clip:placeholderapi:2.11.6")
 
+    compileOnly("io.lumine:Mythic-Dist:4.13.0")
+    compileOnly("io.lumine:Mythic:5.6.2")
+    compileOnly("io.lumine:LumineUtils:1.20-SNAPSHOT")
+
     implementation("net.kyori:adventure-api:4.17.0")
     implementation("net.kyori:adventure-platform-bukkit:4.3.4")
     implementation("net.kyori:adventure-text-minimessage:4.17.0")
-    implementation("de.tr7zw:item-nbt-api:2.13.2")
+    implementation("de.tr7zw:item-nbt-api:2.14.0")
     implementation("com.zaxxer:HikariCP:4.0.3") { isTransitive = false }
+    implementation("commons-lang:commons-lang:2.6")
+    implementation("com.udojava:EvalEx:2.7")
     implementation("org.jetbrains:annotations:21.0.0")
     implementation("com.github.MrXiaoM:PluginBase:1+")
 }
@@ -50,6 +57,8 @@ tasks {
             "top.mrxiaom.pluginbase" to "base",
             "com.zaxxer.hikari" to "hikari",
             "de.tr7zw.changeme.nbtapi" to "nbtapi",
+            "org.apache.commons" to "commons",
+            "com.udojava.evalex" to "evalex",
             "net.kyori" to "kyori",
         ).forEach { (original, target) ->
             relocate(original, "$shadowGroup.$target")
