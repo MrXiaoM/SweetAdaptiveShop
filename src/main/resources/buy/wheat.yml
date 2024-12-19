@@ -1,3 +1,5 @@
+# 商品属于哪个分组
+group: default
 # 商品类型
 # vanilla 为原版, mythic 为mm物品
 type: vanilla

@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 import java.util.function.Function;
 
 public class BuyShop {
-    public final String id;
+    public final String group, id;
     public final ItemStack displayItem;
     public final Function<ItemStack, Boolean> matcher;
     public final double priceBase;
@@ -28,7 +28,8 @@ public class BuyShop {
     public final Routine routine;
     public final String dynamicValueDisplayFormula;
 
-    BuyShop(String id, ItemStack displayItem, Function<ItemStack, Boolean> matcher, double priceBase, DoubleRange scaleRange, double scaleWhenDynamicLargeThan, String scaleFormula, double dynamicValueAdd, Routine routine, String dynamicValueDisplayFormula) {
+    BuyShop(String group, String id, ItemStack displayItem, Function<ItemStack, Boolean> matcher, double priceBase, DoubleRange scaleRange, double scaleWhenDynamicLargeThan, String scaleFormula, double dynamicValueAdd, Routine routine, String dynamicValueDisplayFormula) {
+        this.group = group;
         this.id = id;
         this.displayItem = displayItem;
         this.matcher = matcher;
@@ -44,6 +45,7 @@ public class BuyShop {
     @Nullable
     public static BuyShop load(AbstractModule holder, File file, String id) {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        String group = config.getString("group", "default");
         String type = config.getString("type");
         ItemStack displayItem;
         Function<ItemStack, Boolean> matcher;
@@ -96,7 +98,7 @@ public class BuyShop {
             holder.warn("[buy] 读取 " + id + " 时出错，表达式测试出错");
             return null;
         }
-        return new BuyShop(id, displayItem, matcher, priceBase, scaleRange, scaleWhenDynamicLargeThan, scaleFormula, dynamicValueAdd, routine, dynamicValueDisplayFormula);
+        return new BuyShop(group, id, displayItem, matcher, priceBase, scaleRange, scaleWhenDynamicLargeThan, scaleFormula, dynamicValueAdd, routine, dynamicValueDisplayFormula);
     }
     private static boolean testFormulaFail(String formula) {
         BigDecimal result = Utils.eval(formula, e -> e.and("value", BigDecimal.valueOf(1.23)));
