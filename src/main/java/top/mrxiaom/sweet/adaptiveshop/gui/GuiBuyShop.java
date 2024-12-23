@@ -106,7 +106,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                 ItemStack item = shop.displayItem.clone();
                 String displayName = buySlot.display.replace("%name%", shop.displayName);
                 List<String> lore = new ArrayList<>();
-                List<String> loreTemplate = bypass ? buySlot.lore : buyBypassLore;
+                List<String> loreTemplate = bypass ? buyBypassLore : buySlot.lore;
                 for (String s : loreTemplate) {
                     if (s.equals("description")) {
                         lore.addAll(ItemStackUtil.getItemLore(shop.displayItem));
