@@ -31,21 +31,17 @@ public class OrderDatabase extends AbstractPluginHolder implements IDatabase, Li
     }
 
     @Override
-    public void reload(Connection connection, String prefix) {
+    public void reload(Connection conn, String prefix) throws SQLException {
         TABLE_ORDERS = (prefix + "player_orders").toUpperCase();
-        try (Connection conn = connection) {
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "CREATE TABLE if NOT EXISTS `" + TABLE_ORDERS + "`(" +
-                            "`name` VARCHAR(64)," +
-                            "`order` VARCHAR(64)," +
-                            "`has_done` INT," + // 兼容 SQLite
-                            "`outdate` TIMESTAMP," +
-                            "PRIMARY KEY(`name`, `order`)" +
-                    ");")) {
-                ps.execute();
-            }
-        } catch (SQLException e) {
-            warn(e);
+        try (PreparedStatement ps = conn.prepareStatement(
+                "CREATE TABLE if NOT EXISTS `" + TABLE_ORDERS + "`(" +
+                        "`name` VARCHAR(64)," +
+                        "`order` VARCHAR(64)," +
+                        "`has_done` INT," + // 兼容 SQLite
+                        "`outdate` TIMESTAMP," +
+                        "PRIMARY KEY(`name`, `order`)" +
+                        ");")) {
+            ps.execute();
         }
     }
 

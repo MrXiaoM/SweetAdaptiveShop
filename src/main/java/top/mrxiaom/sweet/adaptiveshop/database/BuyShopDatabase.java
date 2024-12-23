@@ -29,29 +29,25 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, 
     }
 
     @Override
-    public void reload(Connection connection, String prefix) {
+    public void reload(Connection conn, String prefix) throws SQLException {
         TABLE_BUY_SHOP = (prefix + "buy_shop").toUpperCase();
         TABLE_PLAYER_BUY_SHOP = (prefix + "player_buy_shop").toUpperCase();
-        try (Connection conn = connection) {
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "CREATE TABLE if NOT EXISTS `" + TABLE_BUY_SHOP + "`(" +
-                            "`item` VARCHAR(64) PRIMARY KEY," +
-                            "`dynamic_value` DOUBLE," +
-                            "`outdate` TIMESTAMP" +
-                    ");")) {
-                ps.execute();
-            }
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "CREATE TABLE if NOT EXISTS `" + TABLE_PLAYER_BUY_SHOP + "`(" +
-                            "`name` VARCHAR(64)," +
-                            "`item` VARCHAR(64)," +
-                            "`outdate` TIMESTAMP," +
-                            "PRIMARY KEY(`name`, `item`)" +
-                    ");")) {
-                ps.execute();
-            }
-        } catch (SQLException e) {
-            warn(e);
+        try (PreparedStatement ps = conn.prepareStatement(
+                "CREATE TABLE if NOT EXISTS `" + TABLE_BUY_SHOP + "`(" +
+                        "`item` VARCHAR(64) PRIMARY KEY," +
+                        "`dynamic_value` DOUBLE," +
+                        "`outdate` TIMESTAMP" +
+                        ");")) {
+            ps.execute();
+        }
+        try (PreparedStatement ps = conn.prepareStatement(
+                "CREATE TABLE if NOT EXISTS `" + TABLE_PLAYER_BUY_SHOP + "`(" +
+                        "`name` VARCHAR(64)," +
+                        "`item` VARCHAR(64)," +
+                        "`outdate` TIMESTAMP," +
+                        "PRIMARY KEY(`name`, `item`)" +
+                        ");")) {
+            ps.execute();
         }
     }
 
