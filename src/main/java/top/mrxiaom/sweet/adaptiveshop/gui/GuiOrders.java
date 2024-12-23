@@ -145,7 +145,7 @@ public class GuiOrders extends AbstractGuiModule {
     public class Impl extends Gui {
         List<Pair<Order, PlayerOrder>> orders;
         protected Impl(Player player, String title, char[] inventory) {
-            super(player, title, inventory);
+            super(player, PAPI.setPlaceholders(player, title), inventory);
             this.orders = OrderManager.inst().getPlayerOrders(player);
         }
 

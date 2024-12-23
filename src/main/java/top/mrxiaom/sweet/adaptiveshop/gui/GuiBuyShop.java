@@ -13,6 +13,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import top.mrxiaom.pluginbase.func.AutoRegister;
 import top.mrxiaom.pluginbase.func.gui.LoadedIcon;
 import top.mrxiaom.pluginbase.gui.IGui;
@@ -173,7 +174,7 @@ public class GuiBuyShop extends AbstractGuiModule {
         return instanceOf(GuiBuyShop.class);
     }
 
-    public static Impl create(Player player, Group group) {
+    public static Impl create(@NotNull Player player, @NotNull Group group) {
         GuiBuyShop self = inst();
         return self.new Impl(player, self.guiTitle, self.guiInventory, group);
     }
@@ -181,8 +182,8 @@ public class GuiBuyShop extends AbstractGuiModule {
     public class Impl extends Gui {
         Group group;
         List<Pair<BuyShop, PlayerItem>> items;
-        protected Impl(Player player, String title, char[] inventory, Group group) {
-            super(player, title, inventory);
+        protected Impl(@NotNull Player player, String title, char[] inventory, @NotNull Group group) {
+            super(player, PAPI.setPlaceholders(player, title.replace("%type%", group.display)), inventory);
             this.group = group;
             this.items = BuyShopManager.inst().getPlayerItems(player, group.id);
         }
