@@ -1,6 +1,7 @@
 package top.mrxiaom.sweet.adaptiveshop;
         
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -78,6 +79,10 @@ public class SweetAdaptiveShop extends BukkitPlugin {
     @Override
     protected void afterEnable() {
         getLogger().info("SweetAdaptiveShop 加载完毕");
+    }
+
+    public String getDBKey(Player player) {
+        return player.getName(); // TODO
     }
 
     public void saveResource(String path, File file) {

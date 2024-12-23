@@ -28,3 +28,9 @@ dynamic-value:
   routine: weekly
   # 显示该数值的公式，value 为动态值变量
   display-formula: value
+  # 动态值大于多少时，%dynamic_placeholder% 显示的内容
+  # 配置中越大越先显示
+  placeholders:
+    200.0: 商品过剩
+    50.0: 正常供需
+    0.0: 供不应求

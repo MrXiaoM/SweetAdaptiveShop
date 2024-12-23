@@ -1,5 +1,9 @@
 package top.mrxiaom.sweet.adaptiveshop.database;
 
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.database.IDatabase;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
@@ -8,13 +12,20 @@ import top.mrxiaom.sweet.adaptiveshop.func.AbstractPluginHolder;
 
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase {
+public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, Listener {
     private String TABLE_BUY_SHOP, TABLE_PLAYER_BUY_SHOP;
+    public Map<String, List<PlayerItem>> itemsCache = new HashMap<>();
     public BuyShopDatabase(SweetAdaptiveShop plugin) {
         super(plugin);
+        registerEvents();
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent e) {
+        String id = plugin.getDBKey(e.getPlayer());
+        itemsCache.remove(id);
     }
 
     @Override
@@ -114,7 +125,15 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase {
     }
 
     @Nullable
+    public List<PlayerItem> getPlayerItems(Player player) {
+        String id = plugin.getDBKey(player);
+        return getPlayerItems(id);
+    }
+
+    @Nullable
     public List<PlayerItem> getPlayerItems(String player) {
+        List<PlayerItem> cache = itemsCache.get(player);
+        if (cache != null) return cache;
         try (Connection conn = plugin.getConnection()) {
             List<PlayerItem> list = new ArrayList<>();
             try (PreparedStatement ps = conn.prepareStatement(
@@ -129,6 +148,7 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase {
                     }
                 }
             }
+            itemsCache.put(player, list);
             return list;
         } catch (SQLException e) {
             warn(e);
@@ -136,6 +156,10 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase {
         return null;
     }
 
+    public void setPlayerItems(Player player, List<PlayerItem> list) {
+        String id = plugin.getDBKey(player);
+        setPlayerItems(id, list);
+    }
     public void setPlayerItems(String player, List<PlayerItem> list) {
         try (Connection conn = plugin.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(
@@ -156,6 +180,7 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase {
                 ps.executeBatch();
                 ps.clearBatch();
             }
+            itemsCache.put(player, list);
         } catch (SQLException e) {
             warn(e);
         }

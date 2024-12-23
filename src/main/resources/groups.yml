@@ -1,0 +1,8 @@
+groups:
+  default:
+    display: '杂物'
+    # 每天刷新多少个物品
+    daily-count: 5
+  rpg:
+    display: '副本'
+    daily-count: 5

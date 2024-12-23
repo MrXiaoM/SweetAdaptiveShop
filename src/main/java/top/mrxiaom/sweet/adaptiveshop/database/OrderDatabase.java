@@ -1,5 +1,9 @@
 package top.mrxiaom.sweet.adaptiveshop.database;
 
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.database.IDatabase;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
@@ -8,12 +12,22 @@ import top.mrxiaom.sweet.adaptiveshop.func.AbstractPluginHolder;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class OrderDatabase extends AbstractPluginHolder implements IDatabase {
+public class OrderDatabase extends AbstractPluginHolder implements IDatabase, Listener {
     private String TABLE_ORDERS;
+    public Map<String, List<PlayerOrder>> ordersCache = new HashMap<>();
     public OrderDatabase(SweetAdaptiveShop plugin) {
         super(plugin);
+        registerEvents();
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent e) {
+        String id = plugin.getDBKey(e.getPlayer());
+        ordersCache.remove(id);
     }
 
     @Override
@@ -36,7 +50,15 @@ public class OrderDatabase extends AbstractPluginHolder implements IDatabase {
     }
 
     @Nullable
+    public List<PlayerOrder> getPlayerOrders(Player player) {
+        String id = plugin.getDBKey(player);
+        return getPlayerOrders(id);
+    }
+
+    @Nullable
     public List<PlayerOrder> getPlayerOrders(String player) {
+        List<PlayerOrder> cache = ordersCache.get(player);
+        if (cache != null) return cache;
         try (Connection conn = plugin.getConnection()) {
             List<PlayerOrder> list = new ArrayList<>();
             try (PreparedStatement ps = conn.prepareStatement(
@@ -52,11 +74,17 @@ public class OrderDatabase extends AbstractPluginHolder implements IDatabase {
                     }
                 }
             }
+            ordersCache.put(player, list);
             return list;
         } catch (SQLException e) {
             warn(e);
         }
         return null;
+    }
+
+    public void setPlayerOrders(Player player, List<PlayerOrder> list) {
+        String id = plugin.getDBKey(player);
+        setPlayerOrders(id, list);
     }
 
     public void setPlayerOrders(String player, List<PlayerOrder> list) {
@@ -80,9 +108,15 @@ public class OrderDatabase extends AbstractPluginHolder implements IDatabase {
                 ps.executeBatch();
                 ps.clearBatch();
             }
+            ordersCache.put(player, list);
         } catch (SQLException e) {
             warn(e);
         }
+    }
+
+    public void markOrderDone(Player player, String order) {
+        String id = plugin.getDBKey(player);
+        markOrderDone(id, order);
     }
 
     public void markOrderDone(String player, String order) {
@@ -93,6 +127,12 @@ public class OrderDatabase extends AbstractPluginHolder implements IDatabase {
                 ps.setString(1, player);
                 ps.setString(2, order);
                 ps.execute();
+            }
+            List<PlayerOrder> orders = ordersCache.get(player);
+            for (PlayerOrder playerOrder : orders) {
+                if (playerOrder.getOrder().equals(order)) {
+                    playerOrder.setHasDone(true);
+                }
             }
         } catch (SQLException e) {
             warn(e);

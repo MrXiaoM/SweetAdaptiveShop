@@ -1,27 +1,46 @@
 package top.mrxiaom.sweet.adaptiveshop.func;
 
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.func.AutoRegister;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
+import top.mrxiaom.sweet.adaptiveshop.database.BuyShopDatabase;
+import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerItem;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.BuyShop;
+import top.mrxiaom.sweet.adaptiveshop.func.entry.Group;
 import top.mrxiaom.sweet.adaptiveshop.utils.Utils;
 
 import java.io.File;
-import java.util.Map;
-import java.util.TreeMap;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @AutoRegister
 public class BuyShopManager extends AbstractModule {
     File folder;
     Map<String, BuyShop> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-    Map<String, Map<String, BuyShop>> byGroup = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    Map<String, Group> groups = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     public BuyShopManager(SweetAdaptiveShop plugin) {
         super(plugin);
     }
 
     @Override
     public void reloadConfig(MemoryConfiguration config) {
+        File file = new File(plugin.getDataFolder(), "groups.yml");
+        if (!file.exists()) {
+            plugin.saveResource("groups.yml", file);
+        }
+        groups.clear();
+        YamlConfiguration configGroups = YamlConfiguration.loadConfiguration(file);
+        ConfigurationSection section = configGroups.getConfigurationSection("groups");
+        if (section != null) for (String groupName : section.getKeys(false)) {
+            Group loaded = Group.load(section, groupName);
+            groups.put(groupName, loaded);
+        }
+
         String path = config.getString("path.buy", "./buy");
         folder = path.startsWith("./") ? new File(plugin.getDataFolder(), path) : new File(path);
         if (!folder.exists()) {
@@ -31,15 +50,14 @@ public class BuyShopManager extends AbstractModule {
         map.clear();
         reloadConfig(folder);
         info("加载了 " + map.size() + " 个收购商品");
-        byGroup.clear();
         for (Map.Entry<String, BuyShop> entry : map.entrySet()) {
             BuyShop cfg = entry.getValue();
-            Map<String, BuyShop> shopMap = byGroup.get(cfg.group);
-            if (shopMap == null) {
-                shopMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+            Group group = groups.get(cfg.group);
+            if (group == null) {
+                warn("[收购][" + cfg.id + "] 找不到分组 " + cfg.group);
+                continue;
             }
-            shopMap.put(entry.getKey(), entry.getValue());
-            byGroup.put(cfg.group, shopMap);
+            group.buyShop.put(entry.getKey(), entry.getValue());
         }
         OrderManager.inst().realReloadConfig(config); // 确保加载顺序正确
     }
@@ -53,7 +71,12 @@ public class BuyShopManager extends AbstractModule {
             }
             String name = file.getName();
             if (!name.endsWith(".yml") || name.contains(" ")) continue;
-            BuyShop loaded = BuyShop.load(this, file, name.substring(0, name.length() - 4));
+            String id = name.substring(0, name.length() - 4);
+            if (map.containsKey(id)) {
+                warn("重名的收购配置 " + file.getAbsolutePath());
+                continue;
+            }
+            BuyShop loaded = BuyShop.load(this, file, id);
             if (loaded == null) continue;
             map.put(loaded.id, loaded);
         }
@@ -62,6 +85,48 @@ public class BuyShopManager extends AbstractModule {
     @Nullable
     public BuyShop get(String id) {
         return map.get(id);
+    }
+
+    @Nullable
+    public Group getGroup(String group){
+        return groups.get(group);
+    }
+
+    /**
+     * 获取玩家商品列表，并自动刷新已过期商品
+     */
+    public List<BuyShop> getPlayerItems(Player player, @Nullable String group) {
+        BuyShopDatabase db = plugin.getBuyShopDatabase();
+        List<PlayerItem> items = db.getPlayerItems(player);
+        if (items == null) items = new ArrayList<>();
+        List<BuyShop> list = new ArrayList<>();
+        Map<String, Integer> counts = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        items.removeIf(it -> {
+            if (it.isOutdate()) return true;
+            BuyShop shop = get(it.getItem());
+            if (shop == null) return true;
+            list.add(shop);
+            int count = counts.getOrDefault(shop.group, 0) + 1;
+            counts.put(shop.group, count);
+            return false;
+        });
+        LocalDateTime tomorrow = Utils.nextOutdate();
+        boolean flag = false;
+        for (Group g : groups.values()) {
+            int needs = Math.max(0, g.dailyCount - counts.getOrDefault(g.id, 0));
+            for (int i = 0; i < needs; i++) {
+                BuyShop shop = g.randomNewItem(items);
+                if (shop == null) break;
+                list.add(shop);
+                items.add(new PlayerItem(shop.id, tomorrow));
+                flag = true;
+            }
+        }
+        if (flag) db.setPlayerItems(player, items);
+        if (group != null) {
+            list.removeIf(it -> !it.group.equals(group));
+        }
+        return list;
     }
 
     public static BuyShopManager inst() {

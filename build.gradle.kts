@@ -19,6 +19,7 @@ repositories {
     maven("https://repo.rosewooddev.io/repository/public/")
     maven("https://mvn.lumine.io/repository/maven/")
     maven("https://oss.sonatype.org/content/groups/public/")
+    maven("https://s01.oss.sonatype.org/content/groups/public/")
 }
 
 dependencies {
@@ -40,7 +41,7 @@ dependencies {
     implementation("commons-lang:commons-lang:2.6")
     implementation("com.udojava:EvalEx:2.7")
     implementation("org.jetbrains:annotations:21.0.0")
-    implementation("top.mrxiaom:PluginBase:1.0.9")
+    implementation("top.mrxiaom:PluginBase:1.1.1")
 }
 java {
     val javaVersion = JavaVersion.toVersion(targetJavaVersion)

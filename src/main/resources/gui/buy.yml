@@ -1,0 +1,55 @@
+title: '收购商店'
+inventory:
+  - '框框框框框框框框框'
+  - '框　物物物物物　框'
+  - '框框框框框框框框框'
+  - '框框框框原副订刷框'
+main-icons:
+  物:
+    material: PAPER
+    display: '&e&l%name%'
+    lore:
+      - description
+      - ''
+      - '  &f价格: &e%price%金币'
+      - '  &f动态: &e%dynamic%'
+      - '  &f趋势: &e%dynamic_placeholder%'
+      - ''
+      - operation
+    operations:
+      one: '&a左键&7 | &f提交1个物品 &7(获得%price%金币)'
+      stack: '&b右键&7 | &f提交一组(%count%个)物品 &7(获得%price%金币)'
+      all: '&eShift+左键&7 | &f提交全部(%count%个)物品 &7(获得%price%金币)'
+  物_空白:
+    material: AIR
+  刷:
+    material: PAPER
+    custom-model-data: 10000
+    display: '&a刷新商店 &7(%type%)'
+    lore:
+      - ''
+      - '  &f可用刷新券数量: &e%count%'
+      - ''
+      - operation
+    operations:
+      available: '&a左键&7 | &f刷新当前分类的商店物品'
+      unavailable: '&c&m左键&7 | &f可用刷新券不足'
+other-icons:
+  原:
+    material: PAPER
+    custom-model-data: 10000
+    display: '&e杂物收购'
+    left-click-commands:
+      - '[console]sweetadptiveshop open buy default %player_name%'
+  副:
+    material: PAPER
+    custom-model-data: 10000
+    display: '&e副本收购'
+    left-click-commands:
+      - '[console]sweetadptiveshop open buy rpg %player_name%'
+  订:
+    material: PAPER
+    custom-model-data: 10000
+    display: '&e收购订单'
+    left-click-commands:
+      - '[console]sweetadptiveshop open order %player_name%'

@@ -1,16 +1,22 @@
 package top.mrxiaom.sweet.adaptiveshop.func.entry;
 
+import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.Nullable;
+import top.mrxiaom.pluginbase.func.gui.actions.IAction;
 import top.mrxiaom.pluginbase.utils.Util;
+import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractModule;
 import top.mrxiaom.sweet.adaptiveshop.func.BuyShopManager;
 import top.mrxiaom.sweet.adaptiveshop.utils.Utils;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
+import static top.mrxiaom.pluginbase.func.AbstractGuiModule.loadActions;
 
 public class Order {
     public static class Need {
@@ -32,10 +38,11 @@ public class Order {
     public final List<String> lore;
     public final String opApply;
     public final String opCannot;
+    public final String opDone;
     public final List<Need> needs;
-    public final List<String> rewards;
+    public final List<IAction> rewards;
 
-    Order(String id, ItemStack icon, String name, String display, List<String> lore, String opApply, String opCannot, List<Need> needs, List<String> rewards) {
+    Order(String id, ItemStack icon, String name, String display, List<String> lore, String opApply, String opCannot, String opDone, List<Need> needs, List<IAction> rewards) {
         this.id = id;
         this.icon = icon;
         this.name = name;
@@ -43,8 +50,53 @@ public class Order {
         this.lore = lore;
         this.opApply = opApply;
         this.opCannot = opCannot;
+        this.opDone = opDone;
         this.needs = needs;
         this.rewards = rewards;
+    }
+
+    public boolean match(Player player) {
+        for (Order.Need need : needs) {
+            int count = need.item.getCount(player);
+            if (count < need.amount) return false;
+        }
+        return true;
+    }
+
+    public void takeAll(Player player) {
+        PlayerInventory inv = player.getInventory();
+        Map<Need, Integer> takeCount = new HashMap<>();
+        for (int i = 0; i < inv.getSize(); i++) {
+            ItemStack item = inv.getItem(i);
+            if (item == null || item.getType().equals(Material.AIR) || item.getAmount() == 0) continue;
+            for (Need need : needs) {
+                if (need.item.match(item)) {
+                    int needAmount = takeCount.getOrDefault(need, need.amount);
+                    if (needAmount == 0) break;
+                    int amount = item.getAmount();
+                    if (needAmount >= amount) {
+                        needAmount -= amount;
+                        item.setType(Material.AIR);
+                        item.setAmount(0);
+                        item = null;
+                    } else {
+                        item.setAmount(amount - needAmount);
+                        needAmount = 0;
+                    }
+                    takeCount.put(need, needAmount);
+                    inv.setItem(i, item);
+                    break;
+                }
+            }
+        }
+        SweetAdaptiveShop plugin = SweetAdaptiveShop.getInstance();
+        for (Map.Entry<Need, Integer> entry : takeCount.entrySet()) {
+            Integer needToTake = entry.getValue();
+            if (needToTake > 0) {
+                BuyShop item = entry.getKey().item;
+                plugin.warn("预料中的错误: 玩家 " + player + " 提交任务 " + id + " 的需求物品 " + item.id + " 时，有 " + needToTake + " 个物品未提交成功");
+            }
+        }
     }
 
     @Nullable
@@ -70,6 +122,7 @@ public class Order {
         }
         String opApply = config.getString("operations.apply", "");
         String opCannot = config.getString("operations.cannot", "");
+        String opDone = config.getString("operations.done", "");
         List<String> needsRaw = config.getStringList("needs");
         List<Need> needs = new ArrayList<>();
         BuyShopManager manager = BuyShopManager.inst();
@@ -93,7 +146,8 @@ public class Order {
             }
             needs.add(new Need(item, amount, affectDynamicValue));
         }
-        List<String> rewards = config.getStringList("rewards");
-        return new Order(id, icon, name, display, lore, opApply, opCannot, needs, rewards);
+        needs.sort(Comparator.comparingInt(it -> it.item.matchPriority)); // 确保 mythic 在前面
+        List<IAction> rewards = loadActions(config, "rewards");
+        return new Order(id, icon, name, display, lore, opApply, opCannot, opDone, needs, rewards);
     }
 }

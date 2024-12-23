@@ -2,21 +2,29 @@ package top.mrxiaom.sweet.adaptiveshop.utils;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.udojava.evalex.Expression;
+import de.tr7zw.changeme.nbtapi.NBT;
 import org.apache.commons.lang.math.DoubleRange;
 import org.bukkit.Material;
 import org.bukkit.configuration.MemorySection;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
-import top.mrxiaom.pluginbase.utils.IA;
+import top.mrxiaom.pluginbase.utils.ItemStackUtil;
 import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.mythic.IMythic;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.function.Consumer;
 
+import static top.mrxiaom.pluginbase.func.AbstractPluginHolder.t;
 import static top.mrxiaom.pluginbase.utils.ItemStackUtil.getItemMeta;
 
 public class Utils {
@@ -24,6 +32,75 @@ public class Utils {
     public static boolean mkdirs(File file) {
         return file.mkdirs();
     }
+
+    public static long now() {
+        return LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+    }
+
+    public static LocalDateTime nextOutdate() {
+        // TODO: 让用户自定义明天过期时间
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isBefore(LocalDate.now().atTime(4, 0, 0))) {
+            return LocalTime.of(4, 0, 0).atDate(LocalDate.now());
+        }
+        return LocalDate.now().plusDays(1).atTime(4, 0, 0);
+    }
+
+    public static int resolveRefreshCount(Player player, String nbtKey) {
+        long now = Utils.now();
+        int count = 0;
+        PlayerInventory inv = player.getInventory();
+        for (int i = 0; i < inv.getSize(); i++) {
+            ItemStack item = inv.getItem(i);
+            if (item == null || item.getType().equals(Material.AIR) || item.getAmount() == 0) continue;
+            if (NBT.get(item, nbt -> {
+                if (!nbt.hasTag(nbtKey)) return false;
+                Long outdate = nbt.getLong(nbtKey);
+                return outdate == 0L || now < outdate;
+            })) {
+                count += item.getAmount();
+            }
+        }
+        return count;
+    }
+
+    public static boolean takeFirstRefreshCount(Player player, String nbtKey) {
+        long now = Utils.now();
+        PlayerInventory inv = player.getInventory();
+        boolean flag = false;
+        for (int i = 0; i < inv.getSize(); i++) {
+            ItemStack item = inv.getItem(i);
+            if (item == null || item.getType().equals(Material.AIR) || item.getAmount() == 0) continue;
+            Long outdate = NBT.get(item, nbt -> {
+                if (!nbt.hasTag(nbtKey)) return null;
+                return nbt.getLong(nbtKey);
+            });
+            if (outdate == null) continue; // 如果不是刷新券物品，跳过
+            if (outdate != 0 && now >= outdate) { // 如果有过期时间，且已过期，清除物品
+                String name = ItemStackUtil.getItemDisplayName(item);
+                t(player, "&e刷新券 &f" + name + "&e 已过期");
+                item.setType(Material.AIR);
+                item.setAmount(0);
+                inv.setItem(i, null);
+                continue;
+            }
+            // 如果没有过期时间，或者刷新券没有过期，且还没有扣过刷新券，扣除一张
+            if (!flag) {
+                flag = true;
+                int amount = item.getAmount();
+                if (amount > 1) {
+                    item.setAmount(amount - 1);
+                } else {
+                    item.setType(Material.AIR);
+                    item.setAmount(0);
+                    item = null;
+                }
+                inv.setItem(i, item);
+            }
+        }
+        return flag;
+    }
+
     public static ItemStack getItem(String str) {
         if (str.startsWith("mythic-")) {
             IMythic mythic = SweetAdaptiveShop.getInstance().getMythic();

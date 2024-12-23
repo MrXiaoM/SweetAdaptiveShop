@@ -2,3 +2,5 @@
 path:
   buy: ./buy
   order: ./order
+
+orders-count: 3
