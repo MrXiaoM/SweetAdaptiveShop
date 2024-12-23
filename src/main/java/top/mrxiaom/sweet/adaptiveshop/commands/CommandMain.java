@@ -1,5 +1,5 @@
 package top.mrxiaom.sweet.adaptiveshop.commands;
-        
+
 import com.google.common.collect.Lists;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -25,7 +25,9 @@ import top.mrxiaom.sweet.adaptiveshop.utils.TimeUtils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @AutoRegister
 public class CommandMain extends AbstractModule implements CommandExecutor, TabCompleter, Listener {

@@ -155,6 +155,7 @@ public class Utils {
     public static BigDecimal eval(String formula, Consumer<Expression> variables) {
         if (formula == null) {
             SweetAdaptiveShop.getInstance().warn("无法计算空表达式", new RuntimeException());
+            return null;
         }
         try {
             Expression expression = new Expression(formula);

@@ -1,6 +1,5 @@
 package top.mrxiaom.sweet.adaptiveshop.func.entry;
 
-import com.udojava.evalex.Expression;
 import de.tr7zw.changeme.nbtapi.NBT;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -84,33 +83,20 @@ public class BuyShop {
 
     public double getPrice(double dynamic) {
         if (dynamic <= scaleWhenDynamicLargeThan) return priceBase;
-        try {
-            BigDecimal value = BigDecimal.valueOf(dynamic - scaleWhenDynamicLargeThan);
-            BigDecimal scaleValue = new Expression(scaleFormula)
-                    .with("value", value)
-                    .eval();
-            double min = scaleRange.minimum() / 100.0;
-            double max = scaleRange.maximum() / 100.0;
-            double scale = Math.max(min, Math.min(max, scaleValue.doubleValue()));
-            double price = priceBase * scale;
-            return Double.parseDouble(String.format("%.2f", price));
-        } catch (Expression.ExpressionException e) {
-            SweetAdaptiveShop.getInstance().warn("表达式 " + scaleFormula + " 计算出错", e);
-            return priceBase;
-        }
+        BigDecimal value = BigDecimal.valueOf(dynamic - scaleWhenDynamicLargeThan);
+        BigDecimal scaleValue = Utils.eval(scaleFormula, e -> e.with("value", value));
+        if (scaleValue == null) return priceBase;
+        double min = scaleRange.minimum() / 100.0;
+        double max = scaleRange.maximum() / 100.0;
+        double scale = Math.max(min, Math.min(max, scaleValue.doubleValue()));
+        double price = priceBase * scale;
+        return Double.parseDouble(String.format("%.2f", price));
     }
 
     public String getDisplayDynamic(double dynamic) {
-        try {
-            BigDecimal value = BigDecimal.valueOf(dynamic);
-            BigDecimal dynamicValue = new Expression(dynamicValueDisplayFormula)
-                    .with("value", value)
-                    .eval();
-            return String.format("%.2f", dynamicValue.doubleValue());
-        } catch (Expression.ExpressionException e) {
-            SweetAdaptiveShop.getInstance().warn("表达式 " + dynamicValueDisplayFormula + " 计算出错", e);
-            return String.format("%.2f", dynamic);
-        }
+        BigDecimal value = BigDecimal.valueOf(dynamic);
+        BigDecimal dynamicValue = Utils.eval(dynamicValueDisplayFormula, e -> e.with("value", value));
+        return String.format("%.2f", dynamicValue == null ? dynamic : dynamicValue.doubleValue());
     }
 
     @NotNull
