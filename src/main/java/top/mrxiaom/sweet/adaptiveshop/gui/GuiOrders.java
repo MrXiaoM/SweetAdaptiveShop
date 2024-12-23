@@ -20,7 +20,6 @@ import top.mrxiaom.pluginbase.utils.AdventureItemStack;
 import top.mrxiaom.pluginbase.utils.PAPI;
 import top.mrxiaom.pluginbase.utils.Pair;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
-import top.mrxiaom.sweet.adaptiveshop.database.OrderDatabase;
 import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerOrder;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractGuiModule;
 import top.mrxiaom.sweet.adaptiveshop.func.OrderManager;
@@ -95,7 +94,7 @@ public class GuiOrders extends AbstractGuiModule {
                 for (String s : order.lore) {
                     if (s.equals("needs")) {
                         for (Order.Need need : order.needs) {
-                            int count = need.item.getCount(player);
+                            int count = hasDone ? need.amount : Math.min(need.amount, need.item.getCount(player));
                             lore.add(orderLine.replace("%name%", need.item.displayName)
                                     .replace("%count%", String.valueOf(count))
                                     .replace("%require%", String.valueOf(need.amount)));
