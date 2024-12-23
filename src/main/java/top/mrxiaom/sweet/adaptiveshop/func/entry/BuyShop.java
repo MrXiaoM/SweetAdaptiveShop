@@ -3,6 +3,7 @@ package top.mrxiaom.sweet.adaptiveshop.func.entry;
 import com.udojava.evalex.Expression;
 import de.tr7zw.changeme.nbtapi.NBT;
 import org.apache.commons.lang.math.DoubleRange;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -154,8 +155,13 @@ public class BuyShop {
                 inv.setItem(i, item);
             }
         }
+        SweetAdaptiveShop plugin = SweetAdaptiveShop.getInstance();
+        double value = dynamicValueAdd * (count - j);
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            plugin.getBuyShopDatabase().addDynamicValue(id, value, routine.nextOutdate());
+        });
         if (j > 0) {
-            SweetAdaptiveShop.getInstance().warn("预料中的错误: 玩家 " + player.getName() + " 向收购商店 " + id + " 提交 " + count + " 个物品时，有 " + j + " 个物品没有提交成功");
+            plugin.warn("预料中的错误: 玩家 " + player.getName() + " 向收购商店 " + id + " 提交 " + count + " 个物品时，有 " + j + " 个物品没有提交成功");
         }
     }
 

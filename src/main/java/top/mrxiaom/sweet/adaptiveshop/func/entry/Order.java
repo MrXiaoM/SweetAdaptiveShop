@@ -1,5 +1,6 @@
 package top.mrxiaom.sweet.adaptiveshop.func.entry;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -91,9 +92,14 @@ public class Order {
         }
         SweetAdaptiveShop plugin = SweetAdaptiveShop.getInstance();
         for (Map.Entry<Need, Integer> entry : takeCount.entrySet()) {
+            Need need = entry.getKey();
             Integer needToTake = entry.getValue();
+            BuyShop item = need.item;
+            double value = item.dynamicValueAdd * (need.amount - needToTake);
+            if (need.affectDynamicValue) Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                plugin.getBuyShopDatabase().addDynamicValue(item.id, value, item.routine.nextOutdate());
+            });
             if (needToTake > 0) {
-                BuyShop item = entry.getKey().item;
                 plugin.warn("预料中的错误: 玩家 " + player + " 提交任务 " + id + " 的需求物品 " + item.id + " 时，有 " + needToTake + " 个物品未提交成功");
             }
         }
