@@ -163,7 +163,7 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
     private static final List<String> listArgGive = Lists.newArrayList(
             "buy", "order");
     private static final List<String> listOpArg0 = Lists.newArrayList(
-            "open", "reload");
+            "open", "give", "reload");
     @Nullable
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {

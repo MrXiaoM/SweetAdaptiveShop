@@ -26,6 +26,8 @@ public enum Messages implements IHolderAccessor {
             "    &7物品模板请见 template.yml，",
             "    &7物品类型可使用 buy 或 order。",
             "    &7时间计算操作请参考<click:open_url:https://www.minebbs.com/resources/9883><hover:show_text:'我是链接'>&b&n这个链接</hover></click>&r&7的文档说明。",
+            "    &7特别地，多个计算操作使用空格而不是下划线隔开，",
+            "    &7时间填&f 0 &7或者&f infinite &7代表永久。",
             "&f/sashop reload database",
             "  &8-- &7重载 database.yml 并重新连接数据库",
             "&f/sashop reload",
