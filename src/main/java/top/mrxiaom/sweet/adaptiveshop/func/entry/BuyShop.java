@@ -260,7 +260,10 @@ public class BuyShop {
         ConfigurationSection section = config.getConfigurationSection("dynamic-value.placeholders");
         if (section != null) for (String s : section.getKeys(false)) {
             Double value = Util.parseDouble(s).orElse(null);
-            if (value == null) continue;
+            if (value == null) {
+                holder.warn("[buy] 读取 " + id + " 时出错，dynamic-value.placeholders 的一个键 " + s + " 无法转换为数字");
+                continue;
+            }
             String placeholder = section.getString(s);
             dynamicValuePlaceholders.put(value, placeholder);
         }
