@@ -1,5 +1,6 @@
 package top.mrxiaom.sweet.adaptiveshop.gui;
 
+import de.tr7zw.changeme.nbtapi.NBT;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -26,6 +27,7 @@ import top.mrxiaom.sweet.adaptiveshop.func.entry.Group;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static top.mrxiaom.sweet.adaptiveshop.utils.Utils.resolveRefreshCount;
 import static top.mrxiaom.sweet.adaptiveshop.utils.Utils.takeFirstRefreshCount;
@@ -133,6 +135,20 @@ public class GuiBuyShop extends AbstractGuiModule {
                 }
                 AdventureItemStack.setItemDisplayName(item, PAPI.setPlaceholders(player, displayName));
                 AdventureItemStack.setItemLore(item, PAPI.setPlaceholders(player, lore));
+                if (!buySlot.nbtStrings.isEmpty() || !buySlot.nbtInts.isEmpty()) {
+                    NBT.modify(item, nbt -> {
+                        for (Map.Entry<String, String> entry : buySlot.nbtStrings.entrySet()) {
+                            String value = PAPI.setPlaceholders(player, entry.getValue());
+                            nbt.setString(entry.getKey(), value);
+                        }
+                        for (Map.Entry<String, String> entry : buySlot.nbtInts.entrySet()) {
+                            String value = PAPI.setPlaceholders(player, entry.getValue());
+                            Integer j = Util.parseInt(value).orElse(null);
+                            if (j == null) continue;
+                            nbt.setInteger(entry.getKey(), j);
+                        }
+                    });
+                }
                 return item;
             }
             case '刷': {
