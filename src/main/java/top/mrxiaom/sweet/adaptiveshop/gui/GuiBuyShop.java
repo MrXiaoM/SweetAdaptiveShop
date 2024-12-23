@@ -99,7 +99,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                 }
                 int count = shop.getCount(player);
                 double price = bypass ? shop.priceBase : shop.getPrice(dynamic);
-                String priceString = String.format("%.2f", price);
+                String priceString = String.format("%.2f", price).replace(".00", "");
                 String dynamicDisplay = bypass ? "" : shop.getDisplayDynamic(dynamic);
                 String dynamicPlaceholder = bypass ? "" : shop.getDynamicValuePlaceholder(dynamic);
 
@@ -118,11 +118,11 @@ public class GuiBuyShop extends AbstractGuiModule {
                         }
                         int stackSize = item.getType().getMaxStackSize();
                         if (count >= stackSize) {
-                            lore.add(buyStack.replace("%price%", String.format("%.2f", price * stackSize))
+                            lore.add(buyStack.replace("%price%", String.format("%.2f", price * stackSize).replace(".00", ""))
                                     .replace("%count%", String.valueOf(stackSize)));
                         }
                         if (count >= 1) {
-                            lore.add(buyAll.replace("%price%", String.format("%.2f", price * count))
+                            lore.add(buyAll.replace("%price%", String.format("%.2f", price * count).replace(".00", ""))
                                     .replace("%count%", String.valueOf(count)));
                         }
                         continue;
@@ -214,7 +214,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                             price = shop.getPrice(dynamic);
                         }
                         plugin.getEconomy().giveMoney(player, price);
-                        AdventureUtil.sendMessage(player, "&a你提交了 &e1&a 个 &e" + shop.displayName + "&a，获得 &e" + String.format("%.2f", price) + "&a 金币!");
+                        AdventureUtil.sendMessage(player, "&a你提交了 &e1&a 个 &e" + shop.displayName + "&a，获得 &e" + String.format("%.2f", price).replace(".00", "") + "&a 金币!");
                         postSubmit(view);
                         return;
                     }
@@ -237,7 +237,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                             double dynamic = dyn == null ? 0.0 : dyn;
                             price = shop.getPrice(dynamic);
                         }
-                        String money = String.format("%.2f", price * stackSize);
+                        String money = String.format("%.2f", price * stackSize).replace(".00", "");
                         plugin.getEconomy().giveMoney(player, Double.parseDouble(money));
                         AdventureUtil.sendMessage(player, "&a你提交了 &e" + stackSize + "&a 个 &e" + shop.displayName + "&a，获得 &e" + money + "&a 金币!");
                         postSubmit(view);
@@ -261,7 +261,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                             double dynamic = dyn == null ? 0.0 : dyn;
                             price = shop.getPrice(dynamic);
                         }
-                        String money = String.format("%.2f", price * count);
+                        String money = String.format("%.2f", price * count).replace(".00", "");
                         plugin.getEconomy().giveMoney(player, Double.parseDouble(money));
                         AdventureUtil.sendMessage(player, "&a你提交了 &e" + count + "&a 个 &e" + shop.displayName + "&a，获得 &e" + money + "&a 金币!");
                         postSubmit(view);
