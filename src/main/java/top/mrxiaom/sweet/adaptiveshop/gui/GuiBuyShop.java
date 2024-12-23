@@ -144,7 +144,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                             lore.add(count > 0 ? refreshAvailable : refreshUnavailable);
                             continue;
                         }
-                        lore.add(s);
+                        lore.add(s.replace("%count%", String.valueOf(count)));
                     }
                     return lore;
                 });

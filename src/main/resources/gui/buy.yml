@@ -42,7 +42,7 @@ main-icons:
       - operation
     operations:
       available: '&a左键&7 | &f刷新当前分类的商店物品'
-      unavailable: '&c&m左键&7 | &f可用刷新券不足'
+      unavailable: '&c&m左键&r&7 | &f可用刷新券不足'
 other-icons:
   框:
     material: WHITE_STAINED_GLASS_PANE
