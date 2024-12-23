@@ -154,6 +154,7 @@ public class GuiOrders extends AbstractGuiModule {
         public void onClick(InventoryAction action, ClickType click, InventoryType.SlotType slotType,
                             int slot, ItemStack currentItem, ItemStack cursor,
                             InventoryView view, InventoryClickEvent event) {
+            event.setCancelled(true);
             Character id = getClickedId(slot);
             if (id != null) {
                 if (id.equals('刷')) {
