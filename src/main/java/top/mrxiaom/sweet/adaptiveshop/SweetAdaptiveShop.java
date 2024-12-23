@@ -1,5 +1,6 @@
 package top.mrxiaom.sweet.adaptiveshop;
         
+import de.tr7zw.changeme.nbtapi.utils.MinecraftVersion;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -48,6 +49,14 @@ public class SweetAdaptiveShop extends BukkitPlugin {
     @Nullable
     public IMythic getMythic() {
         return mythic;
+    }
+
+    @Override
+    protected void beforeLoad() {
+        MinecraftVersion.replaceLogger(getLogger());
+        MinecraftVersion.disableUpdateCheck();
+        MinecraftVersion.disableBStats();
+        MinecraftVersion.getVersion();
     }
 
     @Override
