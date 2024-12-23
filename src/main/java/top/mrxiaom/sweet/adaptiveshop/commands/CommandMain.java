@@ -11,7 +11,6 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.func.AutoRegister;
-import top.mrxiaom.pluginbase.utils.ItemStackUtil;
 import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.Messages;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
@@ -49,7 +48,7 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
                 String name = args.length >= 3 ? args[2] : "default";
                 buyGroup = BuyShopManager.inst().getGroup(name);
                 if (buyGroup == null) {
-                    return t(sender, "分组 " + name + " 不存在");
+                    return Messages.group__not_found.tm(sender, name);
                 }
                 playerCheckIndex = 3;
             } else {
@@ -60,49 +59,49 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
                 if (sender.isOp()) {
                     player = Util.getOnlinePlayer(args[playerCheckIndex]).orElse(null);
                     if (player == null) {
-                        return t(sender, "&e玩家 " + args[playerCheckIndex] + " 不在线");
+                        return Messages.player__not_online.tm(sender, args[playerCheckIndex]);
                     }
                 } else {
-                    return t(sender, "&c你没有执行此操作的权限");
+                    return Messages.player__no_permission.tm(sender);
                 }
             }
             if (player == null) {
-                return t(sender, "只有玩家才能执行该命令");
+                return Messages.player__only.tm(sender);
             }
             switch (type.toLowerCase()) {
                 case "buy":
                     if (buyGroup == null) return true;
                     if (!player.hasPermission("sweet.adaptive.shop.group." + buyGroup.id)) {
-                        return t(player, "&c你没有执行此操作的权限");
+                        return Messages.player__no_permission.tm(player);
                     }
                     GuiBuyShop.create(player, buyGroup).open();
                     return true;
                 case "order":
                     if (!player.hasPermission("sweet.adaptive.shop.order")) {
-                        return t(player, "&c你没有执行此操作的权限");
+                        return Messages.player__no_permission.tm(player);
                     }
                     GuiOrders.create(player).open();
                     return true;
             }
-            return t(sender, "&e找不到这个界面!");
+            return Messages.gui__not_found.tm(sender);
         }
         if (args.length > 5 && "give".equalsIgnoreCase(args[0]) && sender.isOp()) {
             Player player = Util.getOnlinePlayer(args[1]).orElse(null);
             if (player == null) {
-                return t(sender, "&e玩家 " + args[1] + " 不在线");
+                return Messages.player__not_online.tm(sender);
             }
             String templateId = args[2];
             TemplateManager manager = TemplateManager.inst();
             ItemTemplate template = manager.getTemplate(templateId);
             if (template == null) {
-                return t(sender, "&e找不到名为 " + templateId + " 的物品模板");
+                return Messages.template__not_found.tm(sender, templateId);
             }
             int amount = Util.parseInt(args[3]).orElse(0);
             if (amount < 1) {
-                return t(sender, "&e请输入正确的数量");
+                return Messages.int__invalid.tm(sender);
             }
             if (amount > template.material.getMaxStackSize()) {
-                return t(sender, "&e你输入的数量太多了");
+                return Messages.int__much.tm(sender);
             }
             String nbtKey;
             if (args[4].equalsIgnoreCase("buy")) {
@@ -110,7 +109,7 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
             } else if (args[4].equalsIgnoreCase("order")) {
                 nbtKey = GuiOrders.REFRESH_ITEM;
             } else {
-                return t(sender, "&e无效的物品类型 " + args[4]);
+                return Messages.give__type_not_found.tm(sender, args[4]);
             }
             String formatted;
             long outdate;
@@ -134,17 +133,24 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
                     return lore;
                 }, nbt -> nbt.setLong(nbtKey, outdate)));
             }
-            ItemStackUtil.giveItemToPlayer(player, items);
-            return t(sender, "&a成功给予 " + player.getName() + " " + amount + " 个 " + template.display);
+            Collection<ItemStack> last = player.getInventory().addItem(items.toArray(new ItemStack[0])).values();
+            Messages.give__player.tm(player);
+            if (!last.isEmpty()) {
+                Messages.give__full.tm(player);
+                for (ItemStack item : last) {
+                    player.getWorld().dropItem(player.getLocation(), item);
+                }
+            }
+            return Messages.give__success.tm(sender, player.getName(), amount, template.display);
         }
         if (args.length == 1 && "reload".equalsIgnoreCase(args[0]) && sender.isOp()) {
             plugin.reloadConfig();
-            return t(sender, "&a配置文件已重载");
+            return Messages.reload__config.tm(sender);
         }
         if (args.length == 2 && "reload".equalsIgnoreCase(args[0]) && "database".equalsIgnoreCase(args[1]) && sender.isOp()) {
             plugin.options.database().reloadConfig();
             plugin.options.database().reconnect();
-            return t(sender, "&a数据库已重新连接");
+            return Messages.reload__database.tm(sender);
         }
         return (sender.isOp() ? Messages.help_op : Messages.help).tm(sender);
     }

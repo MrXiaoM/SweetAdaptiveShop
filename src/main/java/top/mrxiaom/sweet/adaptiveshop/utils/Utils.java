@@ -13,6 +13,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.utils.ItemStackUtil;
 import top.mrxiaom.pluginbase.utils.Util;
+import top.mrxiaom.sweet.adaptiveshop.Messages;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.mythic.IMythic;
 
@@ -78,7 +79,7 @@ public class Utils {
             if (outdate == null) continue; // 如果不是刷新券物品，跳过
             if (outdate != 0 && now >= outdate) { // 如果有过期时间，且已过期，清除物品
                 String name = ItemStackUtil.getItemDisplayName(item);
-                t(player, "&e刷新券 &f" + name + "&e 已过期");
+                Messages.refresh__outdate.tm(player, name);
                 item.setType(Material.AIR);
                 item.setAmount(0);
                 inv.setItem(i, null);

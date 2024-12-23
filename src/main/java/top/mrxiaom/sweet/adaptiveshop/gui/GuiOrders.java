@@ -19,6 +19,7 @@ import top.mrxiaom.pluginbase.gui.IGui;
 import top.mrxiaom.pluginbase.utils.AdventureItemStack;
 import top.mrxiaom.pluginbase.utils.PAPI;
 import top.mrxiaom.pluginbase.utils.Pair;
+import top.mrxiaom.sweet.adaptiveshop.Messages;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerOrder;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractGuiModule;
@@ -158,11 +159,11 @@ public class GuiOrders extends AbstractGuiModule {
             if (id != null) {
                 if (id.equals('刷')) {
                     if (!takeFirstRefreshCount(player, REFRESH_ITEM)) {
-                        t(player, "&e你没有足够的刷新券!");
+                        Messages.refresh__order__not_enough.tm(player);
                         return;
                     }
                     OrderManager.inst().refresh(player);
-                    t(player, "&a你成功刷新了订单列表!");
+                    Messages.refresh__order__success.tm(player);
                     this.orders = OrderManager.inst().getPlayerOrders(player);
                     open();
                     return;
@@ -174,21 +175,21 @@ public class GuiOrders extends AbstractGuiModule {
                     Order order = pair.getKey();
                     if (click.equals(ClickType.LEFT)) {
                         if (pair.getValue().isOutdate()) {
-                            t(player, "&e这个订单已经过期了! 请重新打开菜单以刷新列表!");
+                            Messages.gui__order__outdate.tm(player);
                             return;
                         }
                         if (pair.getValue().isHasDone()) {
-                            t(player, "&e这个订单已经完成过了!");
+                            Messages.gui__order__has_done.tm(player);
                             return;
                         }
                         if (!order.match(player)) {
-                            t(player, "&e你没有足够的物品提交这个订单!");
+                            Messages.gui__order__not_enough.tm(player);
                             return;
                         }
                         player.closeInventory();
                         order.takeAll(player);
                         plugin.getOrderDatabase().markOrderDone(player, order.id);
-                        t(player, "&a你成功提交了订单 &e" + order.display + "&a!");
+                        Messages.gui__order__success.tm(player, order.display);
                         for (IAction reward : order.rewards) {
                             reward.run(player);
                         }

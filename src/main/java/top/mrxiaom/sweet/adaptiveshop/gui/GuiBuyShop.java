@@ -18,6 +18,7 @@ import top.mrxiaom.pluginbase.func.AutoRegister;
 import top.mrxiaom.pluginbase.func.gui.LoadedIcon;
 import top.mrxiaom.pluginbase.gui.IGui;
 import top.mrxiaom.pluginbase.utils.*;
+import top.mrxiaom.sweet.adaptiveshop.Messages;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerItem;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractGuiModule;
@@ -197,11 +198,11 @@ public class GuiBuyShop extends AbstractGuiModule {
             if (id != null) {
                 if (id.equals('刷')) {
                     if (!takeFirstRefreshCount(player, REFRESH_ITEM)) {
-                        t(player, "&e你没有足够的刷新券!");
+                        Messages.refresh__buy__not_enough.tm(player);
                         return;
                     }
                     group.refresh(player);
-                    t(player, "&a你成功刷新了" + group.display + "商品列表!");
+                    Messages.refresh__buy__success.tm(player, group.display);
                     this.items = BuyShopManager.inst().getPlayerItems(player, group.id);
                     open();
                     return;
@@ -214,11 +215,11 @@ public class GuiBuyShop extends AbstractGuiModule {
                     int count = shop.getCount(player);
                     if (click.equals(ClickType.LEFT)) { // 提交1个
                         if (pair.getValue().isOutdate()) {
-                            t(player, "&e这个商品已经过期了! 请重新打开菜单以刷新列表!");
+                            Messages.gui__buy__outdate.tm(player);
                             return;
                         }
                         if (count < 1) {
-                            t(player, "&e你没有足够的物品提交到商店!");
+                            Messages.gui__buy__not_enough.tm(player);
                             return;
                         }
                         shop.take(player, 1);
@@ -231,18 +232,19 @@ public class GuiBuyShop extends AbstractGuiModule {
                             price = shop.getPrice(dynamic);
                         }
                         plugin.getEconomy().giveMoney(player, price);
-                        AdventureUtil.sendMessage(player, "&a你提交了 &e1&a 个 &e" + shop.displayName + "&a，获得 &e" + String.format("%.2f", price).replace(".00", "") + "&a 金币!");
+                        String money = String.format("%.2f", price).replace(".00", "");
+                        Messages.gui__buy__success.tm(player, 1, shop.displayName, money);
                         postSubmit(view);
                         return;
                     }
                     if (click.equals(ClickType.RIGHT)) { // 提交1组
                         if (pair.getValue().isOutdate()) {
-                            t(player, "&e这个商品已经过期了! 请重新打开菜单以刷新列表!");
+                            Messages.gui__buy__outdate.tm(player);
                             return;
                         }
                         int stackSize = shop.displayItem.getType().getMaxStackSize();
                         if (count < stackSize) {
-                            t(player, "&e你没有足够的物品提交到商店!");
+                            Messages.gui__buy__not_enough.tm(player);
                             return;
                         }
                         shop.take(player, stackSize);
@@ -256,17 +258,17 @@ public class GuiBuyShop extends AbstractGuiModule {
                         }
                         String money = String.format("%.2f", price * stackSize).replace(".00", "");
                         plugin.getEconomy().giveMoney(player, Double.parseDouble(money));
-                        AdventureUtil.sendMessage(player, "&a你提交了 &e" + stackSize + "&a 个 &e" + shop.displayName + "&a，获得 &e" + money + "&a 金币!");
+                        Messages.gui__buy__success.tm(player, stackSize, shop.displayName, money);
                         postSubmit(view);
                         return;
                     }
                     if (click.equals(ClickType.SHIFT_LEFT)) { // 提交全部
                         if (pair.getValue().isOutdate()) {
-                            t(player, "&e这个商品已经过期了! 请重新打开菜单以刷新列表!");
+                            Messages.gui__buy__outdate.tm(player);
                             return;
                         }
                         if (count < 1) {
-                            t(player, "&e你没有足够的物品提交到商店!");
+                            Messages.gui__buy__not_enough.tm(player);
                             return;
                         }
                         shop.take(player, count);
@@ -280,7 +282,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                         }
                         String money = String.format("%.2f", price * count).replace(".00", "");
                         plugin.getEconomy().giveMoney(player, Double.parseDouble(money));
-                        AdventureUtil.sendMessage(player, "&a你提交了 &e" + count + "&a 个 &e" + shop.displayName + "&a，获得 &e" + money + "&a 金币!");
+                        Messages.gui__buy__success.tm(player, count, shop.displayName, money);
                         postSubmit(view);
                         return;
                     }

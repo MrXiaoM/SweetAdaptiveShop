@@ -1,10 +1,8 @@
 package top.mrxiaom.sweet.adaptiveshop;
 
-import org.bukkit.command.CommandSender;
 import top.mrxiaom.pluginbase.func.language.IHolderAccessor;
 import top.mrxiaom.pluginbase.func.language.Language;
 import top.mrxiaom.pluginbase.func.language.LanguageEnumAutoHolder;
-import top.mrxiaom.pluginbase.utils.AdventureUtil;
 
 import java.util.List;
 
@@ -33,6 +31,33 @@ public enum Messages implements IHolderAccessor {
             "&f/sashop reload",
             "  &8-- &7重载插件配置文件，但不重新连接数据库", ""
     ),
+    refresh__outdate("&e刷新券 &f%s&r &e已过期"),
+    refresh__buy__not_enough("&e你没有足够的刷新券!"),
+    refresh__buy__success("&a你成功刷新了%s商品列表!"),
+    refresh__order__not_enough("&e你没有足够的刷新券!"),
+    refresh__order__success("&a你成功刷新了订单列表!"),
+
+    group__not_found("&e分组 &f%s&r &e不存在"),
+    player__not_online("&e玩家 &f%s&r &e不在线"),
+    player__no_permission("&c你没有执行此操作的权限"),
+    player__only("只有玩家才能执行该命令"),
+    gui__not_found("&e找不到这个界面!"),
+    gui__buy__outdate("&e这个商品已经过期了! 请重新打开菜单以刷新列表!"),
+    gui__buy__not_enough("&e你没有足够的物品提交到商店!"),
+    gui__buy__success("&a你提交了 &e%d&a 个 &e%s&r&a，获得 &e%s&r &a金币!"),
+    gui__order__outdate("&e这个订单已经过期了! 请重新打开菜单以刷新列表!"),
+    gui__order__has_done("&e这个订单已经完成过了!"),
+    gui__order__not_enough("&e你没有足够的物品提交这个订单!"),
+    gui__order__success("&a你成功提交了订单 &e%s&r&a!"),
+    template__not_found("&e找不到名为 &f%s&r &e的物品模板"),
+    int__invalid("&e请输入正确的数量"),
+    int__much("&e你输入的数量太多了"),
+    give__type_not_found("&e无效的物品类型 &f%s"),
+    give__success("&a成功给予 &f%s&r &b%d&r &a个 &f%s"),
+    give__player("&a你收到了 &b%d&r &a个 &f%s"),
+    give__full("&f你的物品栏已满，剩余物品已掉落到你附近"),
+    reload__config("&a配置文件已重载"),
+    reload__database("&a数据库已重新连接"),
 
 
     /*------------------------------------------------------------------*/
