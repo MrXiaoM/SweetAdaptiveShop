@@ -1,0 +1,33 @@
+datetime:
+  format: 'yyyy年MM月dd日 HH:mm:ss'
+  infinite: '永久'
+# 物品模板
+templates:
+  # 模板名称，自定
+  buy:
+    material: PAPER
+    custom-model-data: 10001
+    # 名字和 lore 支持 PAPI (不支持动态变化) 和 mini message
+    display: '&e&l商品刷新券'
+    lore:
+      - '&7此道具可以用于'
+      - '&7刷新收购商店列表'
+      - '&f有效期至:'
+      - '&e%datetime%'
+    # 是否有附魔光泽
+    glow: true
+    # 物品是否唯一（禁止堆叠）
+    unique: true
+  order:
+    material: PAPER
+    custom-model-data: 10002
+    display: '&e&l订单刷新券'
+    lore:
+      - '&7此道具可以用于'
+      - '&7刷新收购订单列表'
+      - '&f有效期至:'
+      - '&e%datetime%'
+    # 是否有附魔光泽
+    glow: true
+    # 物品是否唯一（禁止堆叠）
+    unique: true
