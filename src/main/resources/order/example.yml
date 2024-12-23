@@ -19,7 +19,7 @@ lore:
   - operation
 operations:
   apply: '&a左键&7 | &f提交订单'
-  cannot: '&c&m左键&7 | &f未满足需求'
+  cannot: '&c&m左键&r&7 | &f未满足需求'
   done: '&a&l你已完成该订单'
 # 需求商品
 # 这里输入的不是原版物品ID，而是收购商品ID，格式为
