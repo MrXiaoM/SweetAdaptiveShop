@@ -2,7 +2,6 @@ package top.mrxiaom.sweet.adaptiveshop.func.entry;
 
 import com.udojava.evalex.Expression;
 import de.tr7zw.changeme.nbtapi.NBT;
-import org.apache.commons.lang.math.DoubleRange;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -20,6 +19,7 @@ import top.mrxiaom.sweet.adaptiveshop.enums.PermMode;
 import top.mrxiaom.sweet.adaptiveshop.enums.Routine;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractModule;
 import top.mrxiaom.sweet.adaptiveshop.mythic.IMythic;
+import top.mrxiaom.sweet.adaptiveshop.utils.DoubleRange;
 import top.mrxiaom.sweet.adaptiveshop.utils.Utils;
 
 import java.io.File;
@@ -89,8 +89,8 @@ public class BuyShop {
             BigDecimal scaleValue = new Expression(scaleFormula)
                     .with("value", value)
                     .eval();
-            double min = scaleRange.getMinimumDouble() / 100.0;
-            double max = scaleRange.getMaximumDouble() / 100.0;
+            double min = scaleRange.minimum() / 100.0;
+            double max = scaleRange.maximum() / 100.0;
             double scale = Math.max(min, Math.min(max, scaleValue.doubleValue()));
             double price = priceBase * scale;
             return Double.parseDouble(String.format("%.2f", price));

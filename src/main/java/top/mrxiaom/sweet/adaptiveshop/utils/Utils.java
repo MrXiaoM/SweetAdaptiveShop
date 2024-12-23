@@ -3,7 +3,6 @@ package top.mrxiaom.sweet.adaptiveshop.utils;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.udojava.evalex.Expression;
 import de.tr7zw.changeme.nbtapi.NBT;
-import org.apache.commons.lang.math.DoubleRange;
 import org.bukkit.Material;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.entity.Player;
@@ -25,7 +24,6 @@ import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.function.Consumer;
 
-import static top.mrxiaom.pluginbase.func.AbstractPluginHolder.t;
 import static top.mrxiaom.pluginbase.utils.ItemStackUtil.getItemMeta;
 
 public class Utils {

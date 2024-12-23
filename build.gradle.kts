@@ -38,7 +38,6 @@ dependencies {
     implementation("net.kyori:adventure-text-minimessage:4.17.0")
     implementation("de.tr7zw:item-nbt-api:2.14.0")
     implementation("com.zaxxer:HikariCP:4.0.3") { isTransitive = false }
-    implementation("commons-lang:commons-lang:2.6")
     implementation("com.udojava:EvalEx:2.7")
     implementation("org.jetbrains:annotations:21.0.0")
     implementation("top.mrxiaom:PluginBase:1.1.5")
@@ -58,7 +57,6 @@ tasks {
             "top.mrxiaom.pluginbase" to "base",
             "com.zaxxer.hikari" to "hikari",
             "de.tr7zw.changeme.nbtapi" to "nbtapi",
-            "org.apache.commons" to "commons",
             "com.udojava.evalex" to "evalex",
             "net.kyori" to "kyori",
         ).forEach { (original, target) ->
