@@ -72,7 +72,7 @@ public class Order {
     public void takeAll(Player player) {
         PlayerInventory inv = player.getInventory();
         Map<Need, Integer> takeCount = new HashMap<>();
-        for (int i = 0; i < inv.getSize(); i++) {
+        for (int i = inv.getSize() - 1; i >= 0; i--) {
             ItemStack item = inv.getItem(i);
             if (item == null || item.getType().equals(Material.AIR) || item.getAmount() == 0) continue;
             for (Need need : needs) {

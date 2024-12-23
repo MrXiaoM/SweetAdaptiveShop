@@ -143,7 +143,7 @@ public class BuyShop {
     public void take(Player player, int count) {
         PlayerInventory inv = player.getInventory();
         int j = count;
-        for (int i = 0; i < inv.getSize() && j > 0; i++) {
+        for (int i = inv.getSize() - 1; i >= 0 && j > 0; i--) {
             ItemStack item = inv.getItem(i);
             if (item == null || item.getType().equals(Material.AIR) || item.getAmount() == 0) continue;
             if (match(item)) {
