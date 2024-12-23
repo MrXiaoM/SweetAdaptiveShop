@@ -64,9 +64,9 @@ public class GuiOrders extends AbstractGuiModule {
     @Override
     protected void loadMainIcon(ConfigurationSection section, String id, LoadedIcon loadedIcon) {
         switch (id) {
-            case "物":
-                orderLine = section.getString(id +".line");
-            case "物_空白":
+            case "订":
+                orderLine = section.getString(id + ".line");
+            case "订_空白":
                 emptySlot = loadedIcon;
             case "刷":
                 refreshIcon = loadedIcon;
@@ -80,7 +80,7 @@ public class GuiOrders extends AbstractGuiModule {
     protected ItemStack applyMainIcon(IGui instance, Player player, char id, int index, int appearTimes) {
         Impl gui = (Impl) instance;
         switch (id) {
-            case '物': {
+            case '订': {
                 int i = appearTimes - 1;
                 if (i >= gui.orders.size()) {
                     if (emptySlot.material.equals(Material.AIR)) return new ItemStack(Material.AIR);
