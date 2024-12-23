@@ -41,7 +41,7 @@ dependencies {
     implementation("commons-lang:commons-lang:2.6")
     implementation("com.udojava:EvalEx:2.7")
     implementation("org.jetbrains:annotations:21.0.0")
-    implementation("top.mrxiaom:PluginBase:1.1.4")
+    implementation("top.mrxiaom:PluginBase:1.1.5")
 }
 java {
     val javaVersion = JavaVersion.toVersion(targetJavaVersion)

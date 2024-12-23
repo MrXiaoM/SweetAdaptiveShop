@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.func.AutoRegister;
 import top.mrxiaom.pluginbase.utils.ItemStackUtil;
 import top.mrxiaom.pluginbase.utils.Util;
+import top.mrxiaom.sweet.adaptiveshop.Messages;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractModule;
 import top.mrxiaom.sweet.adaptiveshop.func.BuyShopManager;
@@ -31,7 +32,7 @@ import java.util.*;
 public class CommandMain extends AbstractModule implements CommandExecutor, TabCompleter, Listener {
     public CommandMain(SweetAdaptiveShop plugin) {
         super(plugin);
-        registerCommand("sweetadaptiveshop", this);
+        registerCommand("SweetAdaptiveShop".toLowerCase(), this);
     }
 
     @Override
@@ -140,7 +141,12 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
             plugin.reloadConfig();
             return t(sender, "&a配置文件已重载");
         }
-        return true;
+        if (args.length == 2 && "reload".equalsIgnoreCase(args[0]) && "database".equalsIgnoreCase(args[1]) && sender.isOp()) {
+            plugin.options.database().reloadConfig();
+            plugin.options.database().reconnect();
+            return t(sender, "&a数据库已重新连接");
+        }
+        return (sender.isOp() ? Messages.help_op : Messages.help).tm(sender);
     }
 
     private static final List<String> emptyList = Lists.newArrayList();

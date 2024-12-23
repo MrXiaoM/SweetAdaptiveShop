@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.BukkitPlugin;
 import top.mrxiaom.pluginbase.EconomyHolder;
+import top.mrxiaom.pluginbase.func.LanguageManager;
 import top.mrxiaom.sweet.adaptiveshop.database.BuyShopDatabase;
 import top.mrxiaom.sweet.adaptiveshop.database.OrderDatabase;
 import top.mrxiaom.sweet.adaptiveshop.mythic.IMythic;
@@ -24,7 +25,7 @@ public class SweetAdaptiveShop extends BukkitPlugin {
                 .bungee(false)
                 .adventure(true)
                 .database(true)
-                .reconnectDatabaseWhenReloadConfig(true)
+                .reconnectDatabaseWhenReloadConfig(false)
                 .vaultEconomy(true)
                 .scanIgnore("top.mrxiaom.sweet.adaptiveshop.libs")
         );
@@ -74,6 +75,8 @@ public class SweetAdaptiveShop extends BukkitPlugin {
         } else {
             mythic = null;
         }
+        LanguageManager.inst().setLangFile("messages.yml")
+                        .register(Messages.class, Messages::holder);
         options.registerDatabase(
                 this.buyShopDatabase = new BuyShopDatabase(this),
                 this.orderDatabase = new OrderDatabase(this)
