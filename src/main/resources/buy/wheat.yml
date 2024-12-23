@@ -33,7 +33,7 @@ price:
       # no - 价格缩放与权限无关
       # enable - 有权限时开启价格缩放
       # disable - 没有权限时开启价格缩放
-      mode: no
+      mode: 'no'
 # 动态值设置
 dynamic-value:
   # 每向系统出售一个，动态值增加多少
