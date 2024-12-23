@@ -4,6 +4,9 @@ inventory:
   - '框　　订订订　　框'
   - '框框框框框框框框框'
   - '框框框框原副订刷框'
+# 是否在提交订单后关闭界面
+# 关闭此项，则提交订单后刷新界面
+close-after-submit: true
 main-icons:
   订:
     material: PAPER

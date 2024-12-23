@@ -1,8 +1,10 @@
 package top.mrxiaom.sweet.adaptiveshop.gui;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
@@ -31,6 +33,7 @@ import static top.mrxiaom.sweet.adaptiveshop.utils.Utils.takeFirstRefreshCount;
 @AutoRegister
 public class GuiBuyShop extends AbstractGuiModule {
     public static final String REFRESH_ITEM = "SWEET_ADAPTIVE_SHOP_REFRESH";
+    boolean closeAfterSubmit;
     public GuiBuyShop(SweetAdaptiveShop plugin) {
         super(plugin, new File(plugin.getDataFolder(), "gui/buy.yml")); // 界面配置文件
     }
@@ -44,12 +47,13 @@ public class GuiBuyShop extends AbstractGuiModule {
     }
 
     @Override
-    protected String warningPrefix() {
-        return "[gui/buy.yml]";
+    protected void reloadMenuConfig(YamlConfiguration config) {
+        closeAfterSubmit = config.getBoolean("close-after-submit");
     }
 
     @Override
-    protected void clearMainIcons() {
+    protected String warningPrefix() {
+        return "[gui/buy.yml]";
     }
 
     LoadedIcon buySlot, emptySlot, refreshIcon;
@@ -193,6 +197,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                         double price = shop.getPrice(dynamic);
                         plugin.getEconomy().giveMoney(player, price);
                         AdventureUtil.sendMessage(player, "&a你提交了 &e1&a 个 &e" + shop.displayName + "&a，获得 &e" + String.format("%.2f", price) + "&a 金币!");
+                        postSubmit(view);
                         return;
                     }
                     if (click.equals(ClickType.RIGHT)) { // 提交1组
@@ -212,6 +217,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                         String money = String.format("%.2f", price * stackSize);
                         plugin.getEconomy().giveMoney(player, Double.parseDouble(money));
                         AdventureUtil.sendMessage(player, "&a你提交了 &e" + stackSize + "&a 个 &e" + shop.displayName + "&a，获得 &e" + money + "&a 金币!");
+                        postSubmit(view);
                         return;
                     }
                     if (click.equals(ClickType.SHIFT_LEFT)) { // 提交全部
@@ -230,6 +236,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                         String money = String.format("%.2f", price * count);
                         plugin.getEconomy().giveMoney(player, Double.parseDouble(money));
                         AdventureUtil.sendMessage(player, "&a你提交了 &e" + count + "&a 个 &e" + shop.displayName + "&a，获得 &e" + money + "&a 金币!");
+                        postSubmit(view);
                         return;
                     }
                     return;
@@ -238,6 +245,14 @@ public class GuiBuyShop extends AbstractGuiModule {
                 if (icon != null) {
                     icon.click(player, click);
                 }
+            }
+        }
+
+        private void postSubmit(InventoryView view) {
+            if (closeAfterSubmit) {
+                player.closeInventory();
+            } else {
+                Bukkit.getScheduler().runTaskLater(plugin, () -> updateInventory(view), 1L);
             }
         }
     }

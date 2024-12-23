@@ -1,8 +1,10 @@
 package top.mrxiaom.sweet.adaptiveshop.gui;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
@@ -33,6 +35,7 @@ import static top.mrxiaom.sweet.adaptiveshop.utils.Utils.takeFirstRefreshCount;
 @AutoRegister
 public class GuiOrders extends AbstractGuiModule {
     public static final String REFRESH_ITEM = "SWEET_ADAPTIVE_SHOP_REFRESH_ORDER";
+    boolean closeAfterSubmit;
     public GuiOrders(SweetAdaptiveShop plugin) {
         super(plugin, new File(plugin.getDataFolder(), "gui/order.yml"));
     }
@@ -46,12 +49,13 @@ public class GuiOrders extends AbstractGuiModule {
     }
 
     @Override
-    protected String warningPrefix() {
-        return "[gui/order.yml]";
+    protected void reloadMenuConfig(YamlConfiguration config) {
+        closeAfterSubmit = config.getBoolean("close-after-submit");
     }
 
     @Override
-    protected void clearMainIcons() {
+    protected String warningPrefix() {
+        return "[gui/order.yml]";
     }
 
     LoadedIcon emptySlot, refreshIcon;
@@ -183,6 +187,11 @@ public class GuiOrders extends AbstractGuiModule {
                         t(player, "&a你成功提交了订单 &e" + order.display + "&a!");
                         for (IAction reward : order.rewards) {
                             reward.run(player);
+                        }
+                        if (closeAfterSubmit) {
+                            player.closeInventory();
+                        } else {
+                            Bukkit.getScheduler().runTaskLater(plugin, () -> updateInventory(view), 1L);
                         }
                     }
                     return;
