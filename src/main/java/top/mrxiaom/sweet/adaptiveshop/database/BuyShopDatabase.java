@@ -76,6 +76,28 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, 
         return null;
     }
 
+    private void setDynamicValue(Connection conn, boolean insert, String item, double value, LocalDateTime nextOutdateTime) throws SQLException {
+        if (insert) {
+            try (PreparedStatement ps1 = conn.prepareStatement(
+                    "INSERT INTO `" + TABLE_BUY_SHOP + "`(`item`,`dynamic_value`,`outdate`) VALUES(?,?,?);"
+            )) {
+                ps1.setString(1, item);
+                ps1.setDouble(2, Double.parseDouble(String.format("%.2f", value)));
+                ps1.setTimestamp(3, Timestamp.valueOf(nextOutdateTime));
+                ps1.execute();
+            }
+        } else {
+            try (PreparedStatement ps1 = conn.prepareStatement(
+                    "UPDATE `" + TABLE_BUY_SHOP + "` SET `dynamic_value`=?, `outdate`=? WHERE `item`=?;"
+            )) {
+                ps1.setDouble(1, Double.parseDouble(String.format("%.2f", value)));
+                ps1.setTimestamp(2, Timestamp.valueOf(nextOutdateTime));
+                ps1.setString(3, item);
+                ps1.execute();
+            }
+        }
+    }
+
     public void addDynamicValue(String item, double value, LocalDateTime nextOutdateTime) {
         try (Connection conn = plugin.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(
@@ -84,35 +106,17 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, 
                 ps.setString(1, item);
                 try (ResultSet resultSet = ps.executeQuery()) {
                     if (!resultSet.next()) {
-                        try (PreparedStatement ps1 = conn.prepareStatement(
-                                "INSERT INTO `" + TABLE_BUY_SHOP + "`(`item`,`dynamic_value`,`outdate`) VALUES(?,?,?);"
-                        )) {
-                            ps1.setString(1, item);
-                            ps1.setDouble(2, value);
-                            ps1.setTimestamp(3, Timestamp.valueOf(nextOutdateTime));
-                            ps1.execute();
-                        }
+                        setDynamicValue(conn, true, item, value, nextOutdateTime);
                         return;
                     }
                     Timestamp outdate = resultSet.getTimestamp("outdate");
                     Timestamp now = Timestamp.valueOf(LocalDateTime.now());
                     if (now.after(outdate)) {
-                        try (PreparedStatement ps1 = conn.prepareStatement(
-                                "UPDATE `" + TABLE_BUY_SHOP + "` SET `dynamic_value`=?, `outdate`=? WHERE `item`=?;"
-                        )) {
-                            ps1.setDouble(1, value);
-                            ps1.setTimestamp(2, Timestamp.valueOf(nextOutdateTime));
-                            ps1.setString(3, item);
-                        }
+                        setDynamicValue(conn, false, item, value, nextOutdateTime);
                         return;
                     }
                     double dynamicValue = resultSet.getDouble("dynamic_value");
-                    try (PreparedStatement ps1 = conn.prepareStatement(
-                            "UPDATE `" + TABLE_BUY_SHOP + "` SET `dynamic_value`=? WHERE `item`=?;"
-                    )) {
-                        ps1.setDouble(1, dynamicValue + value);
-                        ps1.setString(2, item);
-                    }
+                    setDynamicValue(conn, false, item, dynamicValue + value, nextOutdateTime);
                 }
             }
         } catch (SQLException e) {
