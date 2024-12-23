@@ -1,5 +1,7 @@
 # 保留用
 name: '订单名'
+# 随机抽中该订单所需权限，默认为 sweet.adaptive.shop.order.订单ID
+permission: 'sweet.adaptive.shop.order.%id%'
 # 图标，格式为 物品ID#cmd 或 mythic-mm物品
 icon: stone
 # 物品显示名

@@ -58,6 +58,7 @@ public class GuiBuyShop extends AbstractGuiModule {
 
     LoadedIcon buySlot, emptySlot, refreshIcon;
     String buyOne, buyStack, buyAll, refreshAvailable, refreshUnavailable;
+    List<String> buyBypassLore;
     @Override
     protected void loadMainIcon(ConfigurationSection section, String id, LoadedIcon loadedIcon) {
         switch (id) {
@@ -66,6 +67,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                 buyOne = section.getString(id + ".operations.one");
                 buyStack = section.getString(id + ".operations.stack");
                 buyAll = section.getString(id + ".operations.all");
+                buyBypassLore = section.getStringList(id + ".lore-bypass");
             case "物_空白":
                 emptySlot = loadedIcon;
             case "刷":
@@ -87,18 +89,25 @@ public class GuiBuyShop extends AbstractGuiModule {
                     return emptySlot.generateIcon(player);
                 }
                 BuyShop shop = gui.items.get(i).getKey();
-                Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop.id);
-                double dynamic = dyn == null ? 0.0 : dyn;
+                boolean bypass = shop.hasBypass(player);
+                double dynamic;
+                if (bypass) {
+                    dynamic = 0;
+                } else {
+                    Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop.id);
+                    dynamic = dyn == null ? 0.0 : dyn;
+                }
                 int count = shop.getCount(player);
-                double price = shop.getPrice(dynamic);
+                double price = bypass ? shop.priceBase : shop.getPrice(dynamic);
                 String priceString = String.format("%.2f", price);
-                String dynamicDisplay = shop.getDisplayDynamic(dynamic);
-                String dynamicPlaceholder = shop.getDynamicValuePlaceholder(dynamic);
+                String dynamicDisplay = bypass ? "" : shop.getDisplayDynamic(dynamic);
+                String dynamicPlaceholder = bypass ? "" : shop.getDynamicValuePlaceholder(dynamic);
 
                 ItemStack item = shop.displayItem.clone();
                 String displayName = buySlot.display.replace("%name%", shop.displayName);
                 List<String> lore = new ArrayList<>();
-                for (String s : buySlot.lore) {
+                List<String> loreTemplate = bypass ? buySlot.lore : buyBypassLore;
+                for (String s : loreTemplate) {
                     if (s.equals("description")) {
                         lore.addAll(ItemStackUtil.getItemLore(shop.displayItem));
                         continue;
@@ -192,9 +201,14 @@ public class GuiBuyShop extends AbstractGuiModule {
                             return;
                         }
                         shop.take(player, 1);
-                        Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop.id);
-                        double dynamic = dyn == null ? 0.0 : dyn;
-                        double price = shop.getPrice(dynamic);
+                        double price;
+                        if (shop.hasBypass(player)) {
+                            price = shop.priceBase;
+                        } else {
+                            Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop.id);
+                            double dynamic = dyn == null ? 0.0 : dyn;
+                            price = shop.getPrice(dynamic);
+                        }
                         plugin.getEconomy().giveMoney(player, price);
                         AdventureUtil.sendMessage(player, "&a你提交了 &e1&a 个 &e" + shop.displayName + "&a，获得 &e" + String.format("%.2f", price) + "&a 金币!");
                         postSubmit(view);
@@ -211,9 +225,14 @@ public class GuiBuyShop extends AbstractGuiModule {
                             return;
                         }
                         shop.take(player, stackSize);
-                        Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop.id);
-                        double dynamic = dyn == null ? 0.0 : dyn;
-                        double price = shop.getPrice(dynamic);
+                        double price;
+                        if (shop.hasBypass(player)) {
+                            price = shop.priceBase;
+                        } else {
+                            Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop.id);
+                            double dynamic = dyn == null ? 0.0 : dyn;
+                            price = shop.getPrice(dynamic);
+                        }
                         String money = String.format("%.2f", price * stackSize);
                         plugin.getEconomy().giveMoney(player, Double.parseDouble(money));
                         AdventureUtil.sendMessage(player, "&a你提交了 &e" + stackSize + "&a 个 &e" + shop.displayName + "&a，获得 &e" + money + "&a 金币!");
@@ -230,9 +249,14 @@ public class GuiBuyShop extends AbstractGuiModule {
                             return;
                         }
                         shop.take(player, count);
-                        Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop.id);
-                        double dynamic = dyn == null ? 0.0 : dyn;
-                        double price = shop.getPrice(dynamic);
+                        double price;
+                        if (shop.hasBypass(player)) {
+                            price = shop.priceBase;
+                        } else {
+                            Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop.id);
+                            double dynamic = dyn == null ? 0.0 : dyn;
+                            price = shop.getPrice(dynamic);
+                        }
                         String money = String.format("%.2f", price * count);
                         plugin.getEconomy().giveMoney(player, Double.parseDouble(money));
                         AdventureUtil.sendMessage(player, "&a你提交了 &e" + count + "&a 个 &e" + shop.displayName + "&a，获得 &e" + money + "&a 金币!");

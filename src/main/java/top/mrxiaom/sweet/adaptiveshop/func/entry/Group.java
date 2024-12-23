@@ -2,6 +2,7 @@ package top.mrxiaom.sweet.adaptiveshop.func.entry;
 
 import com.google.common.collect.Lists;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerItem;
 
@@ -19,13 +20,13 @@ public class Group {
     }
 
     @Nullable
-    public BuyShop randomNewItem(List<PlayerItem> items) {
+    public BuyShop randomNewItem(Player player, List<PlayerItem> items) {
         List<String> alreadyAdded = new ArrayList<>();
         for (PlayerItem item : items) {
             alreadyAdded.add(item.getItem());
         }
         List<BuyShop> list = Lists.newArrayList(buyShop.values());
-        list.removeIf(it -> alreadyAdded.contains(it.id));
+        list.removeIf(it -> alreadyAdded.contains(it.id) || !it.hasPermission(player));
         return list.isEmpty() ? null : list.get(new Random().nextInt(list.size()));
     }
 

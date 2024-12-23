@@ -6,6 +6,12 @@ type: vanilla
 material: WHEAT
 # mythic: ExampleItem
 
+# 展示名，可不输入，不输入则自动获取
+# display-name: '名字'
+
+# 随机抽中该物品所需权限，默认为 sweet.adaptive.shop.buy.商品ID
+permission: 'sweet.adaptive.shop.buy.%id%'
+
 # 价格设置
 price:
   # 基础价格
@@ -20,6 +26,14 @@ price:
       # 价格缩放公式，此处 value 为动态值变量减去 large-than 的值
       # 此处为动态值大于 100 后，基础缩放为 100%，每增加1点动态值，缩放减少 1%
       scale-formula: '1 - value / 100'
+    when-has-permission:
+      # 当拥有某权限时
+      permission: 'none'
+      # 工作模式
+      # no - 价格缩放与权限无关
+      # enable - 有权限时开启价格缩放
+      # disable - 没有权限时开启价格缩放
+      mode: no
 # 动态值设置
 dynamic-value:
   # 每向系统出售一个，动态值增加多少

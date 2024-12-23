@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.utils.ItemStackUtil;
 import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
+import top.mrxiaom.sweet.adaptiveshop.enums.PermMode;
 import top.mrxiaom.sweet.adaptiveshop.enums.Routine;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractModule;
 import top.mrxiaom.sweet.adaptiveshop.mythic.IMythic;
@@ -27,7 +28,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class BuyShop {
-    public final String group, id;
+    public final String group, id, permission;
     public final ItemStack displayItem;
     public final String displayName;
     public final int matchPriority;
@@ -36,15 +37,18 @@ public class BuyShop {
     public final DoubleRange scaleRange;
     public final double scaleWhenDynamicLargeThan;
     public final String scaleFormula;
+    public final String scalePermission;
+    public final PermMode scalePermissionMode;
     public final double dynamicValueAdd;
     public final Routine routine;
     public final String dynamicValueDisplayFormula;
     public final Map<Double, String> dynamicValuePlaceholders;
     public final String dynamicValuePlaceholderMin;
 
-    BuyShop(String group, String id, ItemStack displayItem, String displayName, int matchPriority, Function<ItemStack, Boolean> matcher, double priceBase, DoubleRange scaleRange, double scaleWhenDynamicLargeThan, String scaleFormula, double dynamicValueAdd, Routine routine, String dynamicValueDisplayFormula, Map<Double, String> dynamicValuePlaceholders) {
+    BuyShop(String group, String id, String permission, ItemStack displayItem, String displayName, int matchPriority, Function<ItemStack, Boolean> matcher, double priceBase, DoubleRange scaleRange, double scaleWhenDynamicLargeThan, String scaleFormula, String scalePermission, PermMode scalePermissionMode, double dynamicValueAdd, Routine routine, String dynamicValueDisplayFormula, Map<Double, String> dynamicValuePlaceholders) {
         this.group = group;
         this.id = id;
+        this.permission = permission;
         this.displayItem = displayItem;
         this.displayName = displayName;
         this.matchPriority = matchPriority;
@@ -53,6 +57,8 @@ public class BuyShop {
         this.scaleRange = scaleRange;
         this.scaleWhenDynamicLargeThan = scaleWhenDynamicLargeThan;
         this.scaleFormula = scaleFormula;
+        this.scalePermission = scalePermission;
+        this.scalePermissionMode = scalePermissionMode;
         this.dynamicValueAdd = dynamicValueAdd;
         this.routine = routine;
         this.dynamicValueDisplayFormula = dynamicValueDisplayFormula;
@@ -165,10 +171,23 @@ public class BuyShop {
         }
     }
 
+    public boolean hasPermission(Player player) {
+        return player.hasPermission(permission);
+    }
+
+    public boolean hasBypass(Player player) {
+        if (scalePermissionMode.equals(PermMode.ENABLE))
+            return !player.hasPermission(scalePermission);
+        if (scalePermissionMode.equals(PermMode.DISABLE))
+            return player.hasPermission(scalePermission);
+        return false;
+    }
+
     @Nullable
     public static BuyShop load(AbstractModule holder, File file, String id) {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
         String group = config.getString("group", "default");
+        String permission = config.getString("permission", "sweet.adaptive.shop.buy." + id).replace("%id%", id);
         String type = config.getString("type");
         String displayName = config.getString("display-name", null);
         ItemStack displayItem;
@@ -220,6 +239,12 @@ public class BuyShop {
             holder.warn("[buy] 读取 " + id + " 时出错，表达式测试出错");
             return null;
         }
+        String scalePermission = config.getString("price.scale.when-has-permission.permission");
+        PermMode scalePermissionMode = Util.valueOr(PermMode.class, config.getString("price.scale.when-has-permission.mode"), null);
+        if (scalePermissionMode == null) {
+            holder.warn("[buy] 读取 " + id + " 时出错，price.scale.when-has-permission.mode 的值无效");
+            return null;
+        }
         double dynamicValueAdd = config.getDouble("dynamic-value.add");
         Routine routine = Util.valueOr(Routine.class, config.getString("dynamic-value.routine"), null);
         if (routine == null) {
@@ -239,7 +264,7 @@ public class BuyShop {
             String placeholder = section.getString(s);
             dynamicValuePlaceholders.put(value, placeholder);
         }
-        return new BuyShop(group, id, displayItem, displayName, matchPriority, matcher, priceBase, scaleRange, scaleWhenDynamicLargeThan, scaleFormula, dynamicValueAdd, routine, dynamicValueDisplayFormula, dynamicValuePlaceholders);
+        return new BuyShop(group, id, permission, displayItem, displayName, matchPriority, matcher, priceBase, scaleRange, scaleWhenDynamicLargeThan, scaleFormula, scalePermission, scalePermissionMode, dynamicValueAdd, routine, dynamicValueDisplayFormula, dynamicValuePlaceholders);
     }
     private static boolean testFormulaFail(String formula) {
         BigDecimal result = Utils.eval(formula, e -> e.and("value", BigDecimal.valueOf(1.23)));

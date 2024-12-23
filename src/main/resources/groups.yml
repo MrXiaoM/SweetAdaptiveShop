@@ -1,3 +1,4 @@
+# 商品分组，需要权限 sweet.adaptive.shop.group.组名 才能打开相应菜单
 groups:
   default:
     display: '杂物'

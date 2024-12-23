@@ -19,6 +19,12 @@ main-icons:
       - '  &f趋势: &e%dynamic_placeholder%'
       - ''
       - operation
+    lore-bypass:
+      - description
+      - ''
+      - '  &f价格: &e%price%金币'
+      - ''
+      - operation
     operations:
       one: '&a左键&7 | &f提交1个物品 &7(获得%price%金币)'
       stack: '&b右键&7 | &f提交一组(%count%个)物品 &7(获得%price%金币)'

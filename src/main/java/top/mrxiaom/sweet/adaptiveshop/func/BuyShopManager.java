@@ -115,7 +115,7 @@ public class BuyShopManager extends AbstractModule {
         for (Group g : groups.values()) {
             int needs = Math.max(0, g.dailyCount - counts.getOrDefault(g.id, 0));
             for (int i = 0; i < needs; i++) {
-                BuyShop shop = g.randomNewItem(items);
+                BuyShop shop = g.randomNewItem(player, items);
                 if (shop == null) break;
                 PlayerItem entry = new PlayerItem(shop.id, tomorrow);
                 list.add(Pair.of(shop, entry));

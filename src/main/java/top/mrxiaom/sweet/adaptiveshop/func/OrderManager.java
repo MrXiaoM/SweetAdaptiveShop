@@ -8,14 +8,11 @@ import top.mrxiaom.pluginbase.func.AutoRegister;
 import top.mrxiaom.pluginbase.utils.Pair;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.database.OrderDatabase;
-import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerItem;
 import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerOrder;
-import top.mrxiaom.sweet.adaptiveshop.func.entry.BuyShop;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.Order;
 import top.mrxiaom.sweet.adaptiveshop.utils.Utils;
 
 import java.io.File;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -54,13 +51,13 @@ public class OrderManager extends AbstractModule {
 
 
     @Nullable
-    public Order randomNewOrder(List<PlayerOrder> orders) {
+    public Order randomNewOrder(Player player, List<PlayerOrder> orders) {
         List<String> alreadyAdded = new ArrayList<>();
         for (PlayerOrder order : orders) {
             alreadyAdded.add(order.getOrder());
         }
         List<Order> list = Lists.newArrayList(map.values());
-        list.removeIf(it -> alreadyAdded.contains(it.id));
+        list.removeIf(it -> alreadyAdded.contains(it.id) || !it.hasPermission(player));
         return list.isEmpty() ? null : list.get(new Random().nextInt(list.size()));
     }
 
@@ -83,7 +80,7 @@ public class OrderManager extends AbstractModule {
         LocalDateTime tomorrow = Utils.nextOutdate();
         boolean flag = false;
         for (int i = 0; i < needed; i++) {
-            Order order = randomNewOrder(orders);
+            Order order = randomNewOrder(player, orders);
             if (order == null) break;
             PlayerOrder entry = new PlayerOrder(order.id, false, tomorrow);
             list.add(Pair.of(order, entry));

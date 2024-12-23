@@ -63,9 +63,16 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
             }
             switch (type.toLowerCase()) {
                 case "buy":
+                    if (buyGroup == null) return true;
+                    if (!player.hasPermission("sweet.adaptive.shop.group." + buyGroup.id)) {
+                        return t(player, "&c你没有执行此操作的权限");
+                    }
                     GuiBuyShop.create(player, buyGroup).open();
                     return true;
                 case "order":
+                    if (!player.hasPermission("sweet.adaptive.shop.order")) {
+                        return t(player, "&c你没有执行此操作的权限");
+                    }
                     GuiOrders.create(player).open();
                     return true;
             }
