@@ -6,6 +6,7 @@ import org.apache.commons.lang.math.DoubleRange;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -22,10 +23,13 @@ import top.mrxiaom.sweet.adaptiveshop.mythic.IMythic;
 import top.mrxiaom.sweet.adaptiveshop.utils.Utils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.logging.Level;
 
 public class BuyShop {
     public final String group, id, permission;
@@ -63,14 +67,10 @@ public class BuyShop {
         this.routine = routine;
         this.dynamicValueDisplayFormula = dynamicValueDisplayFormula;
         this.dynamicValuePlaceholders = dynamicValuePlaceholders;
-        String minPlaceholder = "";
+        String minPlaceholder = "无";
         Double min = null;
         for (Map.Entry<Double, String> entry : dynamicValuePlaceholders.entrySet()) {
-            if (min == null) {
-                min = entry.getKey();
-                continue;
-            }
-            if (entry.getKey() < min) {
+            if (min == null || entry.getKey() < min) {
                 min = entry.getKey();
                 minPlaceholder = entry.getValue();
             }
@@ -185,7 +185,14 @@ public class BuyShop {
 
     @Nullable
     public static BuyShop load(AbstractModule holder, File file, String id) {
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        YamlConfiguration config = new YamlConfiguration();
+        config.options().pathSeparator('/');
+        try {
+            config.load(file);
+        } catch (FileNotFoundException ignored) {
+        } catch (IOException | InvalidConfigurationException ex) {
+            Bukkit.getLogger().log(Level.SEVERE, "Cannot load " + file, ex);
+        }
         String group = config.getString("group", "default");
         String permission = config.getString("permission", "sweet.adaptive.shop.buy." + id).replace("%id%", id);
         String type = config.getString("type");
@@ -227,37 +234,37 @@ public class BuyShop {
         } else {
             return null;
         }
-        double priceBase = config.getDouble("price.base");
-        DoubleRange scaleRange = Utils.getDoubleRange(config, "price.scale.range");
+        double priceBase = config.getDouble("price/base");
+        DoubleRange scaleRange = Utils.getDoubleRange(config, "price/scale/range");
         if (scaleRange == null) {
             holder.warn("[buy] 读取 " + id + " 时出错，price.scale.range 输入的范围无效");
             return null;
         }
-        double scaleWhenDynamicLargeThan = config.getDouble("price.scale.when-dynamic-value.large-than");
-        String scaleFormula = config.getString("price.scale.when-dynamic-value.scale-formula");
+        double scaleWhenDynamicLargeThan = config.getDouble("price/scale/when-dynamic-value/large-than");
+        String scaleFormula = config.getString("price/scale/when-dynamic-value/scale-formula");
         if (testFormulaFail(scaleFormula)) {
             holder.warn("[buy] 读取 " + id + " 时出错，表达式测试出错");
             return null;
         }
-        String scalePermission = config.getString("price.scale.when-has-permission.permission");
-        PermMode scalePermissionMode = Util.valueOr(PermMode.class, config.getString("price.scale.when-has-permission.mode"), null);
+        String scalePermission = config.getString("price/scale/when-has-permission/permission");
+        PermMode scalePermissionMode = Util.valueOr(PermMode.class, config.getString("price/scale/when-has-permission/mode"), null);
         if (scalePermissionMode == null) {
             holder.warn("[buy] 读取 " + id + " 时出错，price.scale.when-has-permission.mode 的值无效");
             return null;
         }
-        double dynamicValueAdd = config.getDouble("dynamic-value.add");
-        Routine routine = Util.valueOr(Routine.class, config.getString("dynamic-value.routine"), null);
+        double dynamicValueAdd = config.getDouble("dynamic-value/add");
+        Routine routine = Util.valueOr(Routine.class, config.getString("dynamic-value/routine"), null);
         if (routine == null) {
             holder.warn("[buy] 读取 " + id + " 时出错，dynamic-value.routine 的值无效");
             return null;
         }
-        String dynamicValueDisplayFormula = config.getString("dynamic-value.display-formula");
+        String dynamicValueDisplayFormula = config.getString("dynamic-value/display-formula");
         if (testFormulaFail(dynamicValueDisplayFormula)) {
             holder.warn("[buy] 读取 " + id + " 时出错，表达式测试出错");
             return null;
         }
         Map<Double, String> dynamicValuePlaceholders = new HashMap<>();
-        ConfigurationSection section = config.getConfigurationSection("dynamic-value.placeholders");
+        ConfigurationSection section = config.getConfigurationSection("dynamic-value/placeholders");
         if (section != null) for (String s : section.getKeys(false)) {
             Double value = Util.parseDouble(s).orElse(null);
             if (value == null) {
@@ -266,6 +273,7 @@ public class BuyShop {
             }
             String placeholder = section.getString(s);
             dynamicValuePlaceholders.put(value, placeholder);
+            holder.info(value + ": " + placeholder);
         }
         return new BuyShop(group, id, permission, displayItem, displayName, matchPriority, matcher, priceBase, scaleRange, scaleWhenDynamicLargeThan, scaleFormula, scalePermission, scalePermissionMode, dynamicValueAdd, routine, dynamicValueDisplayFormula, dynamicValuePlaceholders);
     }
