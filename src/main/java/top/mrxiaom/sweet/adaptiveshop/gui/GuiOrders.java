@@ -18,6 +18,7 @@ import top.mrxiaom.pluginbase.utils.AdventureItemStack;
 import top.mrxiaom.pluginbase.utils.PAPI;
 import top.mrxiaom.pluginbase.utils.Pair;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
+import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerOrder;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractGuiModule;
 import top.mrxiaom.sweet.adaptiveshop.func.OrderManager;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.Order;
@@ -80,9 +81,9 @@ public class GuiOrders extends AbstractGuiModule {
                     if (emptySlot.material.equals(Material.AIR)) return new ItemStack(Material.AIR);
                     return emptySlot.generateIcon(player);
                 }
-                Pair<Order, Boolean> pair = gui.orders.get(i);
+                Pair<Order, PlayerOrder> pair = gui.orders.get(i);
                 Order order = pair.getKey();
-                boolean hasDone = pair.getValue();
+                boolean hasDone = pair.getValue().isHasDone();
                 ItemStack item = order.icon.clone();
                 String display = order.display;
                 List<String> lore = new ArrayList<>();
@@ -138,7 +139,7 @@ public class GuiOrders extends AbstractGuiModule {
     }
 
     public class Impl extends Gui {
-        List<Pair<Order, Boolean>> orders;
+        List<Pair<Order, PlayerOrder>> orders;
         protected Impl(Player player, String title, char[] inventory) {
             super(player, title, inventory);
             this.orders = OrderManager.inst().getPlayerOrders(player);
@@ -161,13 +162,22 @@ public class GuiOrders extends AbstractGuiModule {
                 if (id.equals('订')) {
                     int i = getAppearTimes(id, slot) - 1;
                     if (i >= orders.size()) return;
-                    Pair<Order, Boolean> pair = orders.get(i);
+                    Pair<Order, PlayerOrder> pair = orders.get(i);
                     Order order = pair.getKey();
                     if (click.equals(ClickType.LEFT)) {
+                        if (pair.getValue().isOutdate()) {
+                            t(player, "&e这个订单已经过期了! 请重新打开菜单以刷新列表!");
+                            return;
+                        }
+                        if (pair.getValue().isHasDone()) {
+                            t(player, "&e这个订单已经完成过了!");
+                            return;
+                        }
                         if (!order.match(player)) {
                             t(player, "&e你没有足够的物品提交这个订单!");
                             return;
                         }
+                        player.closeInventory();
                         order.takeAll(player);
                         plugin.getOrderDatabase().markOrderDone(player, order.id);
                         t(player, "&a你成功提交了订单 &e" + order.display + "&a!");

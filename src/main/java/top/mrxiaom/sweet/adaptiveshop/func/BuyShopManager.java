@@ -6,6 +6,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.func.AutoRegister;
+import top.mrxiaom.pluginbase.utils.Pair;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.database.BuyShopDatabase;
 import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerItem;
@@ -95,17 +96,17 @@ public class BuyShopManager extends AbstractModule {
     /**
      * 获取玩家商品列表，并自动刷新已过期商品
      */
-    public List<BuyShop> getPlayerItems(Player player, @Nullable String group) {
+    public List<Pair<BuyShop, PlayerItem>> getPlayerItems(Player player, @Nullable String group) {
         BuyShopDatabase db = plugin.getBuyShopDatabase();
         List<PlayerItem> items = db.getPlayerItems(player);
         if (items == null) items = new ArrayList<>();
-        List<BuyShop> list = new ArrayList<>();
+        List<Pair<BuyShop, PlayerItem>> list = new ArrayList<>();
         Map<String, Integer> counts = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         items.removeIf(it -> {
             if (it.isOutdate()) return true;
             BuyShop shop = get(it.getItem());
             if (shop == null) return true;
-            list.add(shop);
+            list.add(Pair.of(shop, it));
             int count = counts.getOrDefault(shop.group, 0) + 1;
             counts.put(shop.group, count);
             return false;
@@ -117,14 +118,15 @@ public class BuyShopManager extends AbstractModule {
             for (int i = 0; i < needs; i++) {
                 BuyShop shop = g.randomNewItem(items);
                 if (shop == null) break;
-                list.add(shop);
-                items.add(new PlayerItem(shop.id, tomorrow));
+                PlayerItem entry = new PlayerItem(shop.id, tomorrow);
+                list.add(Pair.of(shop, entry));
+                items.add(entry);
                 flag = true;
             }
         }
         if (flag) db.setPlayerItems(player, items);
         if (group != null) {
-            list.removeIf(it -> !it.group.equals(group));
+            list.removeIf(it -> !it.getKey().group.equals(group));
         }
         return list;
     }

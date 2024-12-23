@@ -67,16 +67,16 @@ public class OrderManager extends AbstractModule {
     /**
      * 获取玩家订单列表，并自动刷新已过期商品
      */
-    public List<Pair<Order, Boolean>> getPlayerOrders(Player player) {
+    public List<Pair<Order, PlayerOrder>> getPlayerOrders(Player player) {
         OrderDatabase db = plugin.getOrderDatabase();
         List<PlayerOrder> orders = db.getPlayerOrders(player);
         if (orders == null) orders = new ArrayList<>();
-        List<Pair<Order, Boolean>> list = new ArrayList<>();
+        List<Pair<Order, PlayerOrder>> list = new ArrayList<>();
         orders.removeIf(it -> {
             if (it.isOutdate()) return true;
             Order order = map.get(it.getOrder());
             if (order == null) return true;
-            list.add(Pair.of(order, it.isHasDone()));
+            list.add(Pair.of(order, it));
             return false;
         });
         int needed = Math.max(0, ordersCount - orders.size());
@@ -85,8 +85,9 @@ public class OrderManager extends AbstractModule {
         for (int i = 0; i < needed; i++) {
             Order order = randomNewOrder(orders);
             if (order == null) break;
-            list.add(Pair.of(order, false));
-            orders.add(new PlayerOrder(order.id, false, tomorrow));
+            PlayerOrder entry = new PlayerOrder(order.id, false, tomorrow);
+            list.add(Pair.of(order, entry));
+            orders.add(entry);
             flag = true;
         }
         if (flag) db.setPlayerOrders(player, orders);

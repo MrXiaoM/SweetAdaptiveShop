@@ -13,11 +13,9 @@ import org.bukkit.inventory.ItemStack;
 import top.mrxiaom.pluginbase.func.AutoRegister;
 import top.mrxiaom.pluginbase.func.gui.LoadedIcon;
 import top.mrxiaom.pluginbase.gui.IGui;
-import top.mrxiaom.pluginbase.utils.AdventureItemStack;
-import top.mrxiaom.pluginbase.utils.AdventureUtil;
-import top.mrxiaom.pluginbase.utils.ItemStackUtil;
-import top.mrxiaom.pluginbase.utils.PAPI;
+import top.mrxiaom.pluginbase.utils.*;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
+import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerItem;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractGuiModule;
 import top.mrxiaom.sweet.adaptiveshop.func.BuyShopManager;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.BuyShop;
@@ -84,7 +82,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                     if (emptySlot.material.equals(Material.AIR)) return new ItemStack(Material.AIR);
                     return emptySlot.generateIcon(player);
                 }
-                BuyShop shop = gui.items.get(i);
+                BuyShop shop = gui.items.get(i).getKey();
                 Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop.id);
                 double dynamic = dyn == null ? 0.0 : dyn;
                 int count = shop.getCount(player);
@@ -153,7 +151,7 @@ public class GuiBuyShop extends AbstractGuiModule {
 
     public class Impl extends Gui {
         Group group;
-        List<BuyShop> items;
+        List<Pair<BuyShop, PlayerItem>> items;
         protected Impl(Player player, String title, char[] inventory, Group group) {
             super(player, title, inventory);
             this.group = group;
@@ -177,9 +175,14 @@ public class GuiBuyShop extends AbstractGuiModule {
                 if (id.equals('物')) {
                     int i = getAppearTimes(id, slot) - 1;
                     if (i >= items.size()) return;
-                    BuyShop shop = items.get(i);
+                    Pair<BuyShop, PlayerItem> pair = items.get(i);
+                    BuyShop shop = pair.getKey();
                     int count = shop.getCount(player);
                     if (click.equals(ClickType.LEFT)) { // 提交1个
+                        if (pair.getValue().isOutdate()) {
+                            t(player, "&e这个商品已经过期了! 请重新打开菜单以刷新列表!");
+                            return;
+                        }
                         if (count < 1) {
                             t(player, "&e你没有足够的物品提交到商店!");
                             return;
@@ -193,6 +196,10 @@ public class GuiBuyShop extends AbstractGuiModule {
                         return;
                     }
                     if (click.equals(ClickType.RIGHT)) { // 提交1组
+                        if (pair.getValue().isOutdate()) {
+                            t(player, "&e这个商品已经过期了! 请重新打开菜单以刷新列表!");
+                            return;
+                        }
                         int stackSize = shop.displayItem.getType().getMaxStackSize();
                         if (count < stackSize) {
                             t(player, "&e你没有足够的物品提交到商店!");
@@ -208,6 +215,10 @@ public class GuiBuyShop extends AbstractGuiModule {
                         return;
                     }
                     if (click.equals(ClickType.SHIFT_LEFT)) { // 提交全部
+                        if (pair.getValue().isOutdate()) {
+                            t(player, "&e这个商品已经过期了! 请重新打开菜单以刷新列表!");
+                            return;
+                        }
                         if (count < 1) {
                             t(player, "&e你没有足够的物品提交到商店!");
                             return;
