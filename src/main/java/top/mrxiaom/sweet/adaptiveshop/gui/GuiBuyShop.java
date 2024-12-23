@@ -63,9 +63,9 @@ public class GuiBuyShop extends AbstractGuiModule {
         switch (id) {
             case "物":
                 buySlot = loadedIcon;
-                buyOne = section.getString(id, ".operations.one");
-                buyStack = section.getString(id, ".operations.stack");
-                buyAll = section.getString(id, ".operations.all");
+                buyOne = section.getString(id + ".operations.one");
+                buyStack = section.getString(id + ".operations.stack");
+                buyAll = section.getString(id + ".operations.all");
             case "物_空白":
                 emptySlot = loadedIcon;
             case "刷":

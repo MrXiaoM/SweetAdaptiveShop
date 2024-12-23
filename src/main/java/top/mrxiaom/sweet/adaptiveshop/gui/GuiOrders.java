@@ -64,7 +64,7 @@ public class GuiOrders extends AbstractGuiModule {
     protected void loadMainIcon(ConfigurationSection section, String id, LoadedIcon loadedIcon) {
         switch (id) {
             case "物":
-                orderLine = section.getString(id, ".line");
+                orderLine = section.getString(id +".line");
             case "物_空白":
                 emptySlot = loadedIcon;
             case "刷":
