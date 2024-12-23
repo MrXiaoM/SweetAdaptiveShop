@@ -24,7 +24,7 @@ import java.util.*;
 public class CommandMain extends AbstractModule implements CommandExecutor, TabCompleter, Listener {
     public CommandMain(SweetAdaptiveShop plugin) {
         super(plugin);
-        registerCommand("sweetadptiveshop", this);
+        registerCommand("sweetadaptiveshop", this);
     }
 
     @Override
