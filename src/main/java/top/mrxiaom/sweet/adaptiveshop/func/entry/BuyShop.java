@@ -273,7 +273,6 @@ public class BuyShop {
             }
             String placeholder = section.getString(s);
             dynamicValuePlaceholders.put(value, placeholder);
-            holder.info(value + ": " + placeholder);
         }
         return new BuyShop(group, id, permission, displayItem, displayName, matchPriority, matcher, priceBase, scaleRange, scaleWhenDynamicLargeThan, scaleFormula, scalePermission, scalePermissionMode, dynamicValueAdd, routine, dynamicValueDisplayFormula, dynamicValuePlaceholders);
     }
