@@ -20,6 +20,7 @@ import top.mrxiaom.pluginbase.utils.AdventureItemStack;
 import top.mrxiaom.pluginbase.utils.PAPI;
 import top.mrxiaom.pluginbase.utils.Pair;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
+import top.mrxiaom.sweet.adaptiveshop.database.OrderDatabase;
 import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerOrder;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractGuiModule;
 import top.mrxiaom.sweet.adaptiveshop.func.OrderManager;
@@ -160,7 +161,10 @@ public class GuiOrders extends AbstractGuiModule {
                         t(player, "&e你没有足够的刷新券!");
                         return;
                     }
-                    // TODO: 刷新订单
+                    OrderManager.inst().refresh(player);
+                    t(player, "&a你成功刷新了订单列表!");
+                    this.orders = OrderManager.inst().getPlayerOrders(player);
+                    open();
                     return;
                 }
                 if (id.equals('订')) {

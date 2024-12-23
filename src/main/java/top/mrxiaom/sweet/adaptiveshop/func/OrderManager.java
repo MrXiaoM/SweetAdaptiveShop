@@ -90,6 +90,22 @@ public class OrderManager extends AbstractModule {
         if (flag) db.setPlayerOrders(player, orders);
         return list;
     }
+
+    public void refresh(Player player) {
+        OrderDatabase db = plugin.getOrderDatabase();
+        List<PlayerOrder> orders = db.getPlayerOrders(player);
+        if (orders == null) orders = new ArrayList<>();
+        else orders.clear();
+        LocalDateTime tomorrow = Utils.nextOutdate();
+        for (int i = 0; i < ordersCount; i++) {
+            Order order = randomNewOrder(player, orders);
+            if (order == null) break;
+            PlayerOrder entry = new PlayerOrder(order.id, false, tomorrow);
+            orders.add(entry);
+        }
+        db.setPlayerOrders(player, orders);
+    }
+
     public static OrderManager inst() {
         return instanceOf(OrderManager.class);
     }

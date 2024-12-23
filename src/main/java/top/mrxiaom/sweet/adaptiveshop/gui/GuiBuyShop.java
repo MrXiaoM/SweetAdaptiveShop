@@ -182,7 +182,10 @@ public class GuiBuyShop extends AbstractGuiModule {
                         t(player, "&e你没有足够的刷新券!");
                         return;
                     }
-                    // TODO: 刷新商品
+                    group.refresh(player);
+                    t(player, "&a你成功刷新了" + group.display + "商品列表!");
+                    this.items = BuyShopManager.inst().getPlayerItems(player, group.id);
+                    open();
                     return;
                 }
                 if (id.equals('物')) {
