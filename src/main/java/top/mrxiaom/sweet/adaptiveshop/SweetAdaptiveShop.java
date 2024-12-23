@@ -13,11 +13,6 @@ import top.mrxiaom.sweet.adaptiveshop.mythic.IMythic;
 import top.mrxiaom.sweet.adaptiveshop.mythic.Mythic4;
 import top.mrxiaom.sweet.adaptiveshop.mythic.Mythic5;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
 public class SweetAdaptiveShop extends BukkitPlugin {
     public static SweetAdaptiveShop getInstance() {
         return (SweetAdaptiveShop) BukkitPlugin.getInstance();
@@ -83,20 +78,5 @@ public class SweetAdaptiveShop extends BukkitPlugin {
 
     public String getDBKey(Player player) {
         return player.getName(); // TODO
-    }
-
-    public void saveResource(String path, File file) {
-        try (InputStream resource = getResource(path)) {
-            if (resource == null) return;
-            try (FileOutputStream output = new FileOutputStream(file)) {
-                int len;
-                byte[] buffer = new byte[1024];
-                while ((len = resource.read(buffer)) != -1) {
-                    output.write(buffer, 0, len);
-                }
-            }
-        } catch (IOException e) {
-            warn("保存资源文件 " + path + " 时出错", e);
-        }
     }
 }
