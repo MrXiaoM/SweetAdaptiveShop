@@ -3,7 +3,7 @@ inventory:
   - '框框框框框框框框框'
   - '框　物物物物物　框'
   - '框框框框框框框框框'
-  - '框框框框原副订刷框'
+  - '框框框框原副单刷框'
 # 是否在提交物品后关闭界面
 # 关闭此项，则提交物品后刷新界面
 close-after-submit: true
@@ -52,16 +52,16 @@ other-icons:
     custom-model-data: 10000
     display: '&e杂物收购'
     left-click-commands:
-      - '[console]sweetadptiveshop open buy default %player_name%'
+      - '[console]sashop open buy default %player_name%'
   副:
     material: PAPER
     custom-model-data: 10000
     display: '&e副本收购'
     left-click-commands:
-      - '[console]sweetadptiveshop open buy rpg %player_name%'
-  订:
+      - '[console]sashop open buy rpg %player_name%'
+  单:
     material: PAPER
     custom-model-data: 10000
     display: '&e收购订单'
     left-click-commands:
-      - '[console]sweetadptiveshop open order %player_name%'
+      - '[console]sashop open order %player_name%'

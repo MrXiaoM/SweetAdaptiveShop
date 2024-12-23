@@ -9,6 +9,6 @@ softdepend:
   - MythicMobs
 authors: [ MrXiaoM ]
 commands:
-  sweetadptiveshop:
+  sweetadaptiveshop:
     description: 'The main command of SweetAdaptiveShop'
     aliases: [ sashop, sas ]
