@@ -27,8 +27,8 @@ main-icons:
       - operation
     operations:
       one: '&a左键&7 | &f提交1个物品 &7(获得%price%金币)'
-      stack: '&b右键&7 | &f提交一组(%count%个)物品 &7(获得%price%金币)'
-      all: '&eShift+左键&7 | &f提交全部(%count%个)物品 &7(获得%price%金币)'
+      stack: '&b右键&7 | &f提交一组物品 &7(%count%个，获得%price%金币)'
+      all: '&eShift+左键&7 | &f提交全部物品 &7(%count%个，获得%price%金币)'
   物_空白:
     material: AIR
   刷:
