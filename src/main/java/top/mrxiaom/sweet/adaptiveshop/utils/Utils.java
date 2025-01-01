@@ -165,6 +165,10 @@ public class Utils {
     public static int limit(int num, int min, int max) {
         return Math.max(min, Math.min(max, num));
     }
+    
+    public static double limit(double num, double min, double max) {
+        return Math.max(min, Math.min(max, num));
+    }
 
     @Nullable
     public static BigDecimal eval(String formula, Consumer<Expression> variables) {

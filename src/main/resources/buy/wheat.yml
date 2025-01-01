@@ -38,7 +38,13 @@ price:
 dynamic-value:
   # 每向系统出售一个，动态值增加多少
   add: 0.01
-  # 动态值重置周期，daily 每天4点，weekly 每周一4点，monthly 每月一号4点
+  # 动态值上限（0 为无限制），在策略为 recover 时建议设置，避免动态值无限制增加
+  maximum: 0
+  # 动态值周期策略，reset 重置为 0，recover 每周期减少特定量的动态值
+  strategy: reset
+  # 策略为 recover 时，动态值每周期降低多少
+  recover: 10-20
+  # 动态值执行策略的周期，daily 每天4点，weekly 每周一4点，monthly 每月一号4点
   routine: weekly
   # 显示该数值的公式，value 为动态值变量
   display-formula: value

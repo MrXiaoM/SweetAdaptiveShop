@@ -16,6 +16,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+
+import static top.mrxiaom.sweet.adaptiveshop.utils.Utils.limit;
 
 public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, Listener {
     private String TABLE_BUY_SHOP, TABLE_PLAYER_BUY_SHOP;
@@ -79,13 +82,19 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, 
         return null;
     }
 
-    private void setDynamicValue(Connection conn, boolean insert, String item, double value, LocalDateTime nextOutdateTime) throws SQLException {
+    private void setDynamicValue(Connection conn, boolean insert, String item, double value, double maximum, LocalDateTime nextOutdateTime) throws SQLException {
+        double finalValue;
+        if (maximum > 0) {
+            finalValue = limit(value, 0, maximum);
+        } else {
+            finalValue = Math.max(0, value);
+        }
         if (insert) {
             try (PreparedStatement ps1 = conn.prepareStatement(
                     "INSERT INTO `" + TABLE_BUY_SHOP + "`(`item`,`dynamic_value`,`outdate`) VALUES(?,?,?);"
             )) {
                 ps1.setString(1, item);
-                ps1.setDouble(2, Double.parseDouble(String.format("%.2f", value)));
+                ps1.setDouble(2, Double.parseDouble(String.format("%.2f", finalValue)));
                 ps1.setTimestamp(3, Timestamp.valueOf(nextOutdateTime));
                 ps1.execute();
             }
@@ -93,7 +102,7 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, 
             try (PreparedStatement ps1 = conn.prepareStatement(
                     "UPDATE `" + TABLE_BUY_SHOP + "` SET `dynamic_value`=?, `outdate`=? WHERE `item`=?;"
             )) {
-                ps1.setDouble(1, Double.parseDouble(String.format("%.2f", value)));
+                ps1.setDouble(1, Double.parseDouble(String.format("%.2f", finalValue)));
                 ps1.setTimestamp(2, Timestamp.valueOf(nextOutdateTime));
                 ps1.setString(3, item);
                 ps1.execute();
@@ -101,7 +110,7 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, 
         }
     }
 
-    public void addDynamicValue(String item, double value, LocalDateTime nextOutdateTime) {
+    public void addDynamicValue(String item, double value, double maximum, LocalDateTime nextOutdateTime, Function<Double, Double> resetValue) {
         try (Connection conn = plugin.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(
                     "SELECT * FROM `" + TABLE_BUY_SHOP + "` WHERE `item`=?;"
@@ -109,17 +118,18 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, 
                 ps.setString(1, item);
                 try (ResultSet resultSet = ps.executeQuery()) {
                     if (!resultSet.next()) {
-                        setDynamicValue(conn, true, item, value, nextOutdateTime);
-                        return;
-                    }
-                    Timestamp outdate = resultSet.getTimestamp("outdate");
-                    Timestamp now = Timestamp.valueOf(LocalDateTime.now());
-                    if (now.after(outdate)) {
-                        setDynamicValue(conn, false, item, value, nextOutdateTime);
+                        setDynamicValue(conn, true, item, value, maximum, nextOutdateTime);
                         return;
                     }
                     double dynamicValue = resultSet.getDouble("dynamic_value");
-                    setDynamicValue(conn, false, item, dynamicValue + value, nextOutdateTime);
+                    Timestamp outdate = resultSet.getTimestamp("outdate");
+                    Timestamp now = Timestamp.valueOf(LocalDateTime.now());
+                    if (now.after(outdate)) {
+                        double reset = resetValue.apply(dynamicValue);
+                        setDynamicValue(conn, false, item, reset, maximum, nextOutdateTime);
+                        return;
+                    }
+                    setDynamicValue(conn, false, item, dynamicValue + value, maximum, nextOutdateTime);
                 }
             }
         } catch (SQLException e) {

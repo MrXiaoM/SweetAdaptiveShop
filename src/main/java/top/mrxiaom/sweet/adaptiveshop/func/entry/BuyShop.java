@@ -16,6 +16,7 @@ import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.enums.PermMode;
 import top.mrxiaom.sweet.adaptiveshop.enums.Routine;
+import top.mrxiaom.sweet.adaptiveshop.enums.Strategy;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractModule;
 import top.mrxiaom.sweet.adaptiveshop.mythic.IMythic;
 import top.mrxiaom.sweet.adaptiveshop.utils.DoubleRange;
@@ -43,12 +44,15 @@ public class BuyShop {
     public final String scalePermission;
     public final PermMode scalePermissionMode;
     public final double dynamicValueAdd;
+    public final double dynamicValueMaximum;
+    public final Strategy dynamicValueStrategy;
+    public final DoubleRange dynamicValueRecover;
     public final Routine routine;
     public final String dynamicValueDisplayFormula;
     public final Map<Double, String> dynamicValuePlaceholders;
     public final String dynamicValuePlaceholderMin;
 
-    BuyShop(String group, String id, String permission, ItemStack displayItem, String displayName, int matchPriority, Function<ItemStack, Boolean> matcher, double priceBase, DoubleRange scaleRange, double scaleWhenDynamicLargeThan, String scaleFormula, String scalePermission, PermMode scalePermissionMode, double dynamicValueAdd, Routine routine, String dynamicValueDisplayFormula, Map<Double, String> dynamicValuePlaceholders) {
+    BuyShop(String group, String id, String permission, ItemStack displayItem, String displayName, int matchPriority, Function<ItemStack, Boolean> matcher, double priceBase, DoubleRange scaleRange, double scaleWhenDynamicLargeThan, String scaleFormula, String scalePermission, PermMode scalePermissionMode, double dynamicValueAdd, double dynamicValueMaximum, Strategy dynamicValueStrategy, DoubleRange dynamicValueRecover, Routine routine, String dynamicValueDisplayFormula, Map<Double, String> dynamicValuePlaceholders) {
         this.group = group;
         this.id = id;
         this.permission = permission;
@@ -63,6 +67,9 @@ public class BuyShop {
         this.scalePermission = scalePermission;
         this.scalePermissionMode = scalePermissionMode;
         this.dynamicValueAdd = dynamicValueAdd;
+        this.dynamicValueMaximum = dynamicValueMaximum;
+        this.dynamicValueStrategy = dynamicValueStrategy;
+        this.dynamicValueRecover = dynamicValueRecover;
         this.routine = routine;
         this.dynamicValueDisplayFormula = dynamicValueDisplayFormula;
         this.dynamicValuePlaceholders = dynamicValuePlaceholders;
@@ -149,12 +156,24 @@ public class BuyShop {
         }
         SweetAdaptiveShop plugin = SweetAdaptiveShop.getInstance();
         double value = dynamicValueAdd * (count - j);
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            plugin.getBuyShopDatabase().addDynamicValue(id, value, routine.nextOutdate());
-        });
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> addDynamicValue(value));
         if (j > 0) {
             plugin.warn("预料中的错误: 玩家 " + player.getName() + " 向收购商店 " + id + " 提交 " + count + " 个物品时，有 " + j + " 个物品没有提交成功");
         }
+    }
+
+    public void addDynamicValue(double value) {
+        SweetAdaptiveShop plugin = SweetAdaptiveShop.getInstance();
+        plugin.getBuyShopDatabase().addDynamicValue(id, value, dynamicValueMaximum, routine.nextOutdate(), this::recoverDynamicValue);
+    }
+
+    public double recoverDynamicValue(double old) {
+        if (dynamicValueRecover == null) return old;
+        double dynamicValue = Math.max(0, old - dynamicValueRecover.random());
+        if (dynamicValueMaximum > 0) {
+            return Math.min(dynamicValueMaximum, dynamicValue);
+        }
+        return dynamicValue;
     }
 
     public boolean hasPermission(Player player) {
@@ -239,6 +258,13 @@ public class BuyShop {
             return null;
         }
         double dynamicValueAdd = config.getDouble("dynamic-value/add");
+        double dynamicValueMaximum = config.getDouble("dynamic-value/maximum", 0.0);
+        Strategy dynamicValueStrategy = Util.valueOr(Strategy.class, config.getString("dynamic-value/strategy"), Strategy.reset);
+        DoubleRange dynamicValueRecover = Utils.getDoubleRange(config, "dynamic-value/recover");
+        if (dynamicValueStrategy.equals(Strategy.recover) && dynamicValueRecover == null) {
+            holder.warn("[buy] 读取 " + id + " 时出错，dynamic-value.strategy 设为 recover 时，未设置 recover 的值");
+            return null;
+        }
         Routine routine = Util.valueOr(Routine.class, config.getString("dynamic-value/routine"), null);
         if (routine == null) {
             holder.warn("[buy] 读取 " + id + " 时出错，dynamic-value.routine 的值无效");
@@ -260,7 +286,7 @@ public class BuyShop {
             String placeholder = section.getString(s);
             dynamicValuePlaceholders.put(value, placeholder);
         }
-        return new BuyShop(group, id, permission, displayItem, displayName, matchPriority, matcher, priceBase, scaleRange, scaleWhenDynamicLargeThan, scaleFormula, scalePermission, scalePermissionMode, dynamicValueAdd, routine, dynamicValueDisplayFormula, dynamicValuePlaceholders);
+        return new BuyShop(group, id, permission, displayItem, displayName, matchPriority, matcher, priceBase, scaleRange, scaleWhenDynamicLargeThan, scaleFormula, scalePermission, scalePermissionMode, dynamicValueAdd, dynamicValueMaximum, dynamicValueStrategy, dynamicValueRecover, routine, dynamicValueDisplayFormula, dynamicValuePlaceholders);
     }
     private static boolean testFormulaFail(String formula) {
         BigDecimal result = Utils.eval(formula, e -> e.and("value", BigDecimal.valueOf(1.23)));

@@ -1,5 +1,7 @@
 package top.mrxiaom.sweet.adaptiveshop.utils;
 
+import java.util.Random;
+
 public class DoubleRange {
     private final double min;
     private final double max;
@@ -17,5 +19,10 @@ public class DoubleRange {
 
     public double maximum() {
         return max;
+    }
+
+    public double random() {
+        double rand = new Random().nextInt(1919810) / 1919809.0;
+        return minimum() + (rand * (maximum() - minimum()));
     }
 }

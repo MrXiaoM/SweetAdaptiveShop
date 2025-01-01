@@ -101,9 +101,7 @@ public class Order {
             Integer needToTake = entry.getValue();
             BuyShop item = need.item;
             double value = item.dynamicValueAdd * (need.amount - needToTake);
-            if (need.affectDynamicValue) Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                plugin.getBuyShopDatabase().addDynamicValue(item.id, value, item.routine.nextOutdate());
-            });
+            if (need.affectDynamicValue) Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> item.addDynamicValue(value));
             if (needToTake > 0) {
                 plugin.warn("预料中的错误: 玩家 " + player + " 提交任务 " + id + " 的需求物品 " + item.id + " 时，有 " + needToTake + " 个物品未提交成功");
             }
