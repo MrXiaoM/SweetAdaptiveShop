@@ -1,7 +1,10 @@
 package top.mrxiaom.sweet.adaptiveshop.enums;
 
+import top.mrxiaom.sweet.adaptiveshop.utils.Utils;
+
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 public enum Routine {
     DAILY, WEEKLY, MONTHLY;
@@ -20,9 +23,6 @@ public enum Routine {
         if (this.equals(MONTHLY)) {
             time = time.plusMonths(1).withDayOfMonth(1);
         }
-        if (time.getHour() < 4) {
-            time = time.minusDays(1);
-        }
-        return time.withHour(4).withMinute(0).withSecond(0);
+        return Utils.nextOutdate(time);
     }
 }

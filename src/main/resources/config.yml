@@ -4,3 +4,9 @@ path:
   order: ./order
 
 orders-count: 3
+
+# 周期具体时间
+routine-time:
+  hour: 4
+  minute: 0
+  second: 0

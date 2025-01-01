@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static top.mrxiaom.sweet.adaptiveshop.utils.Utils.limit;
+
 @AutoRegister
 public class BuyShopManager extends AbstractModule {
     File folder;
@@ -32,6 +34,10 @@ public class BuyShopManager extends AbstractModule {
 
     @Override
     public void reloadConfig(MemoryConfiguration config) {
+        Utils.outdateHour = limit(config.getInt("routine-time.hour", 4), 0, 23);
+        Utils.outdateMinute = limit(config.getInt("routine-time.minute", 0), 0, 59);
+        Utils.outdateSecond = limit(config.getInt("routine-time.second", 0), 0, 59);
+
         File file = new File(plugin.getDataFolder(), "groups.yml");
         if (!file.exists()) {
             plugin.saveResource("groups.yml", file);

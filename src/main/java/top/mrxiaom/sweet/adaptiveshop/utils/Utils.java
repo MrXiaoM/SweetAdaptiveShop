@@ -27,6 +27,7 @@ import java.util.function.Consumer;
 import static top.mrxiaom.pluginbase.utils.ItemStackUtil.getItemMeta;
 
 public class Utils {
+    public static int outdateHour, outdateMinute, outdateSecond;
     @CanIgnoreReturnValue
     public static boolean mkdirs(File file) {
         return file.mkdirs();
@@ -36,13 +37,23 @@ public class Utils {
         return LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
     }
 
+    public static LocalTime outdateTime() {
+        return LocalTime.of(outdateHour, outdateMinute, outdateSecond);
+    }
+
     public static LocalDateTime nextOutdate() {
-        // TODO: 让用户自定义明天过期时间
-        LocalDateTime now = LocalDateTime.now();
-        if (now.isBefore(LocalDate.now().atTime(4, 0, 0))) {
-            return LocalTime.of(4, 0, 0).atDate(LocalDate.now());
+        return nextOutdate(LocalDateTime.now());
+    }
+
+    public static LocalDateTime nextOutdate(LocalDateTime time) {
+        LocalDate localDate = time.toLocalDate();
+        LocalTime outdateTime = outdateTime();
+        // 如果当前时间在到期时间点之前，那就是今天了
+        if (time.toLocalTime().isBefore(outdateTime)) {
+            return outdateTime.atDate(localDate);
         }
-        return LocalDate.now().plusDays(1).atTime(4, 0, 0);
+        // 如果今天的到期时间点已经过去了，那就是明天
+        return localDate.plusDays(1).atTime(outdateTime);
     }
 
     public static int resolveRefreshCount(Player player, String nbtKey) {
@@ -149,6 +160,10 @@ public class Utils {
         } catch (NumberFormatException ignored) {
             return null;
         }
+    }
+
+    public static int limit(int num, int min, int max) {
+        return Math.max(min, Math.min(max, num));
     }
 
     @Nullable
