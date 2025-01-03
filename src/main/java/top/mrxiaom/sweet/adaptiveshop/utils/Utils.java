@@ -180,7 +180,7 @@ public class Utils {
             Expression expression = new Expression(formula);
             variables.accept(expression);
             return expression.eval();
-        } catch (Expression.ExpressionException e) {
+        } catch (RuntimeException e) {
             SweetAdaptiveShop.getInstance().warn("计算表达式 " + formula + " 时出现一个异常", e);
             return null;
         }
