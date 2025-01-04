@@ -22,6 +22,7 @@ public class DoubleRange {
     }
 
     public double random() {
+        if (minimum() == maximum()) return minimum();
         double rand = new Random().nextInt(1919810) / 1919809.0;
         return minimum() + (rand * (maximum() - minimum()));
     }
