@@ -6,7 +6,7 @@ type: vanilla
 material: WHEAT
 # mythic: ExampleItem
 
-# 展示名，可不输入，不输入则自动获取
+# 展示名，可不输入，不输入则自动获取，仅 1.19.4 及以上可以自动获取原版物品名
 # display-name: '名字'
 
 # 随机抽中该物品所需权限，默认为 sweet.adaptive.shop.buy.商品ID
