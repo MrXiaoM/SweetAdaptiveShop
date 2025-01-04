@@ -134,10 +134,11 @@ public class Utils {
                 throw new IllegalStateException("找不到物品 " + str);
             } else {
                 ItemStack item = new ItemStack(m);
-                if (customModelData != null) {
+                if (customModelData != null) try {
                     ItemMeta meta = getItemMeta(item);
                     meta.setCustomModelData(customModelData);
                     item.setItemMeta(meta);
+                } catch (Throwable ignored) {
                 }
 
                 return item;
