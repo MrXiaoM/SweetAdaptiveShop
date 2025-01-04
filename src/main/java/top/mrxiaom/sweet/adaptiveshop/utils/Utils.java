@@ -1,6 +1,5 @@
 package top.mrxiaom.sweet.adaptiveshop.utils;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.udojava.evalex.Expression;
 import de.tr7zw.changeme.nbtapi.NBT;
 import org.bukkit.Material;
@@ -28,7 +27,6 @@ import static top.mrxiaom.pluginbase.utils.ItemStackUtil.getItemMeta;
 
 public class Utils {
     public static int outdateHour, outdateMinute, outdateSecond;
-    @CanIgnoreReturnValue
     public static boolean mkdirs(File file) {
         return file.mkdirs();
     }

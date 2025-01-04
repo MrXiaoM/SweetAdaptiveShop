@@ -215,7 +215,11 @@ public class BuyShop {
             matchPriority = 1000;
             matcher = item -> item.getType().equals(material);
             if (displayName == null) {
-                displayName = "<translate:" + displayItem.getType().getTranslationKey() + ">";
+                if (holder.plugin.isSupportTranslatable()) {
+                    displayName = "<translate:" + displayItem.getType().getTranslationKey() + ">";
+                } else {
+                    displayName = displayItem.getType().name().toLowerCase().replace("_", "");
+                }
             }
         } else if ("mythic".equals(type)) {
             IMythic mythic = holder.plugin.getMythic();

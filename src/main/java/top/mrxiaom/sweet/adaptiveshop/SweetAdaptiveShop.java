@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.BukkitPlugin;
 import top.mrxiaom.pluginbase.EconomyHolder;
 import top.mrxiaom.pluginbase.func.LanguageManager;
+import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.database.BuyShopDatabase;
 import top.mrxiaom.sweet.adaptiveshop.database.OrderDatabase;
 import top.mrxiaom.sweet.adaptiveshop.mythic.IMythic;
@@ -38,6 +39,16 @@ public class SweetAdaptiveShop extends BukkitPlugin {
     private IMythic mythic;
     private BuyShopDatabase buyShopDatabase;
     private OrderDatabase orderDatabase;
+    private boolean supportTranslatable;
+    private boolean supportOffHand;
+
+    public boolean isSupportTranslatable() {
+        return supportTranslatable;
+    }
+
+    public boolean isSupportOffHand() {
+        return supportOffHand;
+    }
 
     public BuyShopDatabase getBuyShopDatabase() {
         return buyShopDatabase;
@@ -58,6 +69,9 @@ public class SweetAdaptiveShop extends BukkitPlugin {
         MinecraftVersion.disableUpdateCheck();
         MinecraftVersion.disableBStats();
         MinecraftVersion.getVersion();
+
+        supportTranslatable = Util.isPresent("org.bukkit.Translatable");
+        supportOffHand = MinecraftVersion.isAtLeastVersion(MinecraftVersion.MC1_9_R1);
     }
 
     @Override

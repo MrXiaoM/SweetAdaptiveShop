@@ -37,7 +37,8 @@ dependencies {
     implementation("net.kyori:adventure-platform-bukkit:4.3.4")
     implementation("net.kyori:adventure-text-minimessage:4.17.0")
     implementation("de.tr7zw:item-nbt-api:2.14.0")
-    implementation("com.zaxxer:HikariCP:4.0.3") { isTransitive = false }
+    implementation("com.zaxxer:HikariCP:4.0.3")
+    implementation("org.slf4j:slf4j-nop:2.0.16")
     implementation("com.udojava:EvalEx:2.7")
     implementation("org.jetbrains:annotations:21.0.0")
     implementation("top.mrxiaom:PluginBase:1.1.6")
@@ -56,12 +57,14 @@ tasks {
             "org.jetbrains.annotations" to "annotations.jetbrains",
             "top.mrxiaom.pluginbase" to "base",
             "com.zaxxer.hikari" to "hikari",
+            "org.slf4j" to "slf4j",
             "de.tr7zw.changeme.nbtapi" to "nbtapi",
             "com.udojava.evalex" to "evalex",
             "net.kyori" to "kyori",
         ).forEach { (original, target) ->
             relocate(original, "$shadowGroup.$target")
         }
+        exclude("META-INF/services/org.slf4j.spi.SLF4JServiceProvider")
     }
     build {
         dependsOn(shadowJar)

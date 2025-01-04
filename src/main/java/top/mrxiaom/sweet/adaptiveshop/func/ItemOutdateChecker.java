@@ -4,21 +4,20 @@ import de.tr7zw.changeme.nbtapi.NBT;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.*;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDropItemEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import top.mrxiaom.pluginbase.func.AutoRegister;
 import top.mrxiaom.pluginbase.utils.ItemStackUtil;
+import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.Messages;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.gui.GuiBuyShop;
@@ -27,9 +26,37 @@ import top.mrxiaom.sweet.adaptiveshop.utils.Utils;
 
 @AutoRegister
 public class ItemOutdateChecker extends AbstractModule implements Listener {
+    public class NewerVersion implements Listener {
+        @EventHandler
+        public void onItemDrop(EntityDropItemEvent e) {
+            onItemDropOrPickup(e, e.getEntity(), e.getItemDrop());
+        }
+        @EventHandler
+        public void onItemPickup(EntityPickupItemEvent e) {
+            onItemDropOrPickup(e, e.getEntity(), e.getItem());
+        }
+    }
+
+    public class OlderVersion implements Listener {
+        @EventHandler
+        public void onItemDrop(PlayerDropItemEvent e) {
+            onItemDropOrPickup(e, e.getPlayer(), e.getItemDrop());
+        }
+        @EventHandler
+        public void onItemPickup(PlayerPickupItemEvent e) {
+            onItemDropOrPickup(e, e.getPlayer(), e.getItem());
+        }
+    }
+
     public ItemOutdateChecker(SweetAdaptiveShop plugin) {
         super(plugin);
         registerEvents();
+        if (Util.isPresent("org.bukkit.event.entity.EntityPickupItemEvent")
+        && Util.isPresent("org.bukkit.event.entity.EntityDropItemEvent")) {
+            registerEvents(new NewerVersion());
+        } else {
+            registerEvents(new OlderVersion());
+        }
     }
 
     public boolean isOutdate(CommandSender sender, ItemStack item) {
@@ -90,20 +117,9 @@ public class ItemOutdateChecker extends AbstractModule implements Listener {
         }
     }
 
-    @EventHandler
-    public void onItemDrop(EntityDropItemEvent e) {
-        Entity entity = e.getEntity();
-        if (isOutdate(entity, e.getItemDrop().getItemStack())) {
-            e.getItemDrop().remove();
-            e.setCancelled(true);
-        }
-    }
-
-    @EventHandler
-    public void onItemPickup(EntityPickupItemEvent e) {
-        LivingEntity entity = e.getEntity();
-        if (isOutdate(entity, e.getItem().getItemStack())) {
-            e.getItem().remove();
+    public void onItemDropOrPickup(Cancellable e, Entity entity, Item item) {
+        if (isOutdate(entity, item.getItemStack())) {
+            item.remove();
             e.setCancelled(true);
         }
     }
@@ -112,6 +128,10 @@ public class ItemOutdateChecker extends AbstractModule implements Listener {
     public void onInteract(PlayerInteractEvent e) {
         Player player = e.getPlayer();
         PlayerInventory inv = player.getInventory();
+        if (!plugin.isSupportOffHand()) {
+            if (isOutdate(player, inv.getItemInHand())) inv.setItemInHand(null);
+            return;
+        }
         if (isOutdate(player, inv.getItemInMainHand())) inv.setItemInMainHand(null);
         if (isOutdate(player, inv.getItemInOffHand())) inv.setItemInOffHand(null);
     }
