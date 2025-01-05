@@ -98,7 +98,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                 if (bypass) {
                     dynamic = 0;
                 } else {
-                    Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop.id);
+                    Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop);
                     dynamic = dyn == null ? 0.0 : dyn;
                 }
                 int count = shop.getCount(player);
@@ -227,7 +227,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                         if (shop.hasBypass(player)) {
                             price = shop.priceBase;
                         } else {
-                            Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop.id);
+                            Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop);
                             double dynamic = dyn == null ? 0.0 : dyn;
                             price = shop.getPrice(dynamic);
                         }
@@ -252,7 +252,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                         if (shop.hasBypass(player)) {
                             price = shop.priceBase;
                         } else {
-                            Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop.id);
+                            Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop);
                             double dynamic = dyn == null ? 0.0 : dyn;
                             price = shop.getPrice(dynamic);
                         }
@@ -276,7 +276,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                         if (shop.hasBypass(player)) {
                             price = shop.priceBase;
                         } else {
-                            Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop.id);
+                            Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop);
                             double dynamic = dyn == null ? 0.0 : dyn;
                             price = shop.getPrice(dynamic);
                         }

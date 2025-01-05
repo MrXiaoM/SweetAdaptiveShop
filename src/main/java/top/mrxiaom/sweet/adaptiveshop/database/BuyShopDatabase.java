@@ -9,6 +9,7 @@ import top.mrxiaom.pluginbase.database.IDatabase;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerItem;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractPluginHolder;
+import top.mrxiaom.sweet.adaptiveshop.func.entry.BuyShop;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -58,20 +59,23 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, 
     }
 
     @Nullable
-    public Double getDynamicValue(String item) {
+    public Double getDynamicValue(BuyShop item) {
         try (Connection conn = plugin.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(
                     "SELECT * FROM `" + TABLE_BUY_SHOP + "` WHERE `item`=?;"
             )) {
-                ps.setString(1, item);
+                ps.setString(1, item.id);
                 try (ResultSet resultSet = ps.executeQuery()) {
                     if (resultSet.next()) {
+                        double dynamicValue = resultSet.getDouble("dynamic_value");
                         Timestamp outdate = resultSet.getTimestamp("outdate");
                         Timestamp now = Timestamp.valueOf(LocalDateTime.now());
                         if (now.after(outdate)) {
+                            double reset = item.recoverDynamicValue(dynamicValue);
+                            setDynamicValue(conn, false, item.id, reset, item.dynamicValueMaximum, item.routine.nextOutdate());
                             return 0.0;
                         }
-                        return resultSet.getDouble("dynamic_value");
+                        return dynamicValue;
                     }
                 }
                 return 0.0;
