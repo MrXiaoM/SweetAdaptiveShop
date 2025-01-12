@@ -1,10 +1,13 @@
 # 商品属于哪个分组
 group: default
 # 商品类型
-# vanilla 为原版, mythic 为mm物品
+# vanilla 为原版物品，使用参数 material
+# mythic 为MythicMobs物品，使用参数 mythic
+# itemsadder 为ItemsAdder物品，使用参数 itemsadder
 type: vanilla
 material: WHEAT
 # mythic: ExampleItem
+# itemsadder: '_iainternal:icon_arrow_chest'
 
 # 展示名，可不输入，不输入则自动获取，仅 1.19.4 及以上可以自动获取原版物品名
 # display-name: '名字'

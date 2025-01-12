@@ -1,6 +1,7 @@
 package top.mrxiaom.sweet.adaptiveshop.func.entry;
 
 import de.tr7zw.changeme.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.iface.ReadableNBT;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -11,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import top.mrxiaom.pluginbase.utils.IA;
 import top.mrxiaom.pluginbase.utils.ItemStackUtil;
 import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
@@ -85,6 +87,7 @@ public class BuyShop {
     }
 
     public boolean match(@NotNull ItemStack item) {
+        if (item.getType().equals(Material.AIR) || item.getAmount() == 0) return false;
         return matcher.apply(item);
     }
 
@@ -236,6 +239,27 @@ public class BuyShop {
             matchPriority = 999;
             matcher = item -> NBT.get(item, nbt -> {
                 return mythicId.equals(nbt.getString("MMOITEMS_ITEM_ID"));
+            });
+            if (displayName == null) {
+                displayName = ItemStackUtil.getItemDisplayName(displayItem);
+            }
+        } else if ("itemsadder".equals(type)) {
+            if (!holder.plugin.isSupportItemsAdder()) {
+                holder.warn("[buy] 获取 " + id + " 时出错，未安装前置 ItemsAdder");
+                return null;
+            }
+            String itemsAdderId = config.getString("itemsadder");
+            displayItem = IA.get(itemsAdderId).orElse(null);
+            if (itemsAdderId == null || displayItem == null) {
+                holder.warn("[buy] 获取 " + id + " 时出错，找不到相应的 ItemsAdder 物品");
+                return null;
+            }
+            matchPriority = 999;
+            matcher = item -> NBT.get(item, nbt -> {
+                ReadableNBT itemsadder = nbt.getCompound("itemsadder");
+                if (itemsadder == null) return false;
+                String realId = itemsadder.getString("namespace") + ":" + itemsadder.getString("id");
+                return realId.equals(itemsAdderId);
             });
             if (displayName == null) {
                 displayName = ItemStackUtil.getItemDisplayName(displayItem);

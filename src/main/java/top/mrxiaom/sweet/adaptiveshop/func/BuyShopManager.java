@@ -1,5 +1,6 @@
 package top.mrxiaom.sweet.adaptiveshop.func;
 
+import dev.lone.itemsadder.api.ItemsAdder;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -56,6 +57,19 @@ public class BuyShopManager extends AbstractModule {
             Utils.mkdirs(folder);
             plugin.saveResource("buy/wheat.yml", new File(folder, "wheat.yml"));
         }
+        if (!plugin.isSupportItemsAdder()) {
+            reloadBuyShops();
+        } else {
+            if (ItemsAdder.areItemsLoaded()) {
+                reloadBuyShops();
+            } else {
+                info("发现服务器已安装 ItemsAdder，但物品尚未加载。将计划在 ItemsAdder 加载物品后再加载商品与订单。");
+                ItemsAdderManager.inst().scheduleReload();
+            }
+        }
+    }
+
+    public void reloadBuyShops() {
         map.clear();
         reloadConfig(folder);
         info("加载了 " + map.size() + " 个收购商品");
@@ -68,7 +82,7 @@ public class BuyShopManager extends AbstractModule {
             }
             group.buyShop.put(entry.getKey(), entry.getValue());
         }
-        OrderManager.inst().realReloadConfig(config); // 确保加载顺序正确
+        OrderManager.inst().realReloadConfig(plugin.getConfig()); // 确保加载顺序正确
     }
 
     private void reloadConfig(File folder) {
