@@ -41,6 +41,7 @@ public class SweetAdaptiveShop extends BukkitPlugin {
     private OrderDatabase orderDatabase;
     private boolean supportTranslatable;
     private boolean supportOffHand;
+    private boolean supportItemsAdder;
 
     public boolean isSupportTranslatable() {
         return supportTranslatable;
@@ -48,6 +49,10 @@ public class SweetAdaptiveShop extends BukkitPlugin {
 
     public boolean isSupportOffHand() {
         return supportOffHand;
+    }
+
+    public boolean isSupportItemsAdder() {
+        return supportItemsAdder;
     }
 
     public BuyShopDatabase getBuyShopDatabase() {
@@ -76,6 +81,7 @@ public class SweetAdaptiveShop extends BukkitPlugin {
 
     @Override
     protected void beforeEnable() {
+        supportItemsAdder = Util.isPresent("dev.lone.itemsadder.api.CustomStack");
         Plugin mythicPlugin = Bukkit.getPluginManager().getPlugin("MythicMobs");
         if (mythicPlugin != null) {
             String ver = mythicPlugin.getDescription().getVersion();
