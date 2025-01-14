@@ -220,16 +220,21 @@ public class BuyShop {
         int matchPriority;
         Function<ItemStack, Boolean> matcher;
         if ("vanilla".equals(type)) {
-            String[] s = config.getString("material", "").split(":", 2);
-            Material material = Util.valueOr(Material.class, s[0], null);
-            if (material == null) {
-                holder.warn("[buy] 读取 " + id + " 时，找不到 material 对应物品");
-                return null;
+            String raw = config.getString("material", "");
+            String[] s = raw.contains(":") ? raw.split(":", 2) : new String[]{raw};
+            Material material = Material.matchMaterial(s[0]);
+            if (material == null || material.equals(Material.AIR)) {
+                material = Util.valueOr(Material.class, s[0], null);
+                if (material == null || material.equals(Material.AIR)) {
+                    holder.warn("[buy] 读取 " + id + " 时，找不到 material 对应物品");
+                    return null;
+                }
             }
             Integer data = s.length > 1 ? Util.parseInt(s[1]).orElse(null) : null;
             displayItem = data == null ? new ItemStack(material) : new ItemStack(material, 1, data.shortValue());
             matchPriority = 1000;
-            matcher = item -> item.getType().equals(material)
+            Material finalMaterial = material;
+            matcher = item -> item.getType().equals(finalMaterial)
                     && (data == null || item.getDurability() == data.shortValue());
             if (displayName == null) {
                 if (holder.plugin.isSupportTranslatable()) {
