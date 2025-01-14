@@ -70,10 +70,11 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, 
                         double dynamicValue = resultSet.getDouble("dynamic_value");
                         Timestamp outdate = resultSet.getTimestamp("outdate");
                         Timestamp now = Timestamp.valueOf(LocalDateTime.now());
-                        if (now.after(outdate)) {
+                        if (now.after(outdate)) { // 动态值过期之后
+                            // 按配置策略，重置或恢复动态值
                             double reset = item.recoverDynamicValue(dynamicValue);
                             setDynamicValue(conn, false, item.id, reset, item.dynamicValueMaximum, item.routine.nextOutdate());
-                            return 0.0;
+                            return reset;
                         }
                         return dynamicValue;
                     }
@@ -88,9 +89,9 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, 
 
     private void setDynamicValue(Connection conn, boolean insert, String item, double value, double maximum, LocalDateTime nextOutdateTime) throws SQLException {
         double finalValue;
-        if (maximum > 0) {
+        if (maximum > 0) { // 启用限制时，限制为 [0, maximum]
             finalValue = limit(value, 0, maximum);
-        } else {
+        } else { // 未启用限制时，限制为 [0, +∞)
             finalValue = Math.max(0, value);
         }
         if (insert) {
@@ -128,12 +129,15 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, 
                     double dynamicValue = resultSet.getDouble("dynamic_value");
                     Timestamp outdate = resultSet.getTimestamp("outdate");
                     Timestamp now = Timestamp.valueOf(LocalDateTime.now());
-                    if (now.after(outdate)) {
+                    if (now.after(outdate)) { // 动态值过期之后
+                        // 按配置策略，重置或恢复动态值
                         double reset = resetValue.apply(dynamicValue);
                         setDynamicValue(conn, false, item, reset, maximum, nextOutdateTime);
                         return;
                     }
-                    setDynamicValue(conn, false, item, dynamicValue + value, maximum, nextOutdateTime);
+                    // 未过期则增加动态值
+                    double newValue = dynamicValue + value;
+                    setDynamicValue(conn, false, item, newValue, maximum, nextOutdateTime);
                 }
             }
         } catch (SQLException e) {

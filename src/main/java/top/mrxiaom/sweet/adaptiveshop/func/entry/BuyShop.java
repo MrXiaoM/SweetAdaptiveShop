@@ -179,7 +179,9 @@ public class BuyShop {
     }
 
     public double recoverDynamicValue(double old) {
-        if (dynamicValueRecover == null) return 0;
+        if (dynamicValueStrategy.equals(Strategy.reset) || dynamicValueRecover == null) {
+            return 0;
+        }
         double dynamicValue = Math.max(0, old - dynamicValueRecover.random());
         if (dynamicValueMaximum > 0) {
             return Math.min(dynamicValueMaximum, dynamicValue);
