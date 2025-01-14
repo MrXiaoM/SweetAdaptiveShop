@@ -192,6 +192,7 @@ public class BuyShop {
     }
 
     @Nullable
+    @SuppressWarnings({"deprecation"})
     public static BuyShop load(AbstractModule holder, File file, String id) {
         YamlConfiguration config = new YamlConfiguration();
         config.options().pathSeparator('/');
@@ -209,14 +210,17 @@ public class BuyShop {
         int matchPriority;
         Function<ItemStack, Boolean> matcher;
         if ("vanilla".equals(type)) {
-            Material material = Util.valueOr(Material.class, config.getString("material"), null);
+            String[] s = config.getString("material", "").split(":", 2);
+            Material material = Util.valueOr(Material.class, s[0], null);
             if (material == null) {
                 holder.warn("[buy] 读取 " + id + " 时，找不到 material 对应物品");
                 return null;
             }
-            displayItem = new ItemStack(material);
+            Integer data = s.length > 1 ? Util.parseInt(s[1]).orElse(null) : null;
+            displayItem = data == null ? new ItemStack(material) : new ItemStack(material, 1, data.shortValue());
             matchPriority = 1000;
-            matcher = item -> item.getType().equals(material);
+            matcher = item -> item.getType().equals(material)
+                    && (data == null || item.getDurability() == data.shortValue());
             if (displayName == null) {
                 if (holder.plugin.isSupportTranslatable()) {
                     displayName = "<translate:" + displayItem.getType().getTranslationKey() + ">";
