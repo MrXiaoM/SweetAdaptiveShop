@@ -175,7 +175,7 @@ public class BuyShop {
 
     public void addDynamicValue(double value) {
         SweetAdaptiveShop plugin = SweetAdaptiveShop.getInstance();
-        plugin.getBuyShopDatabase().addDynamicValue(id, value, dynamicValueMaximum, routine.nextOutdate(), this::recoverDynamicValue);
+        plugin.getBuyShopDatabase().addDynamicValue(this, value);
     }
 
     public double recoverDynamicValue(double old) {
