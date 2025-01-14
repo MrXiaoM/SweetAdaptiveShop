@@ -129,14 +129,15 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, 
                     double dynamicValue = resultSet.getDouble("dynamic_value");
                     Timestamp outdate = resultSet.getTimestamp("outdate");
                     Timestamp now = Timestamp.valueOf(LocalDateTime.now());
+                    double newValue;
                     if (now.after(outdate)) { // 动态值过期之后
                         // 按配置策略，重置或恢复动态值
                         double reset = resetValue.apply(dynamicValue);
-                        setDynamicValue(conn, false, item, reset, maximum, nextOutdateTime);
-                        return;
+                        newValue = reset + value;
+                    } else {
+                        // 未过期则增加动态值
+                        newValue = dynamicValue + value;
                     }
-                    // 未过期则增加动态值
-                    double newValue = dynamicValue + value;
                     setDynamicValue(conn, false, item, newValue, maximum, nextOutdateTime);
                 }
             }
