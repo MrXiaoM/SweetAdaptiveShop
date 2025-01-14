@@ -49,7 +49,9 @@ dynamic-value:
   strategy: reset
   # 策略为 recover 时，动态值每周期降低多少
   recover: 10-20
-  # 动态值执行策略的周期，daily 每天4点，weekly 每周一4点，monthly 每月一号4点
+  # 动态值执行策略的周期，
+  # daily 每天指定时间，weekly 每周一指定时间，monthly 每月一号指定时间
+  # 具体指定的时间请见 config.yml
   routine: weekly
   # 显示该数值的公式，value 为动态值变量
   display-formula: value
