@@ -101,6 +101,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                     Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop);
                     dynamic = dyn == null ? 0.0 : dyn;
                 }
+                boolean noCut = shop.dynamicValueMaximum == 0 || !shop.dynamicValueCutWhenMaximum;
                 int count = shop.getCount(player);
                 double price = bypass ? shop.priceBase : shop.getPrice(dynamic);
                 String priceString = String.format("%.2f", price).replace(".00", "");
@@ -118,16 +119,23 @@ public class GuiBuyShop extends AbstractGuiModule {
                     }
                     if (s.equals("operation")) {
                         if (count >= 1) {
-                            lore.add(buyOne.replace("%price%", priceString));
+                            if (noCut || dynamic + shop.dynamicValueAdd <= shop.dynamicValueMaximum) {
+                                lore.add(buyOne.replace("%price%", priceString));
+                            }
                         }
                         int stackSize = item.getType().getMaxStackSize();
                         if (count >= stackSize) {
-                            lore.add(buyStack.replace("%price%", String.format("%.2f", price * stackSize).replace(".00", ""))
-                                    .replace("%count%", String.valueOf(stackSize)));
+                            if (noCut || dynamic + shop.dynamicValueAdd * stackSize <= shop.dynamicValueMaximum) {
+                                lore.add(buyStack.replace("%price%", String.format("%.2f", price * stackSize).replace(".00", ""))
+                                        .replace("%count%", String.valueOf(stackSize)));
+                            }
                         }
                         if (count >= 1) {
-                            lore.add(buyAll.replace("%price%", String.format("%.2f", price * count).replace(".00", ""))
-                                    .replace("%count%", String.valueOf(count)));
+                            if (noCut || dynamic + shop.dynamicValueAdd * count <= shop.dynamicValueMaximum) {
+                                // 个人感觉按动态值上限算可以卖的总数量很麻烦，容易出BUG，就不写了
+                                lore.add(buyAll.replace("%price%", String.format("%.2f", price * count).replace(".00", ""))
+                                        .replace("%count%", String.valueOf(count)));
+                            }
                         }
                         continue;
                     }
@@ -222,13 +230,20 @@ public class GuiBuyShop extends AbstractGuiModule {
                             Messages.gui__buy__not_enough.tm(player);
                             return;
                         }
+                        Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop);
+                        double dynamic = dyn == null ? 0.0 : dyn;
+                        if (shop.dynamicValueMaximum > 0 && shop.dynamicValueCutWhenMaximum) {
+                            double add = shop.dynamicValueAdd;
+                            if (dynamic + add > shop.dynamicValueMaximum) {
+                                Messages.gui__buy__maximum.tm(player);
+                                return;
+                            }
+                        }
                         shop.take(player, 1);
                         double price;
                         if (shop.hasBypass(player)) {
                             price = shop.priceBase;
                         } else {
-                            Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop);
-                            double dynamic = dyn == null ? 0.0 : dyn;
                             price = shop.getPrice(dynamic);
                         }
                         plugin.getEconomy().giveMoney(player, price);
@@ -247,13 +262,20 @@ public class GuiBuyShop extends AbstractGuiModule {
                             Messages.gui__buy__not_enough.tm(player);
                             return;
                         }
+                        Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop);
+                        double dynamic = dyn == null ? 0.0 : dyn;
+                        if (shop.dynamicValueMaximum > 0 && shop.dynamicValueCutWhenMaximum) {
+                            double add = shop.dynamicValueAdd * stackSize;
+                            if (dynamic + add > shop.dynamicValueMaximum) {
+                                Messages.gui__buy__maximum.tm(player);
+                                return;
+                            }
+                        }
                         shop.take(player, stackSize);
                         double price;
                         if (shop.hasBypass(player)) {
                             price = shop.priceBase;
                         } else {
-                            Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop);
-                            double dynamic = dyn == null ? 0.0 : dyn;
                             price = shop.getPrice(dynamic);
                         }
                         String money = String.format("%.2f", price * stackSize).replace(".00", "");
@@ -271,13 +293,20 @@ public class GuiBuyShop extends AbstractGuiModule {
                             Messages.gui__buy__not_enough.tm(player);
                             return;
                         }
+                        Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop);
+                        double dynamic = dyn == null ? 0.0 : dyn;
+                        if (shop.dynamicValueMaximum > 0 && shop.dynamicValueCutWhenMaximum) {
+                            double add = shop.dynamicValueAdd * count;
+                            if (dynamic + add > shop.dynamicValueMaximum) {
+                                Messages.gui__buy__maximum.tm(player);
+                                return;
+                            }
+                        }
                         shop.take(player, count);
                         double price;
                         if (shop.hasBypass(player)) {
                             price = shop.priceBase;
                         } else {
-                            Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop);
-                            double dynamic = dyn == null ? 0.0 : dyn;
                             price = shop.getPrice(dynamic);
                         }
                         String money = String.format("%.2f", price * count).replace(".00", "");

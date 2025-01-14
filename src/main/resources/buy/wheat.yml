@@ -45,6 +45,8 @@ dynamic-value:
   add: 0.01
   # 动态值上限（0 为无限制），在策略为 recover 时建议设置，避免动态值无限制增加
   maximum: 0
+  # 是否在动态值达到上限时停止收购
+  cut-when-maximum: false
   # 动态值周期策略，reset 重置为 0，recover 每周期减少特定量的动态值
   strategy: reset
   # 策略为 recover 时，动态值每周期降低多少

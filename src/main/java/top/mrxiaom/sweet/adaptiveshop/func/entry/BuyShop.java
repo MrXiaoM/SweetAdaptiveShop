@@ -47,6 +47,7 @@ public class BuyShop {
     public final PermMode scalePermissionMode;
     public final double dynamicValueAdd;
     public final double dynamicValueMaximum;
+    public final boolean dynamicValueCutWhenMaximum;
     public final Strategy dynamicValueStrategy;
     public final DoubleRange dynamicValueRecover;
     public final Routine routine;
@@ -54,7 +55,13 @@ public class BuyShop {
     public final Map<Double, String> dynamicValuePlaceholders;
     public final String dynamicValuePlaceholderMin;
 
-    BuyShop(String group, String id, String permission, ItemStack displayItem, String displayName, int matchPriority, Function<ItemStack, Boolean> matcher, double priceBase, DoubleRange scaleRange, double scaleWhenDynamicLargeThan, String scaleFormula, String scalePermission, PermMode scalePermissionMode, double dynamicValueAdd, double dynamicValueMaximum, Strategy dynamicValueStrategy, DoubleRange dynamicValueRecover, Routine routine, String dynamicValueDisplayFormula, Map<Double, String> dynamicValuePlaceholders) {
+    BuyShop(String group, String id, String permission, ItemStack displayItem, String displayName,
+            int matchPriority, Function<ItemStack, Boolean> matcher, double priceBase,
+            DoubleRange scaleRange, double scaleWhenDynamicLargeThan, String scaleFormula,
+            String scalePermission, PermMode scalePermissionMode,
+            double dynamicValueAdd, double dynamicValueMaximum, boolean dynamicValueCutWhenMaximum,
+            Strategy dynamicValueStrategy, DoubleRange dynamicValueRecover, Routine routine,
+            String dynamicValueDisplayFormula, Map<Double, String> dynamicValuePlaceholders) {
         this.group = group;
         this.id = id;
         this.permission = permission;
@@ -70,6 +77,7 @@ public class BuyShop {
         this.scalePermissionMode = scalePermissionMode;
         this.dynamicValueAdd = dynamicValueAdd;
         this.dynamicValueMaximum = dynamicValueMaximum;
+        this.dynamicValueCutWhenMaximum = dynamicValueCutWhenMaximum;
         this.dynamicValueStrategy = dynamicValueStrategy;
         this.dynamicValueRecover = dynamicValueRecover;
         this.routine = routine;
@@ -291,6 +299,7 @@ public class BuyShop {
         }
         double dynamicValueAdd = config.getDouble("dynamic-value/add");
         double dynamicValueMaximum = config.getDouble("dynamic-value/maximum", 0.0);
+        boolean dynamicValueCutWhenMaximum = config.getBoolean("dynamic-value/cut-when-maximum", false);
         Strategy dynamicValueStrategy = Util.valueOr(Strategy.class, config.getString("dynamic-value/strategy"), Strategy.reset);
         DoubleRange dynamicValueRecover = Utils.getDoubleRange(config, "dynamic-value/recover");
         if (dynamicValueStrategy.equals(Strategy.recover) && dynamicValueRecover == null) {
@@ -318,7 +327,13 @@ public class BuyShop {
             String placeholder = section.getString(s);
             dynamicValuePlaceholders.put(value, placeholder);
         }
-        return new BuyShop(group, id, permission, displayItem, displayName, matchPriority, matcher, priceBase, scaleRange, scaleWhenDynamicLargeThan, scaleFormula, scalePermission, scalePermissionMode, dynamicValueAdd, dynamicValueMaximum, dynamicValueStrategy, dynamicValueRecover, routine, dynamicValueDisplayFormula, dynamicValuePlaceholders);
+        return new BuyShop(group, id, permission, displayItem, displayName,
+                matchPriority, matcher, priceBase,
+                scaleRange, scaleWhenDynamicLargeThan, scaleFormula,
+                scalePermission, scalePermissionMode,
+                dynamicValueAdd, dynamicValueMaximum, dynamicValueCutWhenMaximum,
+                dynamicValueStrategy, dynamicValueRecover, routine,
+                dynamicValueDisplayFormula, dynamicValuePlaceholders);
     }
     private static boolean testFormulaFail(String formula) {
         BigDecimal result = Utils.eval(formula, e -> e.and("value", BigDecimal.valueOf(1.23)));
