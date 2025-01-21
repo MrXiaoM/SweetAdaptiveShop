@@ -41,6 +41,10 @@ price:
       mode: 'no'
 # 动态值设置
 dynamic-value:
+  # 是否每个玩家独立储存动态值
+  # false - 全服共用一个动态值
+  # true - 每个玩家的动态值都不同
+  per-player: false
   # 每向系统出售一个，动态值增加多少
   add: 0.01
   # 动态值上限（0 为无限制），在策略为 recover 时建议设置，避免动态值无限制增加

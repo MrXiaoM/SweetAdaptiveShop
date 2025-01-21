@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.database.IDatabase;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
@@ -21,7 +22,7 @@ import java.util.Map;
 import static top.mrxiaom.sweet.adaptiveshop.utils.Utils.limit;
 
 public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, Listener {
-    private String TABLE_BUY_SHOP, TABLE_PLAYER_BUY_SHOP;
+    private String TABLE_BUY_SHOP, TABLE_BUY_SHOP_PER_PLAYER, TABLE_PLAYER_BUY_SHOP;
     public Map<String, List<PlayerItem>> itemsCache = new HashMap<>();
     public BuyShopDatabase(SweetAdaptiveShop plugin) {
         super(plugin);
@@ -37,12 +38,23 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, 
     @Override
     public void reload(Connection conn, String prefix) throws SQLException {
         TABLE_BUY_SHOP = (prefix + "buy_shop").toUpperCase();
+        TABLE_BUY_SHOP_PER_PLAYER = (prefix + "buy_shop_per_player").toUpperCase();
         TABLE_PLAYER_BUY_SHOP = (prefix + "player_buy_shop").toUpperCase();
         try (PreparedStatement ps = conn.prepareStatement(
                 "CREATE TABLE if NOT EXISTS `" + TABLE_BUY_SHOP + "`(" +
                         "`item` VARCHAR(64) PRIMARY KEY," +
                         "`dynamic_value` DOUBLE," +
                         "`outdate` TIMESTAMP" +
+                        ");")) {
+            ps.execute();
+        }
+        try (PreparedStatement ps = conn.prepareStatement(
+                "CREATE TABLE if NOT EXISTS `" + TABLE_BUY_SHOP_PER_PLAYER + "`(" +
+                        "`player` VARCHAR(64)," +
+                        "`item` VARCHAR(64)," +
+                        "`dynamic_value` DOUBLE," +
+                        "`outdate` TIMESTAMP," +
+                        "PRIMARY KEY(`player`, `item`)" +
                         ");")) {
             ps.execute();
         }
@@ -58,12 +70,21 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, 
     }
 
     @Nullable
-    public Double getDynamicValue(BuyShop item) {
+    public Double getDynamicValue(BuyShop item, @Nullable Player player) {
+        if (item.dynamicValuePerPlayer && player == null) {
+            return null;
+        }
         try (Connection conn = plugin.getConnection()) {
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "SELECT * FROM `" + TABLE_BUY_SHOP + "` WHERE `item`=?;"
+            try (PreparedStatement ps = conn.prepareStatement(item.dynamicValuePerPlayer ?
+                    ("SELECT * FROM `" + TABLE_BUY_SHOP + "` WHERE `player`=? AND `item`=?") :
+                    ("SELECT * FROM `" + TABLE_BUY_SHOP + "` WHERE `item`=?;")
             )) {
-                ps.setString(1, item.id);
+                if (item.dynamicValuePerPlayer) {
+                    ps.setString(1, plugin.getDBKey(player));
+                    ps.setString(2, item.id);
+                } else {
+                    ps.setString(1, item.id);
+                }
                 try (ResultSet resultSet = ps.executeQuery()) {
                     if (resultSet.next()) {
                         double dynamicValue = resultSet.getDouble("dynamic_value");
@@ -72,7 +93,7 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, 
                         if (now.after(outdate)) { // 动态值过期之后
                             // 按配置策略，重置或恢复动态值
                             double reset = item.recoverDynamicValue(dynamicValue);
-                            setDynamicValue(conn, false, item, reset);
+                            setDynamicValue(conn, false, item, player, reset);
                             return reset;
                         }
                         return dynamicValue;
@@ -86,7 +107,7 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, 
         return null;
     }
 
-    private void setDynamicValue(Connection conn, boolean insert, BuyShop item, double value) throws SQLException {
+    private void setDynamicValue(Connection conn, boolean insert, BuyShop item, Player player, double value) throws SQLException {
         double finalValue;
         if (item.dynamicValueMaximum > 0) { // 启用限制时，限制为 [0, maximum]
             finalValue = limit(value, 0, item.dynamicValueMaximum);
@@ -95,35 +116,57 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, 
         }
         LocalDateTime nextOutdateTime = item.routine.nextOutdate();
         if (insert) {
-            try (PreparedStatement ps1 = conn.prepareStatement(
-                    "INSERT INTO `" + TABLE_BUY_SHOP + "`(`item`,`dynamic_value`,`outdate`) VALUES(?,?,?);"
+            try (PreparedStatement ps1 = conn.prepareStatement(item.dynamicValuePerPlayer ?
+                    ("INSERT INTO `" + TABLE_PLAYER_BUY_SHOP + "`(`player`,`item`,`dynamic_value`,`outdate`) VALUES(?,?,?,?);") :
+                    ("INSERT INTO `" + TABLE_BUY_SHOP + "`(`item`,`dynamic_value`,`outdate`) VALUES(?,?,?);")
             )) {
-                ps1.setString(1, item.id);
-                ps1.setDouble(2, Double.parseDouble(String.format("%.2f", finalValue)));
-                ps1.setTimestamp(3, Timestamp.valueOf(nextOutdateTime));
+                if (item.dynamicValuePerPlayer) {
+                    ps1.setString(1, plugin.getDBKey(player));
+                    ps1.setString(2, item.id);
+                    ps1.setDouble(3, Double.parseDouble(String.format("%.2f", finalValue)));
+                    ps1.setTimestamp(4, Timestamp.valueOf(nextOutdateTime));
+                } else {
+                    ps1.setString(1, item.id);
+                    ps1.setDouble(2, Double.parseDouble(String.format("%.2f", finalValue)));
+                    ps1.setTimestamp(3, Timestamp.valueOf(nextOutdateTime));
+                }
                 ps1.execute();
             }
         } else {
-            try (PreparedStatement ps1 = conn.prepareStatement(
-                    "UPDATE `" + TABLE_BUY_SHOP + "` SET `dynamic_value`=?, `outdate`=? WHERE `item`=?;"
+            try (PreparedStatement ps1 = conn.prepareStatement(item.dynamicValuePerPlayer ?
+                    ("UPDATE `" + TABLE_BUY_SHOP_PER_PLAYER + "` SET `dynamic_value`=?, `outdate`=? WHERE `player`=? AND `item`=?;") :
+                    ("UPDATE `" + TABLE_BUY_SHOP + "` SET `dynamic_value`=?, `outdate`=? WHERE `item`=?;")
             )) {
-                ps1.setDouble(1, Double.parseDouble(String.format("%.2f", finalValue)));
-                ps1.setTimestamp(2, Timestamp.valueOf(nextOutdateTime));
-                ps1.setString(3, item.id);
+                if (item.dynamicValuePerPlayer) {
+                    ps1.setDouble(1, Double.parseDouble(String.format("%.2f", finalValue)));
+                    ps1.setTimestamp(2, Timestamp.valueOf(nextOutdateTime));
+                    ps1.setString(3, plugin.getDBKey(player));
+                    ps1.setString(4, item.id);
+                } else {
+                    ps1.setDouble(1, Double.parseDouble(String.format("%.2f", finalValue)));
+                    ps1.setTimestamp(2, Timestamp.valueOf(nextOutdateTime));
+                    ps1.setString(3, item.id);
+                }
                 ps1.execute();
             }
         }
     }
 
-    public void addDynamicValue(BuyShop item, double value) {
+    public void addDynamicValue(BuyShop item, @NotNull Player player, double value) {
         try (Connection conn = plugin.getConnection()) {
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "SELECT * FROM `" + TABLE_BUY_SHOP + "` WHERE `item`=?;"
+            try (PreparedStatement ps = conn.prepareStatement(item.dynamicValuePerPlayer ?
+                    ("SELECT * FROM `" + TABLE_BUY_SHOP_PER_PLAYER + "` WHERE `player`=? AND `item`=?;") :
+                    ("SELECT * FROM `" + TABLE_BUY_SHOP + "` WHERE `item`=?;")
             )) {
-                ps.setString(1, item.id);
+                if (item.dynamicValuePerPlayer) {
+                    ps.setString(1, plugin.getDBKey(player));
+                    ps.setString(2, item.id);
+                } else {
+                    ps.setString(1, item.id);
+                }
                 try (ResultSet resultSet = ps.executeQuery()) {
                     if (!resultSet.next()) { // 数据库中没有记录时，记为 0，加上 value
-                        setDynamicValue(conn, true, item, value);
+                        setDynamicValue(conn, true, item, player, value);
                         return;
                     }
                     double dynamicValue = resultSet.getDouble("dynamic_value");
@@ -138,7 +181,7 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, 
                         // 未过期则增加动态值
                         newValue = dynamicValue + value;
                     }
-                    setDynamicValue(conn, false, item, newValue);
+                    setDynamicValue(conn, false, item, player, newValue);
                 }
             }
         } catch (SQLException e) {

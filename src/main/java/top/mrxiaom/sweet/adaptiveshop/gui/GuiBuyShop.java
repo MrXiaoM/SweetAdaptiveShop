@@ -98,7 +98,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                 if (bypass) {
                     dynamic = 0;
                 } else {
-                    Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop);
+                    Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop, player);
                     dynamic = dyn == null ? 0.0 : dyn;
                 }
                 boolean noCut = shop.dynamicValueMaximum == 0 || !shop.dynamicValueCutWhenMaximum;
@@ -230,7 +230,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                             Messages.gui__buy__not_enough.tm(player);
                             return;
                         }
-                        Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop);
+                        Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop, player);
                         double dynamic = dyn == null ? 0.0 : dyn;
                         if (shop.dynamicValueMaximum > 0 && shop.dynamicValueCutWhenMaximum) {
                             double add = shop.dynamicValueAdd;
@@ -262,7 +262,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                             Messages.gui__buy__not_enough.tm(player);
                             return;
                         }
-                        Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop);
+                        Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop, player);
                         double dynamic = dyn == null ? 0.0 : dyn;
                         if (shop.dynamicValueMaximum > 0 && shop.dynamicValueCutWhenMaximum) {
                             double add = shop.dynamicValueAdd * stackSize;
@@ -293,7 +293,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                             Messages.gui__buy__not_enough.tm(player);
                             return;
                         }
-                        Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop);
+                        Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop, player);
                         double dynamic = dyn == null ? 0.0 : dyn;
                         if (shop.dynamicValueMaximum > 0 && shop.dynamicValueCutWhenMaximum) {
                             double add = shop.dynamicValueAdd * count;

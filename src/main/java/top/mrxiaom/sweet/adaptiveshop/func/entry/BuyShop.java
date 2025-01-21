@@ -4,6 +4,7 @@ import de.tr7zw.changeme.nbtapi.NBT;
 import de.tr7zw.changeme.nbtapi.iface.ReadableNBT;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -45,6 +46,7 @@ public class BuyShop {
     public final String scaleFormula;
     public final String scalePermission;
     public final PermMode scalePermissionMode;
+    public final boolean dynamicValuePerPlayer;
     public final double dynamicValueAdd;
     public final double dynamicValueMaximum;
     public final boolean dynamicValueCutWhenMaximum;
@@ -58,7 +60,7 @@ public class BuyShop {
     BuyShop(String group, String id, String permission, ItemStack displayItem, String displayName,
             int matchPriority, Function<ItemStack, Boolean> matcher, double priceBase,
             DoubleRange scaleRange, double scaleWhenDynamicLargeThan, String scaleFormula,
-            String scalePermission, PermMode scalePermissionMode,
+            String scalePermission, PermMode scalePermissionMode, boolean dynamicValuePerPlayer,
             double dynamicValueAdd, double dynamicValueMaximum, boolean dynamicValueCutWhenMaximum,
             Strategy dynamicValueStrategy, DoubleRange dynamicValueRecover, Routine routine,
             String dynamicValueDisplayFormula, Map<Double, String> dynamicValuePlaceholders) {
@@ -75,6 +77,7 @@ public class BuyShop {
         this.scaleFormula = scaleFormula;
         this.scalePermission = scalePermission;
         this.scalePermissionMode = scalePermissionMode;
+        this.dynamicValuePerPlayer = dynamicValuePerPlayer;
         this.dynamicValueAdd = dynamicValueAdd;
         this.dynamicValueMaximum = dynamicValueMaximum;
         this.dynamicValueCutWhenMaximum = dynamicValueCutWhenMaximum;
@@ -167,15 +170,15 @@ public class BuyShop {
         }
         SweetAdaptiveShop plugin = SweetAdaptiveShop.getInstance();
         double value = dynamicValueAdd * (count - j);
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> addDynamicValue(value));
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> addDynamicValue(player, value));
         if (j > 0) {
             plugin.warn("预料中的错误: 玩家 " + player.getName() + " 向收购商店 " + id + " 提交 " + count + " 个物品时，有 " + j + " 个物品没有提交成功");
         }
     }
 
-    public void addDynamicValue(double value) {
+    public void addDynamicValue(Player player, double value) {
         SweetAdaptiveShop plugin = SweetAdaptiveShop.getInstance();
-        plugin.getBuyShopDatabase().addDynamicValue(this, value);
+        plugin.getBuyShopDatabase().addDynamicValue(this, player, value);
     }
 
     public double recoverDynamicValue(double old) {
@@ -304,6 +307,7 @@ public class BuyShop {
             holder.warn("[buy] 读取 " + id + " 时出错，price.scale.when-has-permission.mode 的值无效");
             return null;
         }
+        boolean dynamicValuePerPlayer = config.getBoolean("dynamic-value/per-player", false);
         double dynamicValueAdd = config.getDouble("dynamic-value/add");
         double dynamicValueMaximum = config.getDouble("dynamic-value/maximum", 0.0);
         boolean dynamicValueCutWhenMaximum = config.getBoolean("dynamic-value/cut-when-maximum", false);
@@ -337,7 +341,7 @@ public class BuyShop {
         return new BuyShop(group, id, permission, displayItem, displayName,
                 matchPriority, matcher, priceBase,
                 scaleRange, scaleWhenDynamicLargeThan, scaleFormula,
-                scalePermission, scalePermissionMode,
+                scalePermission, scalePermissionMode, dynamicValuePerPlayer,
                 dynamicValueAdd, dynamicValueMaximum, dynamicValueCutWhenMaximum,
                 dynamicValueStrategy, dynamicValueRecover, routine,
                 dynamicValueDisplayFormula, dynamicValuePlaceholders);
