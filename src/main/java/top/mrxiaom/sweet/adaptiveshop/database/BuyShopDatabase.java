@@ -76,7 +76,7 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, 
         }
         try (Connection conn = plugin.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(item.dynamicValuePerPlayer ?
-                    ("SELECT * FROM `" + TABLE_BUY_SHOP + "` WHERE `player`=? AND `item`=?") :
+                    ("SELECT * FROM `" + TABLE_BUY_SHOP_PER_PLAYER + "` WHERE `player`=? AND `item`=?") :
                     ("SELECT * FROM `" + TABLE_BUY_SHOP + "` WHERE `item`=?;")
             )) {
                 if (item.dynamicValuePerPlayer) {
@@ -117,7 +117,7 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, 
         LocalDateTime nextOutdateTime = item.routine.nextOutdate();
         if (insert) {
             try (PreparedStatement ps1 = conn.prepareStatement(item.dynamicValuePerPlayer ?
-                    ("INSERT INTO `" + TABLE_PLAYER_BUY_SHOP + "`(`player`,`item`,`dynamic_value`,`outdate`) VALUES(?,?,?,?);") :
+                    ("INSERT INTO `" + TABLE_BUY_SHOP_PER_PLAYER + "`(`player`,`item`,`dynamic_value`,`outdate`) VALUES(?,?,?,?);") :
                     ("INSERT INTO `" + TABLE_BUY_SHOP + "`(`item`,`dynamic_value`,`outdate`) VALUES(?,?,?);")
             )) {
                 if (item.dynamicValuePerPlayer) {
