@@ -41,3 +41,8 @@
 + `sweet.adaptive.shop.buy.商品ID` 允许随机抽到某个收购商品的权限，该权限可在商品配置里修改
 + `sweet.adaptive.shop.order.订单ID` 允许随机抽到某个订单的权限，该权限可在订单配置里修改
 
+## 变量
+
+```
+%sashop_dynamic_<商品ID>% - 获取某个商品的动态值
+```
