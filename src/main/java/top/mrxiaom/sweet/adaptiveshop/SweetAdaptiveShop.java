@@ -42,6 +42,7 @@ public class SweetAdaptiveShop extends BukkitPlugin {
     private boolean supportTranslatable;
     private boolean supportOffHand;
     private boolean supportItemsAdder;
+    private boolean uuidMode;
 
     public boolean isSupportTranslatable() {
         return supportTranslatable;
@@ -53,6 +54,14 @@ public class SweetAdaptiveShop extends BukkitPlugin {
 
     public boolean isSupportItemsAdder() {
         return supportItemsAdder;
+    }
+
+    public void setUuidMode(boolean uuidMode) {
+        this.uuidMode = uuidMode;
+    }
+
+    public boolean isUuidMode() {
+        return uuidMode;
     }
 
     public BuyShopDatabase getBuyShopDatabase() {
@@ -77,6 +86,11 @@ public class SweetAdaptiveShop extends BukkitPlugin {
 
         supportTranslatable = Util.isPresent("org.bukkit.Translatable");
         supportOffHand = MinecraftVersion.isAtLeastVersion(MinecraftVersion.MC1_9_R1);
+    }
+
+    @Override
+    public void reloadConfig() {
+        super.reloadConfig();
     }
 
     @Override
@@ -112,6 +126,10 @@ public class SweetAdaptiveShop extends BukkitPlugin {
     }
 
     public String getDBKey(Player player) {
-        return player.getName(); // TODO
+        if (isUuidMode()) {
+            return player.getUniqueId().toString();
+        } else {
+            return player.getName();
+        }
     }
 }

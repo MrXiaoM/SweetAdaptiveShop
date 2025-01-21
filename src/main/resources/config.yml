@@ -3,6 +3,18 @@ path:
   buy: ./buy
   order: ./order
 
+# 应该用玩家名还是UUID来储存玩家数据
+# auto - 使用 server.properties 中的 online-mode 设置
+# false - 使用玩家名储存
+# true - 使用UUID储存
+###### 警告: 已经开始使用本插件之后不要修改此选项 ######
+###### 警告: 已经开始使用本插件之后不要修改此选项 ######
+###### 警告: 已经开始使用本插件之后不要修改此选项 ######
+uuid-mode: auto
+# 针对插件旧版本的安全选项，开启此项，则 uuid-mode 始终为 false
+# 将此项注释掉，则此项默认为 true
+uuid-mode-legacy: false
+
 orders-count: 3
 
 # 周期具体时间
