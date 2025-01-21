@@ -71,7 +71,7 @@ public class BuyShopDatabase extends AbstractPluginHolder implements IDatabase, 
 
     @Nullable
     public Double getDynamicValue(BuyShop item, @Nullable Player player) {
-        if (item.dynamicValuePerPlayer && player == null) {
+        if (item == null || item.dynamicValuePerPlayer && player == null) {
             return null;
         }
         try (Connection conn = plugin.getConnection()) {

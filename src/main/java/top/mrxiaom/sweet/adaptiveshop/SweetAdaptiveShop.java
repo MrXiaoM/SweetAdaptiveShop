@@ -105,6 +105,9 @@ public class SweetAdaptiveShop extends BukkitPlugin {
 
     @Override
     protected void afterEnable() {
+        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            new Placeholders(this).register();
+        }
         getLogger().info("SweetAdaptiveShop 加载完毕");
     }
 
