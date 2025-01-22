@@ -35,6 +35,7 @@ public class Group {
     }
 
     public void refresh(Player player) {
+        if (dailyCount <= 0) return;
         SweetAdaptiveShop plugin = SweetAdaptiveShop.getInstance();
         BuyShopDatabase db = plugin.getBuyShopDatabase();
         List<PlayerItem> items = db.getPlayerItems(player);

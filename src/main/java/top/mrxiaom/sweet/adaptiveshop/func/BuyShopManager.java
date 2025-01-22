@@ -136,6 +136,7 @@ public class BuyShopManager extends AbstractModule {
         LocalDateTime tomorrow = Utils.nextOutdate();
         boolean flag = false;
         for (Group g : groups.values()) {
+            if (g.dailyCount <= 0) continue;
             int needs = Math.max(0, g.dailyCount - counts.getOrDefault(g.id, 0));
             for (int i = 0; i < needs; i++) {
                 BuyShop shop = g.randomNewItem(player, items);

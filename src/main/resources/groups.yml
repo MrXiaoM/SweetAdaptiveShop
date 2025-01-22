@@ -7,3 +7,8 @@ groups:
   rpg:
     display: '副本'
     daily-count: 5
+  keep:
+    display: '保留'
+    # 设为0，代表此组保留，不可打开这个组的分组菜单
+    # 用于在订单中填入不希望出现在每日商品中的商品
+    daily-count: 0
