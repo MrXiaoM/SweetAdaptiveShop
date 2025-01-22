@@ -2,12 +2,16 @@
 name: '订单名'
 # 随机抽中该订单所需权限，默认为 sweet.adaptive.shop.order.订单ID
 permission: 'sweet.adaptive.shop.order.%id%'
+# 抽到这个任务后，允许完成的次数，不填默认为 1
+# 填 unlimited 则代表无限制
+limit: 1
 # 图标，格式为 物品ID#cmd 或 mythic-mm物品
 icon: stone
 # 物品显示名
 display: '&e订单名'
 # 图标lore
 # 插件会把 needs 和 operation 所在行替换成相应格式
+# %done_count% 将会替换为订单已完成次数
 lore:
   - ''
   - '  &f订单需求:'

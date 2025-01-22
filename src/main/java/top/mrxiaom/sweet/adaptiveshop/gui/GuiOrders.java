@@ -88,7 +88,9 @@ public class GuiOrders extends AbstractGuiModule {
                 }
                 Pair<Order, PlayerOrder> pair = gui.orders.get(i);
                 Order order = pair.getKey();
-                boolean hasDone = pair.getValue().isHasDone();
+                int doneCount = pair.getValue().getDoneCount();
+                String doneCountStr = String.valueOf(doneCount);
+                boolean hasDone = order.isAllDone(doneCount);
                 ItemStack item = order.icon.clone();
                 String display = order.display;
                 List<String> lore = new ArrayList<>();
@@ -110,7 +112,7 @@ public class GuiOrders extends AbstractGuiModule {
                         }
                         continue;
                     }
-                    lore.add(s);
+                    lore.add(s.replace("%done_count%", doneCountStr));
                 }
                 AdventureItemStack.setItemDisplayName(item, PAPI.setPlaceholders(player, display));
                 AdventureItemStack.setItemLore(item, PAPI.setPlaceholders(player, lore));
@@ -174,11 +176,12 @@ public class GuiOrders extends AbstractGuiModule {
                     Pair<Order, PlayerOrder> pair = orders.get(i);
                     Order order = pair.getKey();
                     if (click.equals(ClickType.LEFT)) {
-                        if (pair.getValue().isOutdate()) {
+                        PlayerOrder data = pair.getValue();
+                        if (data.isOutdate()) {
                             Messages.gui__order__outdate.tm(player);
                             return;
                         }
-                        if (pair.getValue().isHasDone()) {
+                        if (order.isAllDone(data.getDoneCount())) {
                             Messages.gui__order__has_done.tm(player);
                             return;
                         }
@@ -188,7 +191,7 @@ public class GuiOrders extends AbstractGuiModule {
                         }
                         player.closeInventory();
                         order.takeAll(player);
-                        plugin.getOrderDatabase().markOrderDone(player, order.id);
+                        plugin.getOrderDatabase().markOrderDone(player, order.id, data.getDoneCount() + 1);
                         Messages.gui__order__success.tm(player, order.display);
                         for (IAction reward : order.rewards) {
                             reward.run(player);

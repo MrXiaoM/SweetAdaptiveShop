@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.database.IDatabase;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
@@ -45,6 +46,13 @@ public class OrderDatabase extends AbstractPluginHolder implements IDatabase, Li
         }
     }
 
+    @NotNull
+    public List<PlayerOrder> getPlayerOrdersCacheOrNew(Player player) {
+        String id = plugin.getDBKey(player);
+        List<PlayerOrder> orders = ordersCache.get(id);
+        return orders != null ? orders : new ArrayList<>();
+    }
+
     @Nullable
     public List<PlayerOrder> getPlayerOrders(Player player) {
         String id = plugin.getDBKey(player);
@@ -64,9 +72,9 @@ public class OrderDatabase extends AbstractPluginHolder implements IDatabase, Li
                 try (ResultSet resultSet = ps.executeQuery()) {
                     while (resultSet.next()) {
                         String order = resultSet.getString("order");
-                        boolean hasDone = resultSet.getInt("has_done") == 1;
+                        int doneCount = resultSet.getInt("has_done");
                         Timestamp outdate = resultSet.getTimestamp("outdate");
-                        list.add(new PlayerOrder(order, hasDone, outdate.toLocalDateTime()));
+                        list.add(new PlayerOrder(order, doneCount, outdate.toLocalDateTime()));
                     }
                 }
             }
@@ -85,19 +93,22 @@ public class OrderDatabase extends AbstractPluginHolder implements IDatabase, Li
 
     public void setPlayerOrders(String player, List<PlayerOrder> list) {
         try (Connection conn = plugin.getConnection()) {
+            // 清空玩家的所有订单
             try (PreparedStatement ps = conn.prepareStatement(
                     "DELETE FROM `" + TABLE_ORDERS + "` WHERE `name`=?;"
             )) {
                 ps.setString(1, player);
                 ps.execute();
             }
+            // 再把订单列表写回去，虽然效率可能低了点，但是一个周期就那么几条订单，
+            // 谁家好人会给玩家安排几百条订单啊，影响不大
             try (PreparedStatement ps = conn.prepareStatement(
                     "INSERT INTO `" + TABLE_ORDERS + "`(`name`,`order`,`has_done`,`outdate`) VALUES (?,?,?,?);"
             )) {
                 for (PlayerOrder order : list) {
                     ps.setString(1, player);
                     ps.setString(2, order.getOrder());
-                    ps.setInt(3, order.isHasDone() ? 1 : 0);
+                    ps.setInt(3, order.getDoneCount());
                     ps.setTimestamp(4, Timestamp.valueOf(order.getOutdate()));
                     ps.addBatch();
                 }
@@ -110,24 +121,25 @@ public class OrderDatabase extends AbstractPluginHolder implements IDatabase, Li
         }
     }
 
-    public void markOrderDone(Player player, String order) {
+    public void markOrderDone(Player player, String order, int doneCount) {
         String id = plugin.getDBKey(player);
-        markOrderDone(id, order);
+        markOrderDone(id, order, doneCount);
     }
 
-    public void markOrderDone(String player, String order) {
+    public void markOrderDone(String player, String order, int doneCount) {
         try (Connection conn = plugin.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(
-                    "UPDATE `" + TABLE_ORDERS + "` SET `has_done`=1 WHERE `name`=? AND `order`=?"
+                    "UPDATE `" + TABLE_ORDERS + "` SET `has_done`=? WHERE `name`=? AND `order`=?"
             )) {
-                ps.setString(1, player);
-                ps.setString(2, order);
+                ps.setInt(1, doneCount);
+                ps.setString(2, player);
+                ps.setString(3, order);
                 ps.execute();
             }
             List<PlayerOrder> orders = ordersCache.get(player);
-            for (PlayerOrder playerOrder : orders) {
+            if (orders != null) for (PlayerOrder playerOrder : orders) {
                 if (playerOrder.getOrder().equals(order)) {
-                    playerOrder.setHasDone(true);
+                    playerOrder.setDoneCount(doneCount);
                 }
             }
         } catch (SQLException e) {

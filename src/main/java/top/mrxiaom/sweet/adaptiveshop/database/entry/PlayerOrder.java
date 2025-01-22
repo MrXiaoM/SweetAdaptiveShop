@@ -4,12 +4,12 @@ import java.time.LocalDateTime;
 
 public class PlayerOrder {
     String order;
-    boolean hasDone;
+    int doneCount;
     LocalDateTime outdate;
 
-    public PlayerOrder(String order, boolean hasDone, LocalDateTime outdate) {
+    public PlayerOrder(String order, int doneCount, LocalDateTime outdate) {
         this.order = order;
-        this.hasDone = hasDone;
+        this.doneCount = doneCount;
         this.outdate = outdate;
     }
 
@@ -21,12 +21,12 @@ public class PlayerOrder {
         this.order = order;
     }
 
-    public boolean isHasDone() {
-        return hasDone;
+    public int getDoneCount() {
+        return doneCount;
     }
 
-    public void setHasDone(boolean hasDone) {
-        this.hasDone = hasDone;
+    public void setDoneCount(int doneCount) {
+        this.doneCount = doneCount;
     }
 
     public LocalDateTime getOutdate() {

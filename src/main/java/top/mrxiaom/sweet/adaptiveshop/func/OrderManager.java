@@ -69,6 +69,7 @@ public class OrderManager extends AbstractModule {
         List<PlayerOrder> orders = db.getPlayerOrders(player);
         if (orders == null) orders = new ArrayList<>();
         List<Pair<Order, PlayerOrder>> list = new ArrayList<>();
+        // 移除已过期订单
         orders.removeIf(it -> {
             if (it.isOutdate()) return true;
             Order order = map.get(it.getOrder());
@@ -76,13 +77,14 @@ public class OrderManager extends AbstractModule {
             list.add(Pair.of(order, it));
             return false;
         });
+        // 在订单数量不足时，补充订单到列表
         int needed = Math.max(0, ordersCount - orders.size());
         LocalDateTime tomorrow = Utils.nextOutdate();
         boolean flag = false;
         for (int i = 0; i < needed; i++) {
             Order order = randomNewOrder(player, orders);
             if (order == null) break;
-            PlayerOrder entry = new PlayerOrder(order.id, false, tomorrow);
+            PlayerOrder entry = new PlayerOrder(order.id, 0, tomorrow);
             list.add(Pair.of(order, entry));
             orders.add(entry);
             flag = true;
@@ -93,14 +95,13 @@ public class OrderManager extends AbstractModule {
 
     public void refresh(Player player) {
         OrderDatabase db = plugin.getOrderDatabase();
-        List<PlayerOrder> orders = db.getPlayerOrders(player);
-        if (orders == null) orders = new ArrayList<>();
-        else orders.clear();
+        List<PlayerOrder> orders = db.getPlayerOrdersCacheOrNew(player);
+        orders.clear();
         LocalDateTime tomorrow = Utils.nextOutdate();
         for (int i = 0; i < ordersCount; i++) {
             Order order = randomNewOrder(player, orders);
             if (order == null) break;
-            PlayerOrder entry = new PlayerOrder(order.id, false, tomorrow);
+            PlayerOrder entry = new PlayerOrder(order.id, 0, tomorrow);
             orders.add(entry);
         }
         db.setPlayerOrders(player, orders);

@@ -35,6 +35,7 @@ public class Order {
     public final String id, permission;
     public final ItemStack icon;
     public final String name;
+    public final Integer limit;
     public final String display;
     public final List<String> lore;
     public final String opApply;
@@ -43,11 +44,12 @@ public class Order {
     public final List<Need> needs;
     public final List<IAction> rewards;
 
-    Order(String id, String permission, ItemStack icon, String name, String display, List<String> lore, String opApply, String opCannot, String opDone, List<Need> needs, List<IAction> rewards) {
+    Order(String id, String permission, ItemStack icon, String name, Integer limit, String display, List<String> lore, String opApply, String opCannot, String opDone, List<Need> needs, List<IAction> rewards) {
         this.id = id;
         this.permission = permission;
         this.icon = icon;
         this.name = name;
+        this.limit = limit;
         this.display = display;
         this.lore = lore;
         this.opApply = opApply;
@@ -67,6 +69,11 @@ public class Order {
             if (count < need.amount) return false;
         }
         return true;
+    }
+
+    public boolean isAllDone(int doneCount) {
+        if (limit == null) return false;
+        return doneCount >= limit;
     }
 
     public void takeAll(Player player) {
@@ -119,6 +126,17 @@ public class Order {
             return null;
         }
         String name = config.getString("name", id);
+        String limitString = config.getString("limit", "1");
+        Integer limit;
+        if (limitString.equalsIgnoreCase("unlimited")) {
+            limit = null;
+        } else {
+            limit = Util.parseInt(limitString).orElse(null);
+            if (limit == null) {
+                holder.warn("[order] 读取 " + id + " 错误，limit 的值无效");
+                return null;
+            }
+        }
         String permission = config.getString("permission", "sweet.adaptive.shop.order." + id).replace("%id%", id);
         String display = config.getString("display");
         if (display == null) {
@@ -158,6 +176,6 @@ public class Order {
         }
         needs.sort(Comparator.comparingInt(it -> it.item.matchPriority)); // 确保 mythic 在前面
         List<IAction> rewards = loadActions(config, "rewards");
-        return new Order(id, permission, icon, name, display, lore, opApply, opCannot, opDone, needs, rewards);
+        return new Order(id, permission, icon, name, limit, display, lore, opApply, opCannot, opDone, needs, rewards);
     }
 }
