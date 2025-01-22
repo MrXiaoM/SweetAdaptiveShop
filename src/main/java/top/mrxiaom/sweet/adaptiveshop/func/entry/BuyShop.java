@@ -4,7 +4,6 @@ import de.tr7zw.changeme.nbtapi.NBT;
 import de.tr7zw.changeme.nbtapi.iface.ReadableNBT;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -29,6 +28,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -54,6 +54,7 @@ public class BuyShop {
     public final DoubleRange dynamicValueRecover;
     public final Routine routine;
     public final String dynamicValueDisplayFormula;
+    public final DecimalFormat dynamicValueDisplayFormat;
     public final Map<Double, String> dynamicValuePlaceholders;
     public final String dynamicValuePlaceholderMin;
 
@@ -63,7 +64,7 @@ public class BuyShop {
             String scalePermission, PermMode scalePermissionMode, boolean dynamicValuePerPlayer,
             double dynamicValueAdd, double dynamicValueMaximum, boolean dynamicValueCutWhenMaximum,
             Strategy dynamicValueStrategy, DoubleRange dynamicValueRecover, Routine routine,
-            String dynamicValueDisplayFormula, Map<Double, String> dynamicValuePlaceholders) {
+            String dynamicValueDisplayFormula, DecimalFormat dynamicValueDisplayFormat, Map<Double, String> dynamicValuePlaceholders) {
         this.group = group;
         this.id = id;
         this.permission = permission;
@@ -85,6 +86,7 @@ public class BuyShop {
         this.dynamicValueRecover = dynamicValueRecover;
         this.routine = routine;
         this.dynamicValueDisplayFormula = dynamicValueDisplayFormula;
+        this.dynamicValueDisplayFormat = dynamicValueDisplayFormat;
         this.dynamicValuePlaceholders = dynamicValuePlaceholders;
         String minPlaceholder = "无";
         Double min = null;
@@ -117,7 +119,8 @@ public class BuyShop {
     public String getDisplayDynamic(double dynamic) {
         BigDecimal value = BigDecimal.valueOf(dynamic);
         BigDecimal dynamicValue = Utils.eval(dynamicValueDisplayFormula, e -> e.with("value", value));
-        return String.format("%.2f", dynamicValue == null ? dynamic : dynamicValue.doubleValue());
+        double displayValue = dynamicValue == null ? dynamic : dynamicValue.doubleValue();
+        return dynamicValueDisplayFormat.format(displayValue);
     }
 
     @NotNull
@@ -298,7 +301,7 @@ public class BuyShop {
         double scaleWhenDynamicLargeThan = config.getDouble("price/scale/when-dynamic-value/large-than");
         String scaleFormula = config.getString("price/scale/when-dynamic-value/scale-formula");
         if (testFormulaFail(scaleFormula)) {
-            holder.warn("[buy] 读取 " + id + " 时出错，表达式测试出错");
+            holder.warn("[buy] 读取 " + id + " 时出错，scale-formula 表达式测试出错");
             return null;
         }
         String scalePermission = config.getString("price/scale/when-has-permission/permission");
@@ -324,8 +327,15 @@ public class BuyShop {
         }
         String dynamicValueDisplayFormula = config.getString("dynamic-value/display-formula");
         if (testFormulaFail(dynamicValueDisplayFormula)) {
-            holder.warn("[buy] 读取 " + id + " 时出错，表达式测试出错");
+            holder.warn("[buy] 读取 " + id + " 时出错，display-formula 表达式测试出错");
             return null;
+        }
+        DecimalFormat dynamicValueDisplayFormat;
+        try {
+            dynamicValueDisplayFormat = new DecimalFormat(config.getString("dynamic-value/display-format", "#.00"));
+        } catch (Throwable ignored) {
+            holder.warn("[buy] 读取 " + id + " 时出错，display-format 格式错误，已设为 '#.00'");
+            dynamicValueDisplayFormat = new DecimalFormat("#.00");
         }
         Map<Double, String> dynamicValuePlaceholders = new HashMap<>();
         ConfigurationSection section = config.getConfigurationSection("dynamic-value/placeholders");
@@ -344,7 +354,7 @@ public class BuyShop {
                 scalePermission, scalePermissionMode, dynamicValuePerPlayer,
                 dynamicValueAdd, dynamicValueMaximum, dynamicValueCutWhenMaximum,
                 dynamicValueStrategy, dynamicValueRecover, routine,
-                dynamicValueDisplayFormula, dynamicValuePlaceholders);
+                dynamicValueDisplayFormula, dynamicValueDisplayFormat, dynamicValuePlaceholders);
     }
     private static boolean testFormulaFail(String formula) {
         BigDecimal result = Utils.eval(formula, e -> e.and("value", BigDecimal.valueOf(1.23)));
