@@ -263,7 +263,7 @@ public class BuyShop {
             }
             matchPriority = 999;
             matcher = item -> NBT.get(item, nbt -> {
-                return mythicId.equals(nbt.getString("MMOITEMS_ITEM_ID"));
+                return mythicId.equals(nbt.getString("MYTHIC_TYPE"));
             });
             if (displayName == null) {
                 displayName = ItemStackUtil.getItemDisplayName(displayItem);
