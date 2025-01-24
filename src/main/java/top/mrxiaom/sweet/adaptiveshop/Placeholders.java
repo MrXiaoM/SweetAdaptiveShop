@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.sweet.adaptiveshop.func.BuyShopManager;
-import top.mrxiaom.sweet.adaptiveshop.func.entry.BuyShop;
+import top.mrxiaom.sweet.adaptiveshop.func.entry.shop.BuyShop;
 
 public class Placeholders extends PlaceholderExpansion {
     SweetAdaptiveShop plugin;

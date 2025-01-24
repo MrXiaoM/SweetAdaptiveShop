@@ -10,7 +10,7 @@ import top.mrxiaom.pluginbase.database.IDatabase;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerItem;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractPluginHolder;
-import top.mrxiaom.sweet.adaptiveshop.func.entry.BuyShop;
+import top.mrxiaom.sweet.adaptiveshop.func.entry.shop.BuyShop;
 
 import java.sql.*;
 import java.time.LocalDateTime;

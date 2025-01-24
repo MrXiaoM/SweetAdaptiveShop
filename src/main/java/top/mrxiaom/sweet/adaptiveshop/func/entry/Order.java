@@ -12,6 +12,7 @@ import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractModule;
 import top.mrxiaom.sweet.adaptiveshop.func.BuyShopManager;
+import top.mrxiaom.sweet.adaptiveshop.func.entry.shop.BuyShop;
 import top.mrxiaom.sweet.adaptiveshop.utils.Utils;
 
 import java.io.File;

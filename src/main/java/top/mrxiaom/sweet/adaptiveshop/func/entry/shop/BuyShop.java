@@ -1,4 +1,4 @@
-package top.mrxiaom.sweet.adaptiveshop.func.entry;
+package top.mrxiaom.sweet.adaptiveshop.func.entry.shop;
 
 import de.tr7zw.changeme.nbtapi.NBT;
 import de.tr7zw.changeme.nbtapi.iface.ReadableNBT;

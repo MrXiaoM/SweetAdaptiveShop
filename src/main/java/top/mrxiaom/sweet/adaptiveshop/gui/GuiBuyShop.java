@@ -23,7 +23,7 @@ import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerItem;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractGuiModule;
 import top.mrxiaom.sweet.adaptiveshop.func.BuyShopManager;
-import top.mrxiaom.sweet.adaptiveshop.func.entry.BuyShop;
+import top.mrxiaom.sweet.adaptiveshop.func.entry.shop.BuyShop;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.Group;
 
 import java.io.File;

@@ -1,4 +1,4 @@
-package top.mrxiaom.sweet.adaptiveshop.func.entry;
+package top.mrxiaom.sweet.adaptiveshop.func.entry.shop;
 
 import org.bukkit.entity.Player;
 
