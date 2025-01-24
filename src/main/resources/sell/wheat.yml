@@ -1,0 +1,84 @@
+# 商品属于哪个分组
+group: default
+# 展示图标类型
+# vanilla 为原版物品，使用参数 material
+# mythic 为MythicMobs物品，使用参数 mythic
+# itemsadder 为ItemsAdder物品，使用参数 itemsadder
+type: vanilla
+# 旧版本可使用 '物品ID:子ID' 格式，如 'WOOL:3'
+# 在旧版本，不输入冒号添加子ID，则代表这一物品ID下任意子ID的物品都可以匹配
+material: WHEAT
+# mythic: ExampleItem
+# itemsadder: '_iainternal:icon_arrow_chest'
+
+# 展示名，可不输入，不输入则自动获取，仅 1.19.4 及以上可以自动获取原版物品名
+# display-name: '名字'
+
+# 最大数量，不输入则自动获取展示图标的最大数量
+# max-count: 64
+
+# 购买商品执行的命令，其中 %count% 会替换为购买数量
+# [console]控制台执行
+# [player]玩家执行
+# [message]提示消息
+# [give]原版ID 数量，给予玩家物品，背包空间不足时掉落到附近
+commands:
+  - '[give]WHEAT %count%'
+
+# 随机抽中该物品所需权限，默认为 sweet.adaptive.shop.sell.商品ID
+permission: 'sweet.adaptive.shop.sell.%id%'
+
+# 价格设置
+price:
+  # 基础价格
+  base: 1.0
+  # 价格缩放设置
+  scale:
+    # 缩放范围百分比，默认配置为最高可以缩放到 200%
+    range: 100-200
+    when-dynamic-value:
+      # 动态值大于多少时开始缩放
+      large-than: 100
+      # 价格缩放公式，此处 value 为动态值变量减去 large-than 的值
+      # 此处为动态值大于 100 后，基础缩放为 100%，每增加1点动态值，缩放增加 1%
+      # 文档：https://github.com/ezylang/EvalEx/tree/2.x?tab=readme-ov-file#supported-functions
+      scale-formula: '1 + value / 100'
+    when-has-permission:
+      # 当拥有某权限时
+      permission: 'none'
+      # 工作模式
+      # no - 价格缩放与权限无关
+      # enable - 有权限时开启价格缩放
+      # disable - 没有权限时开启价格缩放
+      mode: 'no'
+# 动态值设置
+dynamic-value:
+  # 是否每个玩家独立储存动态值
+  # false - 全服共用一个动态值
+  # true - 每个玩家的动态值都不同
+  per-player: false
+  # 每从系统购买一个，动态值增加多少
+  add: 0.01
+  # 动态值上限（0 为无限制），在策略为 recover 时建议设置，避免动态值无限制增加
+  maximum: 0
+  # 是否在动态值达到上限时停止出售
+  cut-when-maximum: false
+  # 动态值周期策略，reset 重置为 0，recover 每周期减少特定量的动态值
+  strategy: reset
+  # 策略为 recover 时，动态值每周期降低多少
+  recover: 10-20
+  # 动态值执行策略的周期，
+  # daily 每天指定时间，weekly 每周一指定时间，monthly 每月一号指定时间
+  # 具体指定的时间请见 config.yml
+  routine: weekly
+  # 显示该数值的公式，value 为动态值变量
+  # 文档：https://github.com/ezylang/EvalEx/tree/2.x?tab=readme-ov-file#supported-functions
+  display-formula: value
+  # 动态值变量显示格式
+  display-format: '#.00'
+  # 动态值大于多少时，%dynamic_placeholder% 显示的内容
+  # 配置中越大越先显示
+  placeholders:
+    '150.0': '供不应求'
+    '50.0': '正常供需'
+    '0.0': '商品过剩'

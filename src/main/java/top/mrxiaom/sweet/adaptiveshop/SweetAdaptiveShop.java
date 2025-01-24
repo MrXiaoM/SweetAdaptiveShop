@@ -13,6 +13,7 @@ import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.actions.ActionGive;
 import top.mrxiaom.sweet.adaptiveshop.database.BuyShopDatabase;
 import top.mrxiaom.sweet.adaptiveshop.database.OrderDatabase;
+import top.mrxiaom.sweet.adaptiveshop.database.SellShopDatabase;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractGuiModule;
 import top.mrxiaom.sweet.adaptiveshop.mythic.IMythic;
 import top.mrxiaom.sweet.adaptiveshop.mythic.Mythic4;
@@ -40,6 +41,7 @@ public class SweetAdaptiveShop extends BukkitPlugin {
 
     private IMythic mythic;
     private BuyShopDatabase buyShopDatabase;
+    private SellShopDatabase sellShopDatabase;
     private OrderDatabase orderDatabase;
     private boolean supportTranslatable;
     private boolean supportOffHand;
@@ -68,6 +70,10 @@ public class SweetAdaptiveShop extends BukkitPlugin {
 
     public BuyShopDatabase getBuyShopDatabase() {
         return buyShopDatabase;
+    }
+
+    public SellShopDatabase getSellShopDatabase() {
+        return sellShopDatabase;
     }
 
     public OrderDatabase getOrderDatabase() {
@@ -115,6 +121,7 @@ public class SweetAdaptiveShop extends BukkitPlugin {
                         .register(Messages.class, Messages::holder);
         options.registerDatabase(
                 this.buyShopDatabase = new BuyShopDatabase(this),
+                this.sellShopDatabase = new SellShopDatabase(this),
                 this.orderDatabase = new OrderDatabase(this)
         );
         AbstractGuiModule.registerActionProvider(ActionGive.PROVIDER);

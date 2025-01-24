@@ -9,6 +9,7 @@ import top.mrxiaom.sweet.adaptiveshop.database.BuyShopDatabase;
 import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerItem;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.shop.BuyShop;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.shop.IShop;
+import top.mrxiaom.sweet.adaptiveshop.func.entry.shop.SellShop;
 import top.mrxiaom.sweet.adaptiveshop.utils.Utils;
 
 import java.time.LocalDateTime;
@@ -33,6 +34,11 @@ public class Group {
     }
 
     @Nullable
+    public SellShop randomNewSellShop(Player player, List<PlayerItem> items) {
+        return randomNewFrom(sellShop.values(), player, items);
+    }
+
+    @Nullable
     private <T extends IShop> T randomNewFrom(Collection<T> values, Player player, List<PlayerItem> items) {
         List<String> alreadyAdded = new ArrayList<>();
         for (PlayerItem item : items) {
@@ -52,6 +58,22 @@ public class Group {
         items.removeIf(it -> it.isOutdate() || buyShop.containsKey(it.getItem()));
         LocalDateTime tomorrow = Utils.nextOutdate();
         for (int i = 0; i < dailyBuyCount; i++) {
+            BuyShop shop = randomNewBuyShop(player, items);
+            if (shop == null) continue;
+            items.add(new PlayerItem(shop.id, tomorrow));
+        }
+        db.setPlayerItems(player, items);
+    }
+
+    public void refreshSellShop(Player player) {
+        if (dailySellCount <= 0) return;
+        SweetAdaptiveShop plugin = SweetAdaptiveShop.getInstance();
+        BuyShopDatabase db = plugin.getBuyShopDatabase();
+        List<PlayerItem> items = db.getPlayerItems(player);
+        if (items == null) items = new ArrayList<>();
+        items.removeIf(it -> it.isOutdate() || buyShop.containsKey(it.getItem()));
+        LocalDateTime tomorrow = Utils.nextOutdate();
+        for (int i = 0; i < dailySellCount; i++) {
             BuyShop shop = randomNewBuyShop(player, items);
             if (shop == null) continue;
             items.add(new PlayerItem(shop.id, tomorrow));
