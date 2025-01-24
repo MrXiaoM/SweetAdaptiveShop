@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Level;
 
-public class BuyShop {
+public class BuyShop implements IShop{
     public final String group, id, permission;
     public final ItemStack displayItem;
     public final String displayName;
@@ -195,6 +195,12 @@ public class BuyShop {
         return dynamicValue;
     }
 
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
     public boolean hasPermission(Player player) {
         return player.hasPermission(permission);
     }

@@ -1,9 +1,7 @@
 package top.mrxiaom.sweet.adaptiveshop.func;
 
 import dev.lone.itemsadder.api.ItemsAdder;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.func.AutoRegister;
@@ -17,10 +15,7 @@ import top.mrxiaom.sweet.adaptiveshop.utils.Utils;
 
 import java.io.File;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import static top.mrxiaom.sweet.adaptiveshop.utils.Utils.limit;
 
@@ -28,9 +23,13 @@ import static top.mrxiaom.sweet.adaptiveshop.utils.Utils.limit;
 public class BuyShopManager extends AbstractModule {
     File folder;
     Map<String, BuyShop> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-    Map<String, Group> groups = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     public BuyShopManager(SweetAdaptiveShop plugin) {
         super(plugin);
+    }
+
+    @Override
+    public int priority() {
+        return 1001;
     }
 
     @Override
@@ -38,18 +37,6 @@ public class BuyShopManager extends AbstractModule {
         Utils.outdateHour = limit(config.getInt("routine-time.hour", 4), 0, 23);
         Utils.outdateMinute = limit(config.getInt("routine-time.minute", 0), 0, 59);
         Utils.outdateSecond = limit(config.getInt("routine-time.second", 0), 0, 59);
-
-        File file = new File(plugin.getDataFolder(), "groups.yml");
-        if (!file.exists()) {
-            plugin.saveResource("groups.yml", file);
-        }
-        groups.clear();
-        YamlConfiguration configGroups = YamlConfiguration.loadConfiguration(file);
-        ConfigurationSection section = configGroups.getConfigurationSection("groups");
-        if (section != null) for (String groupName : section.getKeys(false)) {
-            Group loaded = Group.load(section, groupName);
-            groups.put(groupName, loaded);
-        }
 
         String path = config.getString("path.buy", "./buy");
         folder = path.startsWith("./") ? new File(plugin.getDataFolder(), path) : new File(path);
@@ -75,7 +62,7 @@ public class BuyShopManager extends AbstractModule {
         info("加载了 " + map.size() + " 个收购商品");
         for (Map.Entry<String, BuyShop> entry : map.entrySet()) {
             BuyShop cfg = entry.getValue();
-            Group group = groups.get(cfg.group);
+            Group group = GroupManager.inst().get(cfg.group);
             if (group == null) {
                 warn("[收购][" + cfg.id + "] 找不到分组 " + cfg.group);
                 continue;
@@ -110,11 +97,6 @@ public class BuyShopManager extends AbstractModule {
         return map.get(id);
     }
 
-    @Nullable
-    public Group getGroup(String group){
-        return groups.get(group);
-    }
-
     /**
      * 获取玩家商品列表，并自动刷新已过期商品
      */
@@ -135,11 +117,12 @@ public class BuyShopManager extends AbstractModule {
         });
         LocalDateTime tomorrow = Utils.nextOutdate();
         boolean flag = false;
-        for (Group g : groups.values()) {
-            if (g.dailyCount <= 0) continue;
-            int needs = Math.max(0, g.dailyCount - counts.getOrDefault(g.id, 0));
+        Collection<Group> groups = GroupManager.inst().groups();
+        for (Group g : groups) {
+            if (g.dailyBuyCount <= 0) continue;
+            int needs = Math.max(0, g.dailyBuyCount - counts.getOrDefault(g.id, 0));
             for (int i = 0; i < needs; i++) {
-                BuyShop shop = g.randomNewItem(player, items);
+                BuyShop shop = g.randomNewBuyShop(player, items);
                 if (shop == null) break;
                 PlayerItem entry = new PlayerItem(shop.id, tomorrow);
                 list.add(Pair.of(shop, entry));

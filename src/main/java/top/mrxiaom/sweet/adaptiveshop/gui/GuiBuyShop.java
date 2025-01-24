@@ -209,7 +209,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                         Messages.refresh__buy__not_enough.tm(player);
                         return;
                     }
-                    group.refresh(player);
+                    group.refreshBuyShop(player);
                     Messages.refresh__buy__success.tm(player, group.display);
                     this.items = BuyShopManager.inst().getPlayerItems(player, group.id);
                     open();

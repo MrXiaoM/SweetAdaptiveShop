@@ -15,35 +15,42 @@ import java.util.*;
 public class Group {
     public final String id;
     public final String display;
-    public final int dailyCount;
+    public final int dailyBuyCount, dailySellCount;
     public final Map<String, BuyShop> buyShop = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-    Group(String id, String display, int dailyCount) {
+    public final Map<String, SellShop> sellShop = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    Group(String id, String display, int dailyBuyCount, int dailySellCount) {
         this.id = id;
         this.display = display;
-        this.dailyCount = dailyCount;
+        this.dailyBuyCount = dailyBuyCount;
+        this.dailySellCount = dailySellCount;
     }
 
     @Nullable
-    public BuyShop randomNewItem(Player player, List<PlayerItem> items) {
+    public BuyShop randomNewBuyShop(Player player, List<PlayerItem> items) {
+        return randomNewFrom(buyShop.values(), player, items);
+    }
+
+    @Nullable
+    private <T extends IShop> T randomNewFrom(Collection<T> values, Player player, List<PlayerItem> items) {
         List<String> alreadyAdded = new ArrayList<>();
         for (PlayerItem item : items) {
             alreadyAdded.add(item.getItem());
         }
-        List<BuyShop> list = Lists.newArrayList(buyShop.values());
-        list.removeIf(it -> alreadyAdded.contains(it.id) || !it.hasPermission(player));
+        List<T> list = Lists.newArrayList(values);
+        list.removeIf(it -> alreadyAdded.contains(it.getId()) || !it.hasPermission(player));
         return list.isEmpty() ? null : list.get(new Random().nextInt(list.size()));
     }
 
-    public void refresh(Player player) {
-        if (dailyCount <= 0) return;
+    public void refreshBuyShop(Player player) {
+        if (dailyBuyCount <= 0) return;
         SweetAdaptiveShop plugin = SweetAdaptiveShop.getInstance();
         BuyShopDatabase db = plugin.getBuyShopDatabase();
         List<PlayerItem> items = db.getPlayerItems(player);
         if (items == null) items = new ArrayList<>();
         items.removeIf(it -> it.isOutdate() || buyShop.containsKey(it.getItem()));
         LocalDateTime tomorrow = Utils.nextOutdate();
-        for (int i = 0; i < dailyCount; i++) {
-            BuyShop shop = randomNewItem(player, items);
+        for (int i = 0; i < dailyBuyCount; i++) {
+            BuyShop shop = randomNewBuyShop(player, items);
             if (shop == null) continue;
             items.add(new PlayerItem(shop.id, tomorrow));
         }
@@ -51,8 +58,9 @@ public class Group {
     }
 
     public static Group load(ConfigurationSection section, String id) {
-        int dailyCount = section.getInt(id + ".daily-count");
+        int dailyBuyCount = section.getInt(id + (section.contains(id + ".daily-buy-count") ? ".daily-buy-count" : ".daily-count"));
+        int dailySellCount = section.getInt(id + (section.contains(id + ".daily-sell-count") ? ".daily-sell-count" : ".daily-count"));
         String display = section.getString(id + ".display", id);
-        return new Group(id, display, dailyCount);
+        return new Group(id, display, dailyBuyCount, dailySellCount);
     }
 }

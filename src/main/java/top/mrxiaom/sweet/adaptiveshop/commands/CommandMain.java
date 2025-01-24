@@ -15,7 +15,7 @@ import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.Messages;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractModule;
-import top.mrxiaom.sweet.adaptiveshop.func.BuyShopManager;
+import top.mrxiaom.sweet.adaptiveshop.func.GroupManager;
 import top.mrxiaom.sweet.adaptiveshop.func.TemplateManager;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.Group;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.ItemTemplate;
@@ -48,7 +48,7 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
             Group buyGroup;
             if (type.equals("buy")) {
                 String name = args.length >= 3 ? args[2] : "default";
-                buyGroup = BuyShopManager.inst().getGroup(name);
+                buyGroup = GroupManager.inst().get(name);
                 if (buyGroup == null) {
                     return Messages.group__not_found.tm(sender, name);
                 }
