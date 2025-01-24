@@ -10,8 +10,10 @@ import top.mrxiaom.pluginbase.BukkitPlugin;
 import top.mrxiaom.pluginbase.EconomyHolder;
 import top.mrxiaom.pluginbase.func.LanguageManager;
 import top.mrxiaom.pluginbase.utils.Util;
+import top.mrxiaom.sweet.adaptiveshop.actions.ActionGive;
 import top.mrxiaom.sweet.adaptiveshop.database.BuyShopDatabase;
 import top.mrxiaom.sweet.adaptiveshop.database.OrderDatabase;
+import top.mrxiaom.sweet.adaptiveshop.func.AbstractGuiModule;
 import top.mrxiaom.sweet.adaptiveshop.mythic.IMythic;
 import top.mrxiaom.sweet.adaptiveshop.mythic.Mythic4;
 import top.mrxiaom.sweet.adaptiveshop.mythic.Mythic5;
@@ -115,6 +117,7 @@ public class SweetAdaptiveShop extends BukkitPlugin {
                 this.buyShopDatabase = new BuyShopDatabase(this),
                 this.orderDatabase = new OrderDatabase(this)
         );
+        AbstractGuiModule.registerActionProvider(ActionGive.PROVIDER);
     }
 
     @Override
