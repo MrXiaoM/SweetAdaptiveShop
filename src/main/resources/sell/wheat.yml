@@ -75,7 +75,7 @@ dynamic-value:
   # 文档：https://github.com/ezylang/EvalEx/tree/2.x?tab=readme-ov-file#supported-functions
   display-formula: value
   # 动态值变量显示格式
-  display-format: '#.00'
+  display-format: '0.00'
   # 动态值大于多少时，%dynamic_placeholder% 显示的内容
   # 配置中越大越先显示
   placeholders:

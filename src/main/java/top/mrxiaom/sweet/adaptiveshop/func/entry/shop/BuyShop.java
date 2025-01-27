@@ -338,10 +338,10 @@ public class BuyShop implements IShop{
         }
         DecimalFormat dynamicValueDisplayFormat;
         try {
-            dynamicValueDisplayFormat = new DecimalFormat(config.getString("dynamic-value/display-format", "#.00"));
+            dynamicValueDisplayFormat = new DecimalFormat(config.getString("dynamic-value/display-format", "0.00"));
         } catch (Throwable ignored) {
-            holder.warn("[buy] 读取 " + id + " 时出错，display-format 格式错误，已设为 '#.00'");
-            dynamicValueDisplayFormat = new DecimalFormat("#.00");
+            holder.warn("[buy] 读取 " + id + " 时出错，display-format 格式错误，已设为 '0.00'");
+            dynamicValueDisplayFormat = new DecimalFormat("0.00");
         }
         Map<Double, String> dynamicValuePlaceholders = new HashMap<>();
         ConfigurationSection section = config.getConfigurationSection("dynamic-value/placeholders");
