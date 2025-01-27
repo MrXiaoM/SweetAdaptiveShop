@@ -133,10 +133,16 @@ public class SellShop implements IShop {
     }
 
     public void give(Player player, int count) {
-        // TODO: 给予玩家物品
         SweetAdaptiveShop plugin = SweetAdaptiveShop.getInstance();
         double value = dynamicValueAdd * count;
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> addDynamicValue(player, value));
+        try {
+            for (IAction action : commands) {
+                action.run(player);
+            }
+        } catch (Throwable t) {
+            SweetAdaptiveShop.getInstance().warn("为玩家 " + player.getName() + " 的出售商店操作执行命令时出现异常", t);
+        }
     }
 
     public void addDynamicValue(Player player, double value) {
