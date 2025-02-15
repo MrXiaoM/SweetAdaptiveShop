@@ -19,6 +19,7 @@ import top.mrxiaom.pluginbase.gui.IGui;
 import top.mrxiaom.pluginbase.utils.AdventureItemStack;
 import top.mrxiaom.pluginbase.utils.PAPI;
 import top.mrxiaom.pluginbase.utils.Pair;
+import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.Messages;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerOrder;
@@ -83,7 +84,7 @@ public class GuiOrders extends AbstractGuiModule {
             case '订': {
                 int i = appearTimes - 1;
                 if (i >= gui.orders.size()) {
-                    if (emptySlot.material.equals(Material.AIR)) return new ItemStack(Material.AIR);
+                    if (emptySlot.material.equals("AIR")) return new ItemStack(Material.AIR);
                     return emptySlot.generateIcon(player);
                 }
                 Pair<Order, PlayerOrder> pair = gui.orders.get(i);
@@ -115,7 +116,7 @@ public class GuiOrders extends AbstractGuiModule {
                     lore.add(s.replace("%done_count%", doneCountStr));
                 }
                 AdventureItemStack.setItemDisplayName(item, PAPI.setPlaceholders(player, display));
-                AdventureItemStack.setItemLore(item, PAPI.setPlaceholders(player, lore));
+                AdventureItemStack.setItemLoreMiniMessage(item, PAPI.setPlaceholders(player, lore));
                 return item;
             }
             case '刷': {
@@ -199,7 +200,7 @@ public class GuiOrders extends AbstractGuiModule {
                         Bukkit.getScheduler().runTaskLater(plugin, () -> {
                             if (closeAfterSubmit) {
                                 player.closeInventory();
-                                player.updateInventory();
+                                Util.submitInvUpdate(player);
                             } else {
                                 updateInventory(view);
                             }

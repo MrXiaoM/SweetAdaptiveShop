@@ -89,7 +89,7 @@ public class GuiBuyShop extends AbstractGuiModule {
             case '物': {
                 int i = appearTimes - 1;
                 if (i >= gui.items.size()) {
-                    if (emptySlot.material.equals(Material.AIR)) return new ItemStack(Material.AIR);
+                    if (emptySlot.material.equals("AIR")) return new ItemStack(Material.AIR);
                     return emptySlot.generateIcon(player);
                 }
                 BuyShop shop = gui.items.get(i).getKey();
@@ -144,7 +144,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                             .replace("%dynamic_placeholder%", dynamicPlaceholder));
                 }
                 AdventureItemStack.setItemDisplayName(item, PAPI.setPlaceholders(player, displayName));
-                AdventureItemStack.setItemLore(item, PAPI.setPlaceholders(player, lore));
+                AdventureItemStack.setItemLoreMiniMessage(item, PAPI.setPlaceholders(player, lore));
                 if (!buySlot.nbtStrings.isEmpty() || !buySlot.nbtInts.isEmpty()) {
                     NBT.modify(item, nbt -> {
                         for (Map.Entry<String, String> entry : buySlot.nbtStrings.entrySet()) {
@@ -328,7 +328,7 @@ public class GuiBuyShop extends AbstractGuiModule {
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 if (closeAfterSubmit) {
                     player.closeInventory();
-                    player.updateInventory();
+                    Util.submitInvUpdate(player);
                 } else {
                     updateInventory(view);
                 }

@@ -51,7 +51,7 @@ public class ItemTemplate {
         }
         if (!lore.isEmpty()) {
             List<String> loreList = PAPI.setPlaceholders(player, fit(loreModifier, lore));
-            AdventureItemStack.setItemLore(item, loreList);
+            AdventureItemStack.setItemLoreMiniMessage(item, loreList);
         }
         if (glow) ItemStackUtil.setGlow(item);
         if (customModelData != null) ItemStackUtil.setCustomModelData(item, customModelData);

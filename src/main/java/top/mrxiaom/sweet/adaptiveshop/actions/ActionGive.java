@@ -9,6 +9,8 @@ import top.mrxiaom.pluginbase.utils.ItemStackUtil;
 import top.mrxiaom.pluginbase.utils.Pair;
 import top.mrxiaom.pluginbase.utils.Util;
 
+import java.util.List;
+
 public class ActionGive implements IAction {
     public static final IActionProvider PROVIDER = (s) -> {
         if (s.startsWith("[give]")) return parse(s.substring(6).split(" "));
@@ -22,7 +24,7 @@ public class ActionGive implements IAction {
         this.count = Math.min(material.getMaxStackSize(), count);
     }
     @Override
-    public void run(Player player, Pair<String, Object>[] pairs) {
+    public void run(Player player, List<Pair<String, Object>> pairs) {
         ItemStack item = new ItemStack(material, count);
         ItemStackUtil.giveItemToPlayer(player, item);
     }
