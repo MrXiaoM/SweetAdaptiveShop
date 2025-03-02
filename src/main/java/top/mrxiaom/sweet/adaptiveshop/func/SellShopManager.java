@@ -19,7 +19,7 @@ import java.util.*;
 
 import static top.mrxiaom.sweet.adaptiveshop.utils.Utils.limit;
 
-@AutoRegister
+//@AutoRegister
 public class SellShopManager extends AbstractModule {
     File folder;
     Map<String, SellShop> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
