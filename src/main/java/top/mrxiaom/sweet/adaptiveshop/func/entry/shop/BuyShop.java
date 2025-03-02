@@ -268,9 +268,7 @@ public class BuyShop implements IShop{
                 return null;
             }
             matchPriority = 999;
-            matcher = item -> NBT.get(item, nbt -> {
-                return mythicId.equals(nbt.getString("MYTHIC_TYPE"));
-            });
+            matcher = item -> mythicId.equals(IMythic.getId(item));
             if (displayName == null) {
                 displayName = ItemStackUtil.getItemDisplayName(displayItem);
             }
