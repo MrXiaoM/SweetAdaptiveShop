@@ -21,11 +21,14 @@ public class Group {
     public final int dailyBuyCount, dailySellCount;
     public final Map<String, BuyShop> buyShop = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     public final Map<String, SellShop> sellShop = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-    Group(String id, String display, int dailyBuyCount, int dailySellCount) {
+    public final boolean enableBuy, enableSell;
+    Group(String id, String display, int dailyBuyCount, int dailySellCount, boolean enableBuy, boolean enableSell) {
         this.id = id;
         this.display = display;
         this.dailyBuyCount = dailyBuyCount;
         this.dailySellCount = dailySellCount;
+        this.enableBuy = enableBuy;
+        this.enableSell = enableSell;
     }
 
     @Nullable
@@ -85,6 +88,8 @@ public class Group {
         int dailyBuyCount = section.getInt(id + (section.contains(id + ".daily-buy-count") ? ".daily-buy-count" : ".daily-count"));
         int dailySellCount = section.getInt(id + (section.contains(id + ".daily-sell-count") ? ".daily-sell-count" : ".daily-count"));
         String display = section.getString(id + ".display", id);
-        return new Group(id, display, dailyBuyCount, dailySellCount);
+        boolean enableBuy = section.getBoolean(id + ".buy", true);
+        boolean enableSell = section.getBoolean(id + ".sell", true);
+        return new Group(id, display, dailyBuyCount, dailySellCount, enableBuy, enableSell);
     }
 }

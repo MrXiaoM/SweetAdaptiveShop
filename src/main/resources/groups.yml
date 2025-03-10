@@ -4,6 +4,10 @@ groups:
     display: '杂物'
     # 每天刷新多少个物品
     daily-count: 5
+    # 是否启用收购商店，默认开启
+    buy: true
+    # 是否启用出售商店，默认开启
+    sell: true
   rpg:
     display: '副本'
     daily-count: 5

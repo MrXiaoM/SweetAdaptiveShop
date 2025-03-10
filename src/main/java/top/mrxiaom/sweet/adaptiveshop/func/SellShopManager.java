@@ -17,9 +17,7 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static top.mrxiaom.sweet.adaptiveshop.utils.Utils.limit;
-
-//@AutoRegister
+@AutoRegister
 public class SellShopManager extends AbstractModule {
     File folder;
     Map<String, SellShop> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
@@ -34,7 +32,6 @@ public class SellShopManager extends AbstractModule {
 
     @Override
     public void reloadConfig(MemoryConfiguration config) {
-
         String path = config.getString("path.sell", "./sell");
         folder = path.startsWith("./") ? new File(plugin.getDataFolder(), path) : new File(path);
         if (!folder.exists()) {
@@ -53,12 +50,12 @@ public class SellShopManager extends AbstractModule {
     public void reloadSellShops() {
         map.clear();
         reloadConfig(folder);
-        info("加载了 " + map.size() + " 个收购商品");
+        info("加载了 " + map.size() + " 个出售商品");
         for (Map.Entry<String, SellShop> entry : map.entrySet()) {
             SellShop cfg = entry.getValue();
             Group group = GroupManager.inst().get(cfg.group);
             if (group == null) {
-                warn("[收购][" + cfg.id + "] 找不到分组 " + cfg.group);
+                warn("[出售][" + cfg.id + "] 找不到分组 " + cfg.group);
                 continue;
             }
             group.sellShop.put(entry.getKey(), entry.getValue());
@@ -77,7 +74,7 @@ public class SellShopManager extends AbstractModule {
             if (!name.endsWith(".yml") || name.contains(" ")) continue;
             String id = name.substring(0, name.length() - 4);
             if (map.containsKey(id)) {
-                warn("重名的收购配置 " + file.getAbsolutePath());
+                warn("重名的出售配置 " + file.getAbsolutePath());
                 continue;
             }
             SellShop loaded = SellShop.load(this, file, id);

@@ -21,6 +21,7 @@ import top.mrxiaom.sweet.adaptiveshop.func.entry.Group;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.ItemTemplate;
 import top.mrxiaom.sweet.adaptiveshop.gui.GuiBuyShop;
 import top.mrxiaom.sweet.adaptiveshop.gui.GuiOrders;
+import top.mrxiaom.sweet.adaptiveshop.gui.GuiSellShop;
 import top.mrxiaom.sweet.adaptiveshop.utils.TimeUtils;
 
 import java.time.LocalDateTime;
@@ -45,16 +46,17 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
             }
             Player player = sender instanceof Player ? (Player) sender : null;
             int playerCheckIndex;
-            Group buyGroup;
-            if (type.equals("buy")) {
+            Group group;
+            if (type.equals("buy") || type.equals("sell")) {
+                boolean buy = type.equals("buy");
                 String name = args.length >= 3 ? args[2] : "default";
-                buyGroup = GroupManager.inst().get(name);
-                if (buyGroup == null) {
+                group = GroupManager.inst().get(name);
+                if (group == null || (buy && !group.enableBuy) || (!buy && !group.enableSell)) {
                     return Messages.group__not_found.tm(sender, name);
                 }
                 playerCheckIndex = 3;
             } else {
-                buyGroup = null;
+                group = null;
                 playerCheckIndex = 2;
             }
             if (args.length >= playerCheckIndex + 1) {
@@ -72,11 +74,18 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
             }
             switch (type.toLowerCase()) {
                 case "buy":
-                    if (buyGroup == null) return true;
-                    if (!player.hasPermission("sweet.adaptive.shop.group." + buyGroup.id)) {
+                    if (group == null) return true;
+                    if (!player.hasPermission("sweet.adaptive.shop.group." + group.id)) {
                         return Messages.player__no_permission.tm(player);
                     }
-                    GuiBuyShop.create(player, buyGroup).open();
+                    GuiBuyShop.create(player, group).open();
+                    return true;
+                case "sell":
+                    if (group == null) return true;
+                    if (!player.hasPermission("sweet.adaptive.shop.group." + group.id)) {
+                        return Messages.player__no_permission.tm(player);
+                    }
+                    GuiSellShop.create(player, group).open();
                     return true;
                 case "order":
                     if (!player.hasPermission("sweet.adaptive.shop.order")) {
@@ -108,6 +117,8 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
             String nbtKey;
             if (args[4].equalsIgnoreCase("buy")) {
                 nbtKey = GuiBuyShop.REFRESH_ITEM;
+            } else if (args[4].equalsIgnoreCase("sell")) {
+                nbtKey = GuiSellShop.REFRESH_ITEM;
             } else if (args[4].equalsIgnoreCase("order")) {
                 nbtKey = GuiOrders.REFRESH_ITEM;
             } else {

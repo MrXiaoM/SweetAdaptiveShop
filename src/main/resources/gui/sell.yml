@@ -1,0 +1,60 @@
+title: '出售商店'
+inventory:
+  - '框框框框框框框框框'
+  - '框　物物物物物　框'
+  - '框框框框框框框框框'
+  - '框框框框框原副刷框'
+# 是否在购买物品后关闭界面
+# 关闭此项，则购买物品后刷新界面
+close-after-submit: true
+main-icons:
+  物:
+    material: PAPER
+    display: '&e&l%name%'
+    lore:
+      - description
+      - ''
+      - '  &f价格: &e%price%金币'
+      - '  &f动态: &e%dynamic%'
+      - '  &f趋势: &e%dynamic_placeholder%'
+      - ''
+      - operation
+    lore-bypass:
+      - description
+      - ''
+      - '  &f价格: &e%price%金币'
+      - ''
+      - operation
+    operations:
+      one: '&a左键&7 | &f购买1个物品 &7(花费%price%金币)'
+      stack: '&b右键&7 | &f购买一组物品 &7(%count%个，花费%price%金币)'
+  物_空白:
+    material: AIR
+  刷:
+    material: PAPER
+    custom-model-data: 10000
+    display: '&a刷新商店 &7(%type%)'
+    lore:
+      - ''
+      - '  &f可用刷新券数量: &e%count%'
+      - ''
+      - operation
+    operations:
+      available: '&a左键&7 | &f刷新当前分类的商店物品'
+      unavailable: '&c&m左键&r&7 | &f可用刷新券不足'
+other-icons:
+  框:
+    material: WHITE_STAINED_GLASS_PANE
+    display: '&f '
+  原:
+    material: PAPER
+    custom-model-data: 10000
+    display: '&e杂物出售'
+    left-click-commands:
+      - '[console]sashop open sell default %player_name%'
+  副:
+    material: PAPER
+    custom-model-data: 10000
+    display: '&e副本出售'
+    left-click-commands:
+      - '[console]sashop open sell rpg %player_name%'

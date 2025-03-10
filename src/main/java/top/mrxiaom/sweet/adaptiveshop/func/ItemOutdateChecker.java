@@ -22,6 +22,7 @@ import top.mrxiaom.sweet.adaptiveshop.Messages;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.gui.GuiBuyShop;
 import top.mrxiaom.sweet.adaptiveshop.gui.GuiOrders;
+import top.mrxiaom.sweet.adaptiveshop.gui.GuiSellShop;
 import top.mrxiaom.sweet.adaptiveshop.utils.Utils;
 
 @AutoRegister
@@ -63,6 +64,7 @@ public class ItemOutdateChecker extends AbstractModule implements Listener {
         if (item == null || item.getType().equals(Material.AIR) || item.getAmount() == 0) return false;
         long outdate = NBT.get(item, nbt -> {
             if (nbt.hasTag(GuiBuyShop.REFRESH_ITEM)) return nbt.getLong(GuiBuyShop.REFRESH_ITEM);
+            if (nbt.hasTag(GuiSellShop.REFRESH_ITEM)) return nbt.getLong(GuiSellShop.REFRESH_ITEM);
             if (nbt.hasTag(GuiOrders.REFRESH_ITEM)) return nbt.getLong(GuiBuyShop.REFRESH_ITEM);
             return 0L;
         });
