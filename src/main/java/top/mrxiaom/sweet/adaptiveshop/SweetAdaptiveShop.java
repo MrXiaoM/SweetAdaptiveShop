@@ -7,8 +7,9 @@ import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.BukkitPlugin;
-import top.mrxiaom.pluginbase.EconomyHolder;
 import top.mrxiaom.pluginbase.actions.ActionProviders;
+import top.mrxiaom.pluginbase.economy.EnumEconomy;
+import top.mrxiaom.pluginbase.economy.IEconomy;
 import top.mrxiaom.pluginbase.func.LanguageManager;
 import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.actions.ActionGive;
@@ -30,12 +31,12 @@ public class SweetAdaptiveShop extends BukkitPlugin {
                 .adventure(true)
                 .database(true)
                 .reconnectDatabaseWhenReloadConfig(false)
-                .vaultEconomy(true)
+                .economy(EnumEconomy.VAULT)
                 .scanIgnore("top.mrxiaom.sweet.adaptiveshop.libs")
         );
     }
     @NotNull
-    public EconomyHolder getEconomy() {
+    public IEconomy getEconomy() {
         return options.economy();
     }
 
