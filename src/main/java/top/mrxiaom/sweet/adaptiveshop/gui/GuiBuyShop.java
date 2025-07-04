@@ -117,6 +117,10 @@ public class GuiBuyShop extends AbstractGuiModule {
                         lore.addAll(ItemStackUtil.getItemLore(shop.displayItem));
                         continue;
                     }
+                    if (s.equals("footer")) {
+                        lore.addAll(shop.footer);
+                        continue;
+                    }
                     if (s.equals("operation")) {
                         if (count >= 1) {
                             if (noCut || dynamic + shop.dynamicValueAdd <= shop.dynamicValueMaximum) {

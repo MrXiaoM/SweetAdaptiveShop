@@ -18,12 +18,14 @@ main-icons:
       - '  &f动态: &e%dynamic%'
       - '  &f趋势: &e%dynamic_placeholder%'
       - ''
+      - footer
       - operation
     lore-bypass:
       - description
       - ''
       - '  &f价格: &e%price%金币'
       - ''
+      - footer
       - operation
     operations:
       one: '&a左键&7 | &f提交1个物品 &7(获得%price%金币)'

@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -38,6 +39,7 @@ public class BuyShop implements IShop{
     public final String group, id, permission;
     public final ItemStack displayItem;
     public final String displayName;
+    public final List<String> footer;
     public final int matchPriority;
     public final Function<ItemStack, Boolean> matcher;
     public final double priceBase;
@@ -59,7 +61,7 @@ public class BuyShop implements IShop{
     public final String dynamicValuePlaceholderMin;
 
     BuyShop(String group, String id, String permission, ItemStack displayItem, String displayName,
-            int matchPriority, Function<ItemStack, Boolean> matcher, double priceBase,
+            List<String> footer, int matchPriority, Function<ItemStack, Boolean> matcher, double priceBase,
             DoubleRange scaleRange, double scaleWhenDynamicLargeThan, String scaleFormula,
             String scalePermission, PermMode scalePermissionMode, boolean dynamicValuePerPlayer,
             double dynamicValueAdd, double dynamicValueMaximum, boolean dynamicValueCutWhenMaximum,
@@ -70,6 +72,7 @@ public class BuyShop implements IShop{
         this.permission = permission;
         this.displayItem = displayItem;
         this.displayName = displayName;
+        this.footer = footer;
         this.matchPriority = matchPriority;
         this.matcher = matcher;
         this.priceBase = priceBase;
@@ -296,6 +299,13 @@ public class BuyShop implements IShop{
         } else {
             return null;
         }
+        List<String> extraDescription = config.getStringList("extra-description");
+        if (!extraDescription.isEmpty()) {
+            List<String> lore = ItemStackUtil.getItemLore(displayItem);
+            lore.addAll(extraDescription);
+            ItemStackUtil.setItemLore(displayItem, lore);
+        }
+        List<String> footer = config.getStringList("footer");
         double priceBase = config.getDouble("price/base");
         DoubleRange scaleRange = Utils.getDoubleRange(config, "price/scale/range");
         if (scaleRange == null) {
@@ -353,7 +363,7 @@ public class BuyShop implements IShop{
             dynamicValuePlaceholders.put(value, placeholder);
         }
         return new BuyShop(group, id, permission, displayItem, displayName,
-                matchPriority, matcher, priceBase,
+                footer, matchPriority, matcher, priceBase,
                 scaleRange, scaleWhenDynamicLargeThan, scaleFormula,
                 scalePermission, scalePermissionMode, dynamicValuePerPlayer,
                 dynamicValueAdd, dynamicValueMaximum, dynamicValueCutWhenMaximum,

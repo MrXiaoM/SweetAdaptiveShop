@@ -14,6 +14,12 @@ material: WHEAT
 # 展示名，可不输入，不输入则自动获取，仅 1.19.4 及以上可以自动获取原版物品名
 # display-name: '名字'
 
+# 顶部额外描述
+extra-description: []
+
+# 底部描述
+footer: []
+
 # 随机抽中该物品所需权限，默认为 sweet.adaptive.shop.buy.商品ID
 permission: 'sweet.adaptive.shop.buy.%id%'
 
