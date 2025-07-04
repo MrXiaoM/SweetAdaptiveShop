@@ -10,16 +10,13 @@ val targetJavaVersion = 8
 val shadowGroup = "top.mrxiaom.sweet.adaptiveshop.libs"
 
 repositories {
-    mavenLocal()
     mavenCentral()
     maven("https://repo.codemc.io/repository/maven-public/")
     maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
-    maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
+    maven("https://repo.helpch.at/releases/")
     maven("https://jitpack.io")
     maven("https://repo.rosewooddev.io/repository/public/")
     maven("https://mvn.lumine.io/repository/maven/")
-    maven("https://oss.sonatype.org/content/groups/public/")
-    maven("https://s01.oss.sonatype.org/content/groups/public/")
 }
 
 dependencies {
@@ -34,15 +31,15 @@ dependencies {
     compileOnly("io.lumine:Mythic:5.6.2")
     compileOnly("io.lumine:LumineUtils:1.20-SNAPSHOT")
 
-    implementation("net.kyori:adventure-api:4.20.0")
-    implementation("net.kyori:adventure-platform-bukkit:4.3.4")
-    implementation("net.kyori:adventure-text-minimessage:4.2-.0")
-    implementation("de.tr7zw:item-nbt-api:2.15.0")
+    implementation("net.kyori:adventure-api:4.22.0")
+    implementation("net.kyori:adventure-platform-bukkit:4.4.0")
+    implementation("net.kyori:adventure-text-minimessage:4.22.0")
+    implementation("de.tr7zw:item-nbt-api:2.15.1")
     implementation("com.zaxxer:HikariCP:4.0.3")
     implementation("org.slf4j:slf4j-nop:2.0.16")
     implementation("com.udojava:EvalEx:2.7")
     implementation("org.jetbrains:annotations:24.0.0")
-    implementation("top.mrxiaom:PluginBase:1.4.0")
+    implementation("top.mrxiaom:PluginBase:1.5.1")
 }
 java {
     val javaVersion = JavaVersion.toVersion(targetJavaVersion)
