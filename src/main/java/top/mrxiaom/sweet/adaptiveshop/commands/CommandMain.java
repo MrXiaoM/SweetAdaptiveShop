@@ -1,6 +1,7 @@
 package top.mrxiaom.sweet.adaptiveshop.commands;
 
 import com.google.common.collect.Lists;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -14,6 +15,8 @@ import top.mrxiaom.pluginbase.func.AutoRegister;
 import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.Messages;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
+import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerItem;
+import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerOrder;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractModule;
 import top.mrxiaom.sweet.adaptiveshop.func.GroupManager;
 import top.mrxiaom.sweet.adaptiveshop.func.TemplateManager;
@@ -29,6 +32,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @AutoRegister
 public class CommandMain extends AbstractModule implements CommandExecutor, TabCompleter, Listener {
@@ -156,6 +160,48 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
             }
             return Messages.give__success.tm(sender, player.getName(), amount, template.display);
         }
+        if (args.length == 3 && "test".equalsIgnoreCase(args[0]) && sender.isOp()) {
+            if ("order".equalsIgnoreCase(args[1])) {
+                OfflinePlayer p = Util.getOfflinePlayer(args[2]).orElse(null);
+                if (p == null) {
+                    return t(sender, "&c玩家不存在");
+                }
+                String key = plugin.getDBKey(p);
+                List<PlayerOrder> orders = plugin.getOrderDatabase().getPlayerOrders(key);
+                t(sender, "玩家 " + p.getName() + " 的订单列表: (" + orders.size() + ")");
+                for (PlayerOrder order : orders) {
+                    t(sender, "  - 订单 " + order.getOrder() + " 完成次数: " + order.getDoneCount() + " 到期时间: " + order.getOutdate());
+                }
+                return t(sender, "");
+            }
+            if ("buy".equalsIgnoreCase(args[1])) {
+                OfflinePlayer p = Util.getOfflinePlayer(args[2]).orElse(null);
+                if (p == null) {
+                    return t(sender, "&c玩家不存在");
+                }
+                String key = plugin.getDBKey(p);
+                List<PlayerItem> items = plugin.getBuyShopDatabase().getPlayerItems(key);
+                t(sender, "玩家 " + p.getName() + " 的收购物品列表 &7(" + items.size() + ")");
+                for (PlayerItem item : items) {
+                    t(sender, "  - 商品 " + item.getItem() + " 到期时间: " + item.getOutdate());
+                }
+                return t(sender, "");
+            }
+            if ("sell".equalsIgnoreCase(args[1])) {
+                OfflinePlayer p = Util.getOfflinePlayer(args[2]).orElse(null);
+                if (p == null) {
+                    return t(sender, "&c玩家不存在");
+                }
+                String key = plugin.getDBKey(p);
+                List<PlayerItem> items = plugin.getSellShopDatabase().getPlayerItems(key);
+                t(sender, "玩家 " + p.getName() + " 的出售物品列表 &7(" + items.size() + ")");
+                for (PlayerItem item : items) {
+                    t(sender, "  - 商品 " + item.getItem() + " 到期时间: " + item.getOutdate());
+                }
+                return t(sender, "");
+            }
+            return true;
+        }
         if (args.length == 1 && "reload".equalsIgnoreCase(args[0]) && sender.isOp()) {
             plugin.reloadConfig();
             return Messages.reload__config.tm(sender);
@@ -175,8 +221,10 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
             "buy", "order");
     private static final List<String> listArgGive = Lists.newArrayList(
             "buy", "order");
+    private static final List<String> listArgTest = Lists.newArrayList(
+            "buy", "order", "sell");
     private static final List<String> listOpArg0 = Lists.newArrayList(
-            "open", "give", "reload");
+            "open", "give", "test", "reload");
     @Nullable
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
@@ -186,6 +234,9 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
         if (args.length == 2) {
             if (args[0].equalsIgnoreCase("open")) {
                 return startsWith(listArgOpen, args[1]);
+            }
+            if (args[0].equalsIgnoreCase("test") && sender.isOp()) {
+                return startsWith(listArgTest, args[1]);
             }
             if (args[0].equalsIgnoreCase("give") && sender.isOp()) {
                 return null;
