@@ -52,6 +52,12 @@ dynamic-value:
   # false - 全服共用一个动态值
   # true - 每个玩家的动态值都不同
   per-player: false
+  # 购买限制
+  limitation:
+    # 购买限制重置周期（未完成，暂时无法修改，暂定为每天 4:00 重置）
+    #period: everyday 4:00
+    # 每个玩家的购买数量限制，0 为无限制
+    player: 0
   # 每向系统出售一个，动态值增加多少
   add: 0.01
   # 动态值上限（0 为无限制），在策略为 recover 时建议设置，避免动态值无限制增加

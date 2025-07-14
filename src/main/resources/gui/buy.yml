@@ -17,6 +17,7 @@ main-icons:
       - '  &f价格: &e%price%金币'
       - '  &f动态: &e%dynamic%'
       - '  &f趋势: &e%dynamic_placeholder%'
+      - '  &f限购: &e%limitation%'
       - ''
       - footer
       - operation
@@ -24,6 +25,7 @@ main-icons:
       - description
       - ''
       - '  &f价格: &e%price%金币'
+      - '  &f限购: &e%limitation%'
       - ''
       - footer
       - operation

@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Level;
 
-public class BuyShop implements IShop{
+public class BuyShop implements IShop {
     public final String group, id, permission;
     public final ItemStack displayItem;
     public final String displayName;
@@ -49,6 +49,7 @@ public class BuyShop implements IShop{
     public final String scalePermission;
     public final PermMode scalePermissionMode;
     public final boolean dynamicValuePerPlayer;
+    public final int dynamicValueLimitationPlayer;
     public final double dynamicValueAdd;
     public final double dynamicValueMaximum;
     public final boolean dynamicValueCutWhenMaximum;
@@ -64,6 +65,7 @@ public class BuyShop implements IShop{
             List<String> footer, int matchPriority, Function<ItemStack, Boolean> matcher, double priceBase,
             DoubleRange scaleRange, double scaleWhenDynamicLargeThan, String scaleFormula,
             String scalePermission, PermMode scalePermissionMode, boolean dynamicValuePerPlayer,
+            int dynamicValueLimitationPlayer,
             double dynamicValueAdd, double dynamicValueMaximum, boolean dynamicValueCutWhenMaximum,
             Strategy dynamicValueStrategy, DoubleRange dynamicValueRecover, Routine routine,
             String dynamicValueDisplayFormula, DecimalFormat dynamicValueDisplayFormat, Map<Double, String> dynamicValuePlaceholders) {
@@ -82,6 +84,7 @@ public class BuyShop implements IShop{
         this.scalePermission = scalePermission;
         this.scalePermissionMode = scalePermissionMode;
         this.dynamicValuePerPlayer = dynamicValuePerPlayer;
+        this.dynamicValueLimitationPlayer = dynamicValueLimitationPlayer;
         this.dynamicValueAdd = dynamicValueAdd;
         this.dynamicValueMaximum = dynamicValueMaximum;
         this.dynamicValueCutWhenMaximum = dynamicValueCutWhenMaximum;
@@ -107,6 +110,9 @@ public class BuyShop implements IShop{
         return matcher.apply(item);
     }
 
+    /**
+     * 根据动态值获取收购价格
+     */
     public double getPrice(double dynamic) {
         if (dynamic <= scaleWhenDynamicLargeThan) return priceBase;
         BigDecimal value = BigDecimal.valueOf(dynamic - scaleWhenDynamicLargeThan);
@@ -119,6 +125,9 @@ public class BuyShop implements IShop{
         return Double.parseDouble(String.format("%.2f", price));
     }
 
+    /**
+     * 获取动态值显示格式
+     */
     public String getDisplayDynamic(double dynamic) {
         BigDecimal value = BigDecimal.valueOf(dynamic);
         BigDecimal dynamicValue = Utils.eval(dynamicValueDisplayFormula, e -> e.with("value", value));
@@ -155,47 +164,60 @@ public class BuyShop implements IShop{
 
     public void take(Player player, int count) {
         PlayerInventory inv = player.getInventory();
-        int j = count;
-        for (int i = inv.getSize() - 1; i >= 0 && j > 0; i--) {
+        int needToTake = count;
+        for (int i = inv.getSize() - 1; i >= 0 && needToTake > 0; i--) {
             ItemStack item = inv.getItem(i);
             if (item == null || item.getType().equals(Material.AIR) || item.getAmount() == 0) continue;
             if (match(item)) {
                 int amount = item.getAmount();
-                if (j >= amount) {
-                    j -= amount;
+                if (needToTake >= amount) {
+                    needToTake -= amount;
                     item.setType(Material.AIR);
                     item.setAmount(0);
                     item = null;
                 } else {
-                    amount = amount - j;
+                    amount = amount - needToTake;
                     item.setAmount(amount);
-                    j = 0;
+                    needToTake = 0;
                 }
                 inv.setItem(i, item);
             }
         }
         SweetAdaptiveShop plugin = SweetAdaptiveShop.getInstance();
-        double value = dynamicValueAdd * (count - j);
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> addDynamicValue(player, value));
-        if (j > 0) {
-            plugin.warn("预料中的错误: 玩家 " + player.getName() + " 向收购商店 " + id + " 提交 " + count + " 个物品时，有 " + j + " 个物品没有提交成功");
+        double value = dynamicValueAdd * (count - needToTake);
+        plugin.getScheduler().runTaskAsync(() -> addDynamicValue(plugin, player, value, count));
+        if (needToTake > 0) {
+            plugin.warn("预料中的错误: 玩家 " + player.getName() + " 向收购商店 " + id + " 提交 " + count + " 个物品时，有 " + needToTake + " 个物品没有提交成功");
         }
     }
 
-    public void addDynamicValue(Player player, double value) {
-        SweetAdaptiveShop plugin = SweetAdaptiveShop.getInstance();
+    public void addDynamicValue(SweetAdaptiveShop plugin, Player player, double value, int count) {
         plugin.getBuyShopDatabase().addDynamicValue(this, player, value);
+        if (dynamicValueLimitationPlayer > 0) {
+            plugin.getBuyCountDatabase().addCount(player, this, count);
+        }
     }
 
+    /**
+     * 获取恢复动态值后，新的动态值是多少
+     * @param old 旧的动态值
+     */
     public double recoverDynamicValue(double old) {
+        // 如果恢复策略是 reset，或者未设置恢复范围
         if (dynamicValueStrategy.equals(Strategy.reset) || dynamicValueRecover == null) {
+            // 恢复为 0
             return 0;
         }
+        // 如果恢复策略是 recover，且设置了恢复范围
+        // 动态值减少范围内随机值
         double dynamicValue = Math.max(0, old - dynamicValueRecover.random());
         if (dynamicValueMaximum > 0) {
+            // 如果限制了最大值，进行限制
             return Math.min(dynamicValueMaximum, dynamicValue);
+        } else {
+            // 如果未限制最大值，直接返回
+            return dynamicValue;
         }
-        return dynamicValue;
     }
 
     @Override
@@ -325,6 +347,7 @@ public class BuyShop implements IShop{
             return null;
         }
         boolean dynamicValuePerPlayer = config.getBoolean("dynamic-value/per-player", false);
+        int dynamicValueLimitationPlayer = config.getInt("dynamic-value/limitation/player", 0);
         double dynamicValueAdd = config.getDouble("dynamic-value/add");
         double dynamicValueMaximum = config.getDouble("dynamic-value/maximum", 0.0);
         boolean dynamicValueCutWhenMaximum = config.getBoolean("dynamic-value/cut-when-maximum", false);
@@ -366,6 +389,7 @@ public class BuyShop implements IShop{
                 footer, matchPriority, matcher, priceBase,
                 scaleRange, scaleWhenDynamicLargeThan, scaleFormula,
                 scalePermission, scalePermissionMode, dynamicValuePerPlayer,
+                dynamicValueLimitationPlayer,
                 dynamicValueAdd, dynamicValueMaximum, dynamicValueCutWhenMaximum,
                 dynamicValueStrategy, dynamicValueRecover, routine,
                 dynamicValueDisplayFormula, dynamicValueDisplayFormat, dynamicValuePlaceholders);

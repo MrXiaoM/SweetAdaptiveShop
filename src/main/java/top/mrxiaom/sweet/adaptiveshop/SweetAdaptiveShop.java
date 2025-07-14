@@ -13,6 +13,7 @@ import top.mrxiaom.pluginbase.economy.IEconomy;
 import top.mrxiaom.pluginbase.func.LanguageManager;
 import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.actions.ActionGive;
+import top.mrxiaom.sweet.adaptiveshop.database.BuyCountDatabase;
 import top.mrxiaom.sweet.adaptiveshop.database.BuyShopDatabase;
 import top.mrxiaom.sweet.adaptiveshop.database.OrderDatabase;
 import top.mrxiaom.sweet.adaptiveshop.database.SellShopDatabase;
@@ -44,6 +45,7 @@ public class SweetAdaptiveShop extends BukkitPlugin {
     private BuyShopDatabase buyShopDatabase;
     private SellShopDatabase sellShopDatabase;
     private OrderDatabase orderDatabase;
+    public BuyCountDatabase buyCountDatabase;
     private boolean supportTranslatable;
     private boolean supportOffHand;
     private boolean supportItemsAdder;
@@ -79,6 +81,10 @@ public class SweetAdaptiveShop extends BukkitPlugin {
 
     public OrderDatabase getOrderDatabase() {
         return orderDatabase;
+    }
+
+    public BuyCountDatabase getBuyCountDatabase() {
+        return buyCountDatabase;
     }
 
     @Nullable
@@ -123,7 +129,8 @@ public class SweetAdaptiveShop extends BukkitPlugin {
         options.registerDatabase(
                 this.buyShopDatabase = new BuyShopDatabase(this),
                 this.sellShopDatabase = new SellShopDatabase(this),
-                this.orderDatabase = new OrderDatabase(this)
+                this.orderDatabase = new OrderDatabase(this),
+                this.buyCountDatabase = new BuyCountDatabase(this)
         );
         ActionProviders.registerActionProvider(ActionGive.PROVIDER);
     }

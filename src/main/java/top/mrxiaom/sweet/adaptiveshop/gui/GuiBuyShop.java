@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import top.mrxiaom.pluginbase.func.AutoRegister;
 import top.mrxiaom.pluginbase.func.gui.LoadedIcon;
 import top.mrxiaom.pluginbase.gui.IGui;
+import top.mrxiaom.pluginbase.temporary.TemporaryInteger;
 import top.mrxiaom.pluginbase.utils.*;
 import top.mrxiaom.sweet.adaptiveshop.Messages;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
@@ -104,14 +105,26 @@ public class GuiBuyShop extends AbstractGuiModule {
                 boolean noCut = shop.dynamicValueMaximum == 0 || !shop.dynamicValueCutWhenMaximum;
                 int count = shop.getCount(player);
                 double price = bypass ? shop.priceBase : shop.getPrice(dynamic);
+                TemporaryInteger buyCount = plugin.getBuyCountDatabase().getCount(player, shop);
+
                 String priceString = String.format("%.2f", price).replace(".00", "");
                 String dynamicDisplay = bypass ? "" : shop.getDisplayDynamic(dynamic);
                 String dynamicPlaceholder = bypass ? "" : shop.getDynamicValuePlaceholder(dynamic);
+                String limitation = shop.dynamicValueLimitationPlayer > 0
+                        ? Messages.gui__limitation__format.str(
+                                Pair.of("%current%", buyCount.getValue()),
+                                Pair.of("%max%", shop.dynamicValueLimitationPlayer))
+                        : Messages.gui__limitation__infinite.str();
 
                 ItemStack item = shop.displayItem.clone();
                 String displayName = buySlot.display.replace("%name%", shop.displayName);
                 List<String> lore = new ArrayList<>();
                 List<String> loreTemplate = bypass ? buyBypassLore : buySlot.lore;
+                ListPair<String, Object> replacements = new ListPair<>();
+                replacements.add("%price%", priceString);
+                replacements.add("%dynamic%", dynamicDisplay);
+                replacements.add("%dynamic_placeholder%", dynamicPlaceholder);
+                replacements.add("%limitation%", limitation);
                 for (String s : loreTemplate) {
                     if (s.equals("description")) {
                         lore.addAll(ItemStackUtil.getItemLore(shop.displayItem));
@@ -130,22 +143,22 @@ public class GuiBuyShop extends AbstractGuiModule {
                         int stackSize = item.getType().getMaxStackSize();
                         if (count >= stackSize) {
                             if (noCut || dynamic + shop.dynamicValueAdd * stackSize <= shop.dynamicValueMaximum) {
-                                lore.add(buyStack.replace("%price%", String.format("%.2f", price * stackSize).replace(".00", ""))
+                                String priceStr = String.format("%.2f", price * stackSize).replace(".00", "");
+                                lore.add(buyStack.replace("%price%", priceStr)
                                         .replace("%count%", String.valueOf(stackSize)));
                             }
                         }
                         if (count >= 1) {
                             if (noCut || dynamic + shop.dynamicValueAdd * count <= shop.dynamicValueMaximum) {
                                 // 个人感觉按动态值上限算可以卖的总数量很麻烦，容易出BUG，就不写了
-                                lore.add(buyAll.replace("%price%", String.format("%.2f", price * count).replace(".00", ""))
+                                String priceStr = String.format("%.2f", price * count).replace(".00", "");
+                                lore.add(buyAll.replace("%price%", priceStr)
                                         .replace("%count%", String.valueOf(count)));
                             }
                         }
                         continue;
                     }
-                    lore.add(s.replace("%price%", priceString)
-                            .replace("%dynamic%", dynamicDisplay)
-                            .replace("%dynamic_placeholder%", dynamicPlaceholder));
+                    lore.add(Pair.replace(s, replacements));
                 }
                 AdventureItemStack.setItemDisplayName(item, PAPI.setPlaceholders(player, displayName));
                 AdventureItemStack.setItemLoreMiniMessage(item, PAPI.setPlaceholders(player, lore));
@@ -233,6 +246,13 @@ public class GuiBuyShop extends AbstractGuiModule {
                         if (count < 1) {
                             Messages.gui__buy__not_enough.tm(player);
                             return;
+                        }
+                        if (shop.dynamicValueLimitationPlayer > 0) {
+                            TemporaryInteger buyCount = plugin.getBuyCountDatabase().getCount(player, shop);
+                            if (buyCount.getValue() + 1 > shop.dynamicValueLimitationPlayer) {
+                                Messages.gui__limitation__reach_tips.tm(player);
+                                return;
+                            }
                         }
                         Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop, player);
                         double dynamic = dyn == null ? 0.0 : dyn;
