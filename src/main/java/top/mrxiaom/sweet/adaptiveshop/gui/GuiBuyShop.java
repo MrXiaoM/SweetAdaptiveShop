@@ -105,17 +105,22 @@ public class GuiBuyShop extends AbstractGuiModule {
                 boolean noCut = shop.dynamicValueMaximum == 0 || !shop.dynamicValueCutWhenMaximum;
                 int count = shop.getCount(player);
                 double price = bypass ? shop.priceBase : shop.getPrice(dynamic);
-                TemporaryInteger buyCount = plugin.getBuyCountDatabase().getCount(player, shop);
 
                 String priceString = String.format("%.2f", price).replace(".00", "");
                 String dynamicDisplay = bypass ? "" : shop.getDisplayDynamic(dynamic);
                 String dynamicPlaceholder = bypass ? "" : shop.getDynamicValuePlaceholder(dynamic);
-                String limitation = shop.dynamicValueLimitationPlayer > 0
-                        ? Messages.gui__limitation__format.str(
-                                Pair.of("%current%", buyCount.getValue()),
-                                Pair.of("%max%", shop.dynamicValueLimitationPlayer))
-                        : Messages.gui__limitation__infinite.str();
-
+                String limitation;
+                int maxLimit;
+                if (shop.dynamicValueLimitationPlayer > 0) {
+                    TemporaryInteger buyCount = plugin.getBuyCountDatabase().getCount(player, shop);
+                    limitation = Messages.gui__limitation__format.str(
+                            Pair.of("%current%", buyCount.getValue()),
+                            Pair.of("%max%", shop.dynamicValueLimitationPlayer));
+                    maxLimit = Math.max(0, shop.dynamicValueLimitationPlayer - buyCount.getValue());
+                } else {
+                    limitation = Messages.gui__limitation__infinite.str();
+                    maxLimit = Integer.MAX_VALUE;
+                }
                 ItemStack item = shop.displayItem.clone();
                 String displayName = buySlot.display.replace("%name%", shop.displayName);
                 List<String> lore = new ArrayList<>();
@@ -135,13 +140,14 @@ public class GuiBuyShop extends AbstractGuiModule {
                         continue;
                     }
                     if (s.equals("operation")) {
+                        if (maxLimit == 0) continue;
                         if (count >= 1) {
                             if (noCut || dynamic + shop.dynamicValueAdd <= shop.dynamicValueMaximum) {
                                 lore.add(buyOne.replace("%price%", priceString));
                             }
                         }
                         int stackSize = item.getType().getMaxStackSize();
-                        if (count >= stackSize) {
+                        if (count >= stackSize && maxLimit >= stackSize) {
                             if (noCut || dynamic + shop.dynamicValueAdd * stackSize <= shop.dynamicValueMaximum) {
                                 String priceStr = String.format("%.2f", price * stackSize).replace(".00", "");
                                 lore.add(buyStack.replace("%price%", priceStr)
@@ -153,7 +159,7 @@ public class GuiBuyShop extends AbstractGuiModule {
                                 // 个人感觉按动态值上限算可以卖的总数量很麻烦，容易出BUG，就不写了
                                 String priceStr = String.format("%.2f", price * count).replace(".00", "");
                                 lore.add(buyAll.replace("%price%", priceStr)
-                                        .replace("%count%", String.valueOf(count)));
+                                        .replace("%count%", String.valueOf(Math.min(count, maxLimit))));
                             }
                         }
                         continue;
@@ -238,106 +244,31 @@ public class GuiBuyShop extends AbstractGuiModule {
                     Pair<BuyShop, PlayerItem> pair = items.get(i);
                     BuyShop shop = pair.getKey();
                     int count = shop.getCount(player);
+                    int maxLimit;
+                    if (shop.dynamicValueLimitationPlayer > 0) {
+                        TemporaryInteger buyCount = plugin.getBuyCountDatabase().getCount(player, shop);
+                        maxLimit = Math.max(0, shop.dynamicValueLimitationPlayer - buyCount.getValue());
+                    } else {
+                        maxLimit = Integer.MAX_VALUE;
+                    }
                     if (click.equals(ClickType.LEFT)) { // 提交1个
-                        if (pair.getValue().isOutdate()) {
-                            Messages.gui__buy__outdate.tm(player);
-                            return;
+                        if (maxLimit >= 1) {
+                            doBuy(shop, pair.value(), count, 1, view);
                         }
-                        if (count < 1) {
-                            Messages.gui__buy__not_enough.tm(player);
-                            return;
-                        }
-                        if (shop.dynamicValueLimitationPlayer > 0) {
-                            TemporaryInteger buyCount = plugin.getBuyCountDatabase().getCount(player, shop);
-                            if (buyCount.getValue() + 1 > shop.dynamicValueLimitationPlayer) {
-                                Messages.gui__limitation__reach_tips.tm(player);
-                                return;
-                            }
-                        }
-                        Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop, player);
-                        double dynamic = dyn == null ? 0.0 : dyn;
-                        if (shop.dynamicValueMaximum > 0 && shop.dynamicValueCutWhenMaximum) {
-                            double add = shop.dynamicValueAdd;
-                            if (dynamic + add > shop.dynamicValueMaximum) {
-                                Messages.gui__buy__maximum.tm(player);
-                                return;
-                            }
-                        }
-                        shop.take(player, 1);
-                        double price;
-                        if (shop.hasBypass(player)) {
-                            price = shop.priceBase;
-                        } else {
-                            price = shop.getPrice(dynamic);
-                        }
-                        plugin.getEconomy().giveMoney(player, price);
-                        String money = String.format("%.2f", price).replace(".00", "");
-                        Messages.gui__buy__success.tm(player, 1, shop.displayName, money);
-                        postSubmit(view);
                         return;
                     }
                     if (click.equals(ClickType.RIGHT)) { // 提交1组
-                        if (pair.getValue().isOutdate()) {
-                            Messages.gui__buy__outdate.tm(player);
-                            return;
-                        }
                         int stackSize = shop.displayItem.getType().getMaxStackSize();
-                        if (count < stackSize) {
-                            Messages.gui__buy__not_enough.tm(player);
-                            return;
+                        if (maxLimit >= stackSize) {
+                            doBuy(shop, pair.value(), count, stackSize, view);
                         }
-                        Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop, player);
-                        double dynamic = dyn == null ? 0.0 : dyn;
-                        if (shop.dynamicValueMaximum > 0 && shop.dynamicValueCutWhenMaximum) {
-                            double add = shop.dynamicValueAdd * stackSize;
-                            if (dynamic + add > shop.dynamicValueMaximum) {
-                                Messages.gui__buy__maximum.tm(player);
-                                return;
-                            }
-                        }
-                        shop.take(player, stackSize);
-                        double price;
-                        if (shop.hasBypass(player)) {
-                            price = shop.priceBase;
-                        } else {
-                            price = shop.getPrice(dynamic);
-                        }
-                        String money = String.format("%.2f", price * stackSize).replace(".00", "");
-                        plugin.getEconomy().giveMoney(player, Double.parseDouble(money));
-                        Messages.gui__buy__success.tm(player, stackSize, shop.displayName, money);
-                        postSubmit(view);
                         return;
                     }
                     if (click.equals(ClickType.SHIFT_LEFT)) { // 提交全部
-                        if (pair.getValue().isOutdate()) {
-                            Messages.gui__buy__outdate.tm(player);
-                            return;
+                        if (maxLimit > 0) {
+                            int countToBuy = Math.min(count, maxLimit);
+                            doBuy(shop, pair.value(), count, countToBuy, view);
                         }
-                        if (count < 1) {
-                            Messages.gui__buy__not_enough.tm(player);
-                            return;
-                        }
-                        Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop, player);
-                        double dynamic = dyn == null ? 0.0 : dyn;
-                        if (shop.dynamicValueMaximum > 0 && shop.dynamicValueCutWhenMaximum) {
-                            double add = shop.dynamicValueAdd * count;
-                            if (dynamic + add > shop.dynamicValueMaximum) {
-                                Messages.gui__buy__maximum.tm(player);
-                                return;
-                            }
-                        }
-                        shop.take(player, count);
-                        double price;
-                        if (shop.hasBypass(player)) {
-                            price = shop.priceBase;
-                        } else {
-                            price = shop.getPrice(dynamic);
-                        }
-                        String money = String.format("%.2f", price * count).replace(".00", "");
-                        plugin.getEconomy().giveMoney(player, Double.parseDouble(money));
-                        Messages.gui__buy__success.tm(player, count, shop.displayName, money);
-                        postSubmit(view);
-                        return;
                     }
                     return;
                 }
@@ -346,6 +277,44 @@ public class GuiBuyShop extends AbstractGuiModule {
                     icon.click(player, click);
                 }
             }
+        }
+
+        private void doBuy(BuyShop shop, PlayerItem pairValue, int count, int countToBuy, InventoryView view) {
+            if (pairValue.isOutdate()) {
+                Messages.gui__buy__outdate.tm(player);
+                return;
+            }
+            if (count <= 0 || count < countToBuy) {
+                Messages.gui__buy__not_enough.tm(player);
+                return;
+            }
+            if (shop.dynamicValueLimitationPlayer > 0) {
+                TemporaryInteger buyCount = plugin.getBuyCountDatabase().getCount(player, shop);
+                if (buyCount.getValue() + countToBuy > shop.dynamicValueLimitationPlayer) {
+                    Messages.gui__limitation__reach_tips.tm(player);
+                    return;
+                }
+            }
+            Double dyn = plugin.getBuyShopDatabase().getDynamicValue(shop, player);
+            double dynamic = dyn == null ? 0.0 : dyn;
+            if (shop.dynamicValueMaximum > 0 && shop.dynamicValueCutWhenMaximum) {
+                double add = shop.dynamicValueAdd * countToBuy;
+                if (dynamic + add > shop.dynamicValueMaximum) {
+                    Messages.gui__buy__maximum.tm(player);
+                    return;
+                }
+            }
+            shop.take(player, countToBuy);
+            double price;
+            if (shop.hasBypass(player)) {
+                price = shop.priceBase;
+            } else {
+                price = shop.getPrice(dynamic);
+            }
+            String money = String.format("%.2f", price * countToBuy).replace(".00", "");
+            plugin.getEconomy().giveMoney(player, Double.parseDouble(money));
+            Messages.gui__buy__success.tm(player, countToBuy, shop.displayName, money);
+            postSubmit(view);
         }
 
         private void postSubmit(InventoryView view) {
