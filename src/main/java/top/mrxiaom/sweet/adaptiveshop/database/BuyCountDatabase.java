@@ -72,10 +72,12 @@ public class BuyCountDatabase extends AbstractPluginHolder implements IDatabase,
         }
     }
 
+    @NotNull
     public TemporaryInteger getCount(@NotNull Player player, @NotNull BuyShop shop) {
         return getCount(plugin.getDBKey(player), shop, false);
     }
 
+    @NotNull
     public TemporaryInteger getCount(@NotNull String player, @NotNull BuyShop shop, boolean update) {
         Map<String, TemporaryInteger> map = Util.getOrPut(caches, player, () -> new HashMap<>());
         TemporaryInteger cache = map.get(shop.id);
@@ -87,13 +89,15 @@ public class BuyCountDatabase extends AbstractPluginHolder implements IDatabase,
             cache = new TemporaryInteger(period, () -> 0);
         }
         try (Connection conn = plugin.getConnection()) {
-            return map.put(shop.id, getCount(conn, player, shop, cache));
+            map.put(shop.id, getCount(conn, player, shop, cache));
+            return cache;
         } catch (SQLException e) {
             warn(e);
         }
         return cache;
     }
 
+    @NotNull
     public TemporaryInteger getCount(@NotNull Connection conn, @NotNull String player, @NotNull BuyShop shop, @NotNull TemporaryInteger cache) throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement(
                      "SELECT * FROM `" + TABLE_PLAYER_BUY_COUNT + "` WHERE `name`=? AND `item`=?;"
