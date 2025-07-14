@@ -49,8 +49,6 @@ java {
 }
 tasks {
     shadowJar {
-        archiveClassifier.set("")
-        destinationDirectory.set(rootProject.file("out"))
         mapOf(
             "org.intellij.lang.annotations" to "annotations.intellij",
             "org.jetbrains.annotations" to "annotations.jetbrains",
@@ -65,8 +63,14 @@ tasks {
         }
         exclude("META-INF/services/org.slf4j.spi.SLF4JServiceProvider")
     }
-    build {
+    val copyTask = create<Copy>("copyBuildArtifact") {
         dependsOn(shadowJar)
+        from(shadowJar.get().outputs)
+        rename { "${project.name}-$version.jar" }
+        into(rootProject.file("out"))
+    }
+    build {
+        dependsOn(copyTask)
     }
     withType<JavaCompile>().configureEach {
         options.encoding = "UTF-8"
