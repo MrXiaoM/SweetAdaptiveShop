@@ -22,7 +22,7 @@ import top.mrxiaom.sweet.adaptiveshop.Messages;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerItem;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractGuiModule;
-import top.mrxiaom.sweet.adaptiveshop.func.SellShopManager;
+import top.mrxiaom.sweet.adaptiveshop.func.config.SellShopManager;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.Group;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.shop.SellShop;
 

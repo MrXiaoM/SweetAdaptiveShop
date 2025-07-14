@@ -18,8 +18,8 @@ import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerItem;
 import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerOrder;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractModule;
-import top.mrxiaom.sweet.adaptiveshop.func.GroupManager;
-import top.mrxiaom.sweet.adaptiveshop.func.TemplateManager;
+import top.mrxiaom.sweet.adaptiveshop.func.config.GroupManager;
+import top.mrxiaom.sweet.adaptiveshop.func.config.TemplateManager;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.Group;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.ItemTemplate;
 import top.mrxiaom.sweet.adaptiveshop.gui.GuiBuyShop;
@@ -32,7 +32,6 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 @AutoRegister
 public class CommandMain extends AbstractModule implements CommandExecutor, TabCompleter, Listener {

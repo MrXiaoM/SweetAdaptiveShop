@@ -1,4 +1,4 @@
-package top.mrxiaom.sweet.adaptiveshop.func;
+package top.mrxiaom.sweet.adaptiveshop.func.config;
 
 import com.google.common.collect.Lists;
 import org.bukkit.configuration.MemoryConfiguration;
@@ -9,6 +9,7 @@ import top.mrxiaom.pluginbase.utils.Pair;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.database.OrderDatabase;
 import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerOrder;
+import top.mrxiaom.sweet.adaptiveshop.func.AbstractModule;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.Order;
 import top.mrxiaom.sweet.adaptiveshop.utils.Utils;
 

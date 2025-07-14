@@ -1,6 +1,5 @@
 package top.mrxiaom.sweet.adaptiveshop.func.entry;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -11,7 +10,7 @@ import top.mrxiaom.pluginbase.api.IAction;
 import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractModule;
-import top.mrxiaom.sweet.adaptiveshop.func.BuyShopManager;
+import top.mrxiaom.sweet.adaptiveshop.func.config.BuyShopManager;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.shop.BuyShop;
 import top.mrxiaom.sweet.adaptiveshop.utils.Utils;
 

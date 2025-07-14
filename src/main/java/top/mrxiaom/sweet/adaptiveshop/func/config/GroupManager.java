@@ -1,4 +1,4 @@
-package top.mrxiaom.sweet.adaptiveshop.func;
+package top.mrxiaom.sweet.adaptiveshop.func.config;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
@@ -6,6 +6,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.func.AutoRegister;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
+import top.mrxiaom.sweet.adaptiveshop.func.AbstractModule;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.Group;
 
 import java.io.File;

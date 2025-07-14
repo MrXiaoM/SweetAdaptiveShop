@@ -1,4 +1,4 @@
-package top.mrxiaom.sweet.adaptiveshop.func;
+package top.mrxiaom.sweet.adaptiveshop.func.config;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.func.AutoRegister;
 import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
+import top.mrxiaom.sweet.adaptiveshop.func.AbstractModule;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.ItemTemplate;
 
 import java.io.File;

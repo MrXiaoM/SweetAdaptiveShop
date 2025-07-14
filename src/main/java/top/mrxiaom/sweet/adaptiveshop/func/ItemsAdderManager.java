@@ -7,6 +7,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import top.mrxiaom.pluginbase.func.AutoRegister;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
+import top.mrxiaom.sweet.adaptiveshop.func.config.BuyShopManager;
+import top.mrxiaom.sweet.adaptiveshop.func.config.SellShopManager;
 
 @AutoRegister(requirePlugins = "ItemsAdder")
 public class ItemsAdderManager extends AbstractModule implements Listener {
@@ -30,7 +32,7 @@ public class ItemsAdderManager extends AbstractModule implements Listener {
         }
     }
 
-    protected void scheduleReload() {
+    public void scheduleReload() {
         scheduleReload = true;
     }
 

@@ -24,7 +24,7 @@ import top.mrxiaom.sweet.adaptiveshop.Messages;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerOrder;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractGuiModule;
-import top.mrxiaom.sweet.adaptiveshop.func.OrderManager;
+import top.mrxiaom.sweet.adaptiveshop.func.config.OrderManager;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.Order;
 
 import java.io.File;
