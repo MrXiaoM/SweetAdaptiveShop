@@ -2,7 +2,7 @@ package top.mrxiaom.sweet.adaptiveshop;
         
 import de.tr7zw.changeme.nbtapi.utils.MinecraftVersion;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -136,7 +136,7 @@ public class SweetAdaptiveShop extends BukkitPlugin {
         getLogger().info("SweetAdaptiveShop 加载完毕");
     }
 
-    public String getDBKey(Player player) {
+    public String getDBKey(OfflinePlayer player) {
         if (isUuidMode()) {
             return player.getUniqueId().toString();
         } else {
