@@ -67,7 +67,6 @@ public class OrderManager extends AbstractModule {
     public List<Pair<Order, PlayerOrder>> getPlayerOrders(Player player) {
         OrderDatabase db = plugin.getOrderDatabase();
         List<PlayerOrder> orders = db.getPlayerOrders(player);
-        if (orders == null) orders = new ArrayList<>();
         List<Pair<Order, PlayerOrder>> list = new ArrayList<>();
         // 移除已过期订单
         orders.removeIf(it -> {

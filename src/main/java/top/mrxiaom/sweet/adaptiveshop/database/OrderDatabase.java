@@ -53,13 +53,13 @@ public class OrderDatabase extends AbstractPluginHolder implements IDatabase, Li
         return orders != null ? orders : new ArrayList<>();
     }
 
-    @Nullable
+    @NotNull
     public List<PlayerOrder> getPlayerOrders(Player player) {
         String id = plugin.getDBKey(player);
         return getPlayerOrders(id);
     }
 
-    @Nullable
+    @NotNull
     public List<PlayerOrder> getPlayerOrders(String player) {
         List<PlayerOrder> cache = ordersCache.get(player);
         if (cache != null) return cache;
@@ -83,7 +83,7 @@ public class OrderDatabase extends AbstractPluginHolder implements IDatabase, Li
         } catch (SQLException e) {
             warn(e);
         }
-        return null;
+        return new ArrayList<>();
     }
 
     public void setPlayerOrders(Player player, List<PlayerOrder> list) {

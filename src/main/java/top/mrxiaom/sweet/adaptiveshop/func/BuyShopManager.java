@@ -103,7 +103,6 @@ public class BuyShopManager extends AbstractModule {
     public List<Pair<BuyShop, PlayerItem>> getPlayerItems(Player player, @Nullable String group) {
         BuyShopDatabase db = plugin.getBuyShopDatabase();
         List<PlayerItem> items = db.getPlayerItems(player);
-        if (items == null) items = new ArrayList<>();
         List<Pair<BuyShop, PlayerItem>> list = new ArrayList<>();
         Map<String, Integer> counts = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         items.removeIf(it -> {

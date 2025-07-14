@@ -189,13 +189,13 @@ public class SellShopDatabase extends AbstractPluginHolder implements IDatabase,
         }
     }
 
-    @Nullable
+    @NotNull
     public List<PlayerItem> getPlayerItems(Player player) {
         String id = plugin.getDBKey(player);
         return getPlayerItems(id);
     }
 
-    @Nullable
+    @NotNull
     public List<PlayerItem> getPlayerItems(String player) {
         List<PlayerItem> cache = itemsCache.get(player);
         if (cache != null) return cache;
@@ -218,7 +218,7 @@ public class SellShopDatabase extends AbstractPluginHolder implements IDatabase,
         } catch (SQLException e) {
             warn(e);
         }
-        return null;
+        return new ArrayList<>();
     }
 
     public void setPlayerItems(Player player, List<PlayerItem> list) {

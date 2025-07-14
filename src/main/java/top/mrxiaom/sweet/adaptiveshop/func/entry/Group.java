@@ -57,7 +57,6 @@ public class Group {
         SweetAdaptiveShop plugin = SweetAdaptiveShop.getInstance();
         BuyShopDatabase db = plugin.getBuyShopDatabase();
         List<PlayerItem> items = db.getPlayerItems(player);
-        if (items == null) items = new ArrayList<>();
         items.removeIf(it -> it.isOutdate() || buyShop.containsKey(it.getItem()));
         LocalDateTime tomorrow = Utils.nextOutdate();
         for (int i = 0; i < dailyBuyCount; i++) {
@@ -73,7 +72,6 @@ public class Group {
         SweetAdaptiveShop plugin = SweetAdaptiveShop.getInstance();
         BuyShopDatabase db = plugin.getBuyShopDatabase();
         List<PlayerItem> items = db.getPlayerItems(player);
-        if (items == null) items = new ArrayList<>();
         items.removeIf(it -> it.isOutdate() || buyShop.containsKey(it.getItem()));
         LocalDateTime tomorrow = Utils.nextOutdate();
         for (int i = 0; i < dailySellCount; i++) {
