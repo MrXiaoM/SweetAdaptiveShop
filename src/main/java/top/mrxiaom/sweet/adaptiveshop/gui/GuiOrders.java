@@ -197,7 +197,7 @@ public class GuiOrders extends AbstractGuiModule {
                         for (IAction reward : order.rewards) {
                             reward.run(player);
                         }
-                        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                        plugin.getScheduler().runTaskLater(() -> {
                             if (closeAfterSubmit) {
                                 player.closeInventory();
                                 Util.submitInvUpdate(player);

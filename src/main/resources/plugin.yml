@@ -9,6 +9,7 @@ softdepend:
   - MythicMobs
   - ItemsAdder
 authors: [ MrXiaoM ]
+folia-supported: true
 commands:
   sweetadaptiveshop:
     description: 'The main command of SweetAdaptiveShop'

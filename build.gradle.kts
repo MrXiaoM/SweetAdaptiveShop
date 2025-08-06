@@ -35,11 +35,12 @@ dependencies {
     implementation("net.kyori:adventure-platform-bukkit:4.4.0")
     implementation("net.kyori:adventure-text-minimessage:4.22.0")
     implementation("de.tr7zw:item-nbt-api:2.15.2-SNAPSHOT")
+    implementation("com.github.technicallycoded:FoliaLib:0.4.4") { isTransitive = false }
     implementation("com.zaxxer:HikariCP:4.0.3")
     implementation("org.slf4j:slf4j-nop:2.0.16")
     implementation("com.udojava:EvalEx:2.7")
     implementation("org.jetbrains:annotations:24.0.0")
-    implementation("top.mrxiaom:PluginBase:1.5.4")
+    implementation("top.mrxiaom:PluginBase:1.5.7")
 }
 java {
     val javaVersion = JavaVersion.toVersion(targetJavaVersion)
@@ -56,6 +57,7 @@ tasks {
             "com.zaxxer.hikari" to "hikari",
             "org.slf4j" to "slf4j",
             "de.tr7zw.changeme.nbtapi" to "nbtapi",
+            "com.tcoded.folialib" to "folialib",
             "com.udojava.evalex" to "evalex",
             "net.kyori" to "kyori",
         ).forEach { (original, target) ->

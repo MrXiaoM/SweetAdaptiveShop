@@ -286,7 +286,7 @@ public class GuiSellShop extends AbstractGuiModule {
         }
 
         private void postSubmit(InventoryView view) {
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            plugin.getScheduler().runTaskLater(() -> {
                 if (closeAfterSubmit) {
                     player.closeInventory();
                     Util.submitInvUpdate(player);

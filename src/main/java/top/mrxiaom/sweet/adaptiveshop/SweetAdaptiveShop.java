@@ -12,6 +12,7 @@ import top.mrxiaom.pluginbase.economy.EnumEconomy;
 import top.mrxiaom.pluginbase.economy.IEconomy;
 import top.mrxiaom.pluginbase.func.LanguageManager;
 import top.mrxiaom.pluginbase.utils.Util;
+import top.mrxiaom.pluginbase.utils.scheduler.FoliaLibScheduler;
 import top.mrxiaom.sweet.adaptiveshop.actions.ActionGive;
 import top.mrxiaom.sweet.adaptiveshop.database.BuyCountDatabase;
 import top.mrxiaom.sweet.adaptiveshop.database.BuyShopDatabase;
@@ -35,6 +36,7 @@ public class SweetAdaptiveShop extends BukkitPlugin {
                 .economy(EnumEconomy.VAULT)
                 .scanIgnore("top.mrxiaom.sweet.adaptiveshop.libs")
         );
+        this.scheduler = new FoliaLibScheduler(this);
     }
     @NotNull
     public IEconomy getEconomy() {

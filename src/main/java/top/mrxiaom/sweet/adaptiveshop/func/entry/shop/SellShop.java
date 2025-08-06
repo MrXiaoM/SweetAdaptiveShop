@@ -135,7 +135,7 @@ public class SellShop implements IShop {
     public void give(Player player, int count) {
         SweetAdaptiveShop plugin = SweetAdaptiveShop.getInstance();
         double value = dynamicValueAdd * count;
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> addDynamicValue(player, value));
+        plugin.getScheduler().runTaskAsync(() -> addDynamicValue(player, value));
         try {
             for (IAction action : commands) {
                 action.run(player);
