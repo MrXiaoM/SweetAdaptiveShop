@@ -3,6 +3,7 @@ package top.mrxiaom.sweet.adaptiveshop.func.config;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.func.AutoRegister;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
@@ -10,10 +11,7 @@ import top.mrxiaom.sweet.adaptiveshop.func.AbstractModule;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.Group;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 @AutoRegister
 public class GroupManager extends AbstractModule {
@@ -45,6 +43,16 @@ public class GroupManager extends AbstractModule {
 
     public Collection<Group> groups() {
         return Collections.unmodifiableCollection(groups.values());
+    }
+
+    public Set<String> groups(Permissible p) {
+        Set<String> set = new HashSet<>();
+        for (Group group : groups.values()) {
+            if (group.hasPermission(p)) {
+                set.add(group.id);
+            }
+        }
+        return set;
     }
 
     public static GroupManager inst() {

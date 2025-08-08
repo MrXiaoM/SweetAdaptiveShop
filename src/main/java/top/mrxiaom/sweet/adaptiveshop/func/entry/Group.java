@@ -3,6 +3,7 @@ package top.mrxiaom.sweet.adaptiveshop.func.entry;
 import com.google.common.collect.Lists;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.database.BuyShopDatabase;
@@ -29,6 +30,10 @@ public class Group {
         this.dailySellCount = dailySellCount;
         this.enableBuy = enableBuy;
         this.enableSell = enableSell;
+    }
+
+    public boolean hasPermission(Permissible p) {
+        return p.hasPermission("sweet.adaptive.shop.group." + id);
     }
 
     @Nullable

@@ -217,11 +217,11 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
     private static final List<String> listArg0 = Lists.newArrayList(
             "open");
     private static final List<String> listArgOpen = Lists.newArrayList(
-            "buy", "order");
+            "buy", "sell", "order");
     private static final List<String> listArgGive = Lists.newArrayList(
-            "buy", "order");
+            "buy", "sell", "order");
     private static final List<String> listArgTest = Lists.newArrayList(
-            "buy", "order", "sell");
+            "buy", "sell", "order");
     private static final List<String> listOpArg0 = Lists.newArrayList(
             "open", "give", "test", "reload");
     @Nullable
@@ -242,8 +242,20 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
             }
         }
         if (args.length == 3) {
-            if (args[0].equalsIgnoreCase("open") && listArgOpen.contains(args[1].toLowerCase()) && sender.isOp()) {
-                return null;
+            if (args[0].equalsIgnoreCase("open") && listArgOpen.contains(args[1].toLowerCase())) {
+                if (args[1].equalsIgnoreCase("buy") || args[1].equalsIgnoreCase("sell")) {
+                    return startsWith(GroupManager.inst().groups(sender), args[2]);
+                }
+                if (args[1].equalsIgnoreCase("order") && sender.isOp()) {
+                    return null;
+                }
+            }
+        }
+        if (args.length == 4) {
+            if (args[0].equalsIgnoreCase("open") && listArgOpen.contains(args[1].toLowerCase())) {
+                if (!args[1].equalsIgnoreCase("order") && sender.isOp()) {
+                    return null;
+                }
             }
         }
         if (args.length == 5) {
