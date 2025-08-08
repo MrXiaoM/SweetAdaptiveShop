@@ -18,8 +18,10 @@ import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerItem;
 import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerOrder;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractModule;
+import top.mrxiaom.sweet.adaptiveshop.func.config.CustomGuiManager;
 import top.mrxiaom.sweet.adaptiveshop.func.config.GroupManager;
 import top.mrxiaom.sweet.adaptiveshop.func.config.TemplateManager;
+import top.mrxiaom.sweet.adaptiveshop.func.config.customgui.CustomGui;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.Group;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.ItemTemplate;
 import top.mrxiaom.sweet.adaptiveshop.gui.GuiBuyShop;
@@ -50,6 +52,7 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
             Player player = sender instanceof Player ? (Player) sender : null;
             int playerCheckIndex;
             Group group;
+            CustomGui model;
             if (type.equals("buy") || type.equals("sell")) {
                 boolean buy = type.equals("buy");
                 String name = args.length >= 3 ? args[2] : "default";
@@ -57,9 +60,22 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
                 if (group == null || (buy && !group.enableBuy) || (!buy && !group.enableSell)) {
                     return Messages.group__not_found.tm(sender, name);
                 }
+                model = null;
+                playerCheckIndex = 3;
+            } else if (type.equals("custom")) {
+                group = null;
+                String name = args.length >= 3 ? args[2] : "";
+                if (name.isEmpty()) {
+                    return Messages.custom_gui__not_input.tm(sender);
+                }
+                model = CustomGuiManager.inst().get(name);
+                if (model == null) {
+                    return Messages.custom_gui__not_found.tm(sender, name);
+                }
                 playerCheckIndex = 3;
             } else {
                 group = null;
+                model = null;
                 playerCheckIndex = 2;
             }
             if (args.length >= playerCheckIndex + 1) {
@@ -95,6 +111,13 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
                         return Messages.player__no_permission.tm(player);
                     }
                     GuiOrders.create(player).open();
+                    return true;
+                case "custom":
+                    if (model == null) return true;
+                    if (!player.hasPermission("sweet.adaptive.shop.custom")) {
+                        return Messages.player__no_permission.tm(player);
+                    }
+                    CustomGuiManager.inst().create(player, model).open();
                     return true;
             }
             return Messages.gui__not_found.tm(sender);
@@ -217,7 +240,7 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
     private static final List<String> listArg0 = Lists.newArrayList(
             "open");
     private static final List<String> listArgOpen = Lists.newArrayList(
-            "buy", "sell", "order");
+            "buy", "sell", "order", "custom");
     private static final List<String> listArgGive = Lists.newArrayList(
             "buy", "sell", "order");
     private static final List<String> listArgTest = Lists.newArrayList(
@@ -248,6 +271,9 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
                 }
                 if (args[1].equalsIgnoreCase("order") && sender.isOp()) {
                     return null;
+                }
+                if (args[1].equalsIgnoreCase("custom")) {
+                    return startsWith(CustomGuiManager.inst().keys(sender), args[2]);
                 }
             }
         }

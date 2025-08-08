@@ -1,0 +1,57 @@
+title: '示例商店菜单'
+inventory:
+  - '框框框框框框框框框'
+  - '框　一　　　　　框'
+  - '框框框框框框框框框'
+  - '框框框框框框框框框'
+# 需要权限才能打开菜单
+# 注释此项则无需权限
+permission: sweet.example
+# 是否在提交订单后关闭界面
+# 关闭此项，则提交订单后刷新界面
+close-after-submit: true
+# 默认图标配置，可用 buy, sell, order
+# 默认配置仅提供 buy 的默认配置，其余请自行到各自界面配置里复制
+default-icons:
+  buy:
+    display: '&e&l%name%'
+    lore:
+      - description
+      - ''
+      - '  &f价格: &e%price%金币'
+      - '  &f动态: &e%dynamic%'
+      - '  &f趋势: &e%dynamic_placeholder%'
+      - '  &f限购: &e%limitation%'
+      - ''
+      - footer
+      - operation
+    lore-bypass:
+      - description
+      - ''
+      - '  &f价格: &e%price%金币'
+      - '  &f限购: &e%limitation%'
+      - ''
+      - footer
+      - operation
+    operations:
+      one: '&a左键&7 | &f提交1个物品 &7(获得%price%金币)'
+      stack: '&b右键&7 | &f提交一组物品 &7(%count%个，获得%price%金币)'
+      all: '&eShift+左键&7 | &f提交全部物品 &7(%count%个，获得%price%金币)'
+# 主要图标（即商品图标）列表
+# 此处的商品将会保持展示，不管玩家有没有相应商品/订单的权限
+main-icons:
+  # 示例的固定商品图标
+  一:
+    # 商品类型
+    # buy - 收购
+    # sell - 出售
+    # order - 订单
+    type: buy
+    # 商品/订单ID
+    item-id: wheat
+    # 下面还可以添加诸如 display, lore 之类的覆盖掉上面默认的配置
+# 其它图标
+other-icons:
+  框:
+    material: WHITE_STAINED_GLASS_PANE
+    display: '&f '

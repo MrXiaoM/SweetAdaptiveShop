@@ -41,6 +41,8 @@ public enum Messages implements IHolderAccessor {
     refresh__order__not_enough("&e你没有足够的刷新券!"),
     refresh__order__success("&a你成功刷新了订单列表!"),
 
+    custom_gui__not_input("&e你应该输入菜单名"),
+    custom_gui__not_found("&e菜单 &f%s&r &e不存在"),
     group__not_found("&e分组 &f%s&r &e不存在"),
     player__not_online("&e玩家 &f%s&r &e不在线"),
     player__no_permission("&c你没有执行此操作的权限"),

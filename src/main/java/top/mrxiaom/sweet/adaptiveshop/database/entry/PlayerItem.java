@@ -2,6 +2,9 @@ package top.mrxiaom.sweet.adaptiveshop.database.entry;
 
 import java.time.LocalDateTime;
 
+/**
+ * 储存玩家的商品ID及其到期时间
+ */
 public class PlayerItem {
     String item;
     LocalDateTime outdate;
