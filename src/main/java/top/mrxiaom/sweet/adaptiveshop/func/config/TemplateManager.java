@@ -54,7 +54,7 @@ public class TemplateManager extends AbstractModule {
             dateTimeFormat = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
             warn("[template.yml] datetime.format 格式有误", e);
         }
-        dateTimeInfinite = config.getString("datetime.infinite");
+        dateTimeInfinite = config.getString("datetime.infinite", "永久");
 
         itemTemplateMap.clear();
         ConfigurationSection section = config.getConfigurationSection("templates");
@@ -77,6 +77,7 @@ public class TemplateManager extends AbstractModule {
             }
             itemTemplateMap.put(id, new ItemTemplate(id, material, display, lore, glow, unique, customModelData, nbtStrings, nbtInts));
         }
+        info("加载了 " + itemTemplateMap.size() + " 个物品模板");
     }
 
     public static TemplateManager inst() {

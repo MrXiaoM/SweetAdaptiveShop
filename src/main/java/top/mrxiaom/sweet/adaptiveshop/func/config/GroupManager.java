@@ -24,7 +24,6 @@ public class GroupManager extends AbstractModule {
 
     @Override
     public void reloadConfig(MemoryConfiguration config) {
-
         File file = new File(plugin.getDataFolder(), "groups.yml");
         if (!file.exists()) {
             plugin.saveResource("groups.yml", file);
@@ -36,6 +35,7 @@ public class GroupManager extends AbstractModule {
             Group loaded = Group.load(section, groupName);
             groups.put(groupName, loaded);
         }
+        info("加载了 " + groups.size() + " 个分组");
     }
 
     @Nullable
