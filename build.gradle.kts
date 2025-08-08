@@ -2,12 +2,19 @@ plugins {
     java
     `maven-publish`
     id ("com.github.johnrengelman.shadow") version "7.0.0"
+    id ("com.github.gmazzo.buildconfig") version "5.6.7"
 }
 
 group = "top.mrxiaom.sweet.adaptiveshop"
 version = "1.0.7"
 val targetJavaVersion = 8
 val shadowGroup = "top.mrxiaom.sweet.adaptiveshop.libs"
+val pluginBaseVersion = "1.5.7"
+val libraries = arrayListOf<String>()
+fun DependencyHandlerScope.library(dependencyNotation: String) {
+    compileOnly(dependencyNotation)
+    libraries.add(dependencyNotation)
+}
 
 repositories {
     mavenCentral()
@@ -31,16 +38,26 @@ dependencies {
     compileOnly("io.lumine:Mythic:5.6.2")
     compileOnly("io.lumine:LumineUtils:1.20-SNAPSHOT")
 
-    implementation("net.kyori:adventure-api:4.22.0")
-    implementation("net.kyori:adventure-platform-bukkit:4.4.0")
-    implementation("net.kyori:adventure-text-minimessage:4.22.0")
+    library("net.kyori:adventure-api:4.22.0")
+    library("net.kyori:adventure-platform-bukkit:4.4.0")
+    library("net.kyori:adventure-text-minimessage:4.22.0")
+    library("com.zaxxer:HikariCP:4.0.3")
+    library("com.udojava:EvalEx:2.7")
+    library("org.jetbrains:annotations:24.0.0")
     implementation("de.tr7zw:item-nbt-api:2.15.2-SNAPSHOT")
     implementation("com.github.technicallycoded:FoliaLib:0.4.4") { isTransitive = false }
-    implementation("com.zaxxer:HikariCP:4.0.3")
-    implementation("org.slf4j:slf4j-nop:2.0.16")
-    implementation("com.udojava:EvalEx:2.7")
-    implementation("org.jetbrains:annotations:24.0.0")
-    implementation("top.mrxiaom:PluginBase:1.5.7")
+    implementation("top.mrxiaom:PluginBase:$pluginBaseVersion") { isTransitive = false }
+    implementation("top.mrxiaom:LibrariesResolver:$pluginBaseVersion") { isTransitive = false }
+}
+buildConfig {
+    className("BuildConstants")
+    packageName("top.mrxiaom.sweet.adaptiveshop")
+
+    val librariesVararg = libraries.joinToString(", ") { "\"$it\"" }
+
+    buildConfigField("String", "VERSION", "\"${project.version}\"")
+    buildConfigField("java.time.Instant", "BUILD_TIME", "java.time.Instant.ofEpochSecond(${System.currentTimeMillis() / 1000L}L)")
+    buildConfigField("String[]", "LIBRARIES", "new String[] { $librariesVararg }")
 }
 java {
     val javaVersion = JavaVersion.toVersion(targetJavaVersion)
@@ -51,19 +68,12 @@ java {
 tasks {
     shadowJar {
         mapOf(
-            "org.intellij.lang.annotations" to "annotations.intellij",
-            "org.jetbrains.annotations" to "annotations.jetbrains",
             "top.mrxiaom.pluginbase" to "base",
-            "com.zaxxer.hikari" to "hikari",
-            "org.slf4j" to "slf4j",
             "de.tr7zw.changeme.nbtapi" to "nbtapi",
             "com.tcoded.folialib" to "folialib",
-            "com.udojava.evalex" to "evalex",
-            "net.kyori" to "kyori",
         ).forEach { (original, target) ->
             relocate(original, "$shadowGroup.$target")
         }
-        exclude("META-INF/services/org.slf4j.spi.SLF4JServiceProvider")
     }
     val copyTask = create<Copy>("copyBuildArtifact") {
         dependsOn(shadowJar)

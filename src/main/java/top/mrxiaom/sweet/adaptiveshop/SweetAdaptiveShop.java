@@ -11,6 +11,7 @@ import top.mrxiaom.pluginbase.actions.ActionProviders;
 import top.mrxiaom.pluginbase.economy.EnumEconomy;
 import top.mrxiaom.pluginbase.economy.IEconomy;
 import top.mrxiaom.pluginbase.func.LanguageManager;
+import top.mrxiaom.pluginbase.resolver.DefaultLibraryResolver;
 import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.pluginbase.utils.scheduler.FoliaLibScheduler;
 import top.mrxiaom.sweet.adaptiveshop.actions.ActionGive;
@@ -22,12 +23,16 @@ import top.mrxiaom.sweet.adaptiveshop.mythic.IMythic;
 import top.mrxiaom.sweet.adaptiveshop.mythic.Mythic4;
 import top.mrxiaom.sweet.adaptiveshop.mythic.Mythic5;
 
+import java.io.File;
+import java.net.URL;
+import java.util.List;
+
 public class SweetAdaptiveShop extends BukkitPlugin {
     public static SweetAdaptiveShop getInstance() {
         return (SweetAdaptiveShop) BukkitPlugin.getInstance();
     }
 
-    public SweetAdaptiveShop() {
+    public SweetAdaptiveShop() throws Exception {
         super(options()
                 .bungee(false)
                 .adventure(true)
@@ -37,6 +42,18 @@ public class SweetAdaptiveShop extends BukkitPlugin {
                 .scanIgnore("top.mrxiaom.sweet.adaptiveshop.libs")
         );
         this.scheduler = new FoliaLibScheduler(this);
+
+        info("正在检查依赖库状态");
+        File librariesDir = new File(this.getDataFolder(), "libraries");
+        DefaultLibraryResolver resolver = new DefaultLibraryResolver(getLogger(), librariesDir);
+
+        resolver.addLibrary(BuildConstants.LIBRARIES);
+
+        List<URL> libraries = resolver.doResolve();
+        info("正在添加 " + libraries.size() + " 个依赖库到类加载器");
+        for (URL library : libraries) {
+            this.classLoader.addURL(library);
+        }
     }
     @NotNull
     public IEconomy getEconomy() {
