@@ -20,6 +20,7 @@ import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerOrder;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractModule;
 import top.mrxiaom.sweet.adaptiveshop.func.config.CustomGuiManager;
 import top.mrxiaom.sweet.adaptiveshop.func.config.GroupManager;
+import top.mrxiaom.sweet.adaptiveshop.func.config.OrderManager;
 import top.mrxiaom.sweet.adaptiveshop.func.config.TemplateManager;
 import top.mrxiaom.sweet.adaptiveshop.func.config.customgui.CustomGui;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.Group;
@@ -33,6 +34,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @AutoRegister
@@ -68,9 +70,13 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
                 if (name.isEmpty()) {
                     return Messages.custom_gui__not_input.tm(sender);
                 }
-                model = CustomGuiManager.inst().get(name);
-                if (model == null) {
+                if (!sender.hasPermission("sweet.adaptive.shop.custom")) {
                     return Messages.custom_gui__not_found.tm(sender, name);
+                } else {
+                    model = CustomGuiManager.inst().get(name);
+                    if (model == null) {
+                        return Messages.custom_gui__not_found.tm(sender, name);
+                    }
                 }
                 playerCheckIndex = 3;
             } else {
@@ -114,7 +120,7 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
                     return true;
                 case "custom":
                     if (model == null) return true;
-                    if (!player.hasPermission("sweet.adaptive.shop.custom")) {
+                    if (!player.hasPermission("sweet.adaptive.shop.custom") || !model.hasPermission(player)) {
                         return Messages.player__no_permission.tm(player);
                     }
                     CustomGuiManager.inst().create(player, model).open();
@@ -182,11 +188,46 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
             }
             return Messages.give__success.tm(sender, player.getName(), amount, template.display);
         }
+        if (args.length >= 3 && "refresh".equalsIgnoreCase(args[0]) && sender.isOp()) {
+            Player player = Util.getOnlinePlayer(args[1]).orElse(null);
+            if (player == null) {
+                return Messages.player__not_online.tm(sender, args[1]);
+            }
+            switch (args[2]) {
+                case "buy": {
+                    if (args.length < 4) {
+                        return Messages.group__not_input.tm(sender);
+                    }
+                    Group group = GroupManager.inst().get(args[3]);
+                    if (group == null) {
+                        return Messages.group__not_found.tm(sender, args[3]);
+                    }
+                    group.refreshBuyShop(player);
+                    return Messages.refresh__buy__success_other.tm(sender, player.getName(), group.display);
+                }
+                case "sell": {
+                    if (args.length < 4) {
+                        return Messages.group__not_input.tm(sender);
+                    }
+                    Group group = GroupManager.inst().get(args[3]);
+                    if (group == null) {
+                        return Messages.group__not_found.tm(sender, args[3]);
+                    }
+                    group.refreshSellShop(player);
+                    return Messages.refresh__sell__success_other.tm(sender, player.getName(), group.display);
+                }
+                case "order": {
+                    OrderManager.inst().refresh(player);
+                    return Messages.refresh__order__success_other.tm(sender, player.getName());
+                }
+            }
+            return Messages.refresh__type_invalid.tm(sender, args[2]);
+        }
         if (args.length == 3 && "test".equalsIgnoreCase(args[0]) && sender.isOp()) {
             if ("order".equalsIgnoreCase(args[1])) {
                 OfflinePlayer p = Util.getOfflinePlayer(args[2]).orElse(null);
                 if (p == null) {
-                    return t(sender, "&c玩家不存在");
+                    return Messages.player__not_found.tm(sender, args[2]);
                 }
                 String key = plugin.getDBKey(p);
                 List<PlayerOrder> orders = plugin.getOrderDatabase().getPlayerOrders(key);
@@ -199,7 +240,7 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
             if ("buy".equalsIgnoreCase(args[1])) {
                 OfflinePlayer p = Util.getOfflinePlayer(args[2]).orElse(null);
                 if (p == null) {
-                    return t(sender, "&c玩家不存在");
+                    return Messages.player__not_found.tm(sender, args[2]);
                 }
                 String key = plugin.getDBKey(p);
                 List<PlayerItem> items = plugin.getBuyShopDatabase().getPlayerItems(key);
@@ -212,7 +253,7 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
             if ("sell".equalsIgnoreCase(args[1])) {
                 OfflinePlayer p = Util.getOfflinePlayer(args[2]).orElse(null);
                 if (p == null) {
-                    return t(sender, "&c玩家不存在");
+                    return Messages.player__not_found.tm(sender, args[2]);
                 }
                 String key = plugin.getDBKey(p);
                 List<PlayerItem> items = plugin.getSellShopDatabase().getPlayerItems(key);
@@ -236,17 +277,18 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
         return (sender.isOp() ? Messages.help_op : Messages.help).tm(sender);
     }
 
-    private static final List<String> emptyList = Lists.newArrayList();
     private static final List<String> listArg0 = Lists.newArrayList(
             "open");
     private static final List<String> listArgOpen = Lists.newArrayList(
             "buy", "sell", "order", "custom");
     private static final List<String> listArgGive = Lists.newArrayList(
             "buy", "sell", "order");
+    private static final List<String> listArgRefresh = Lists.newArrayList(
+            "buy", "sell", "order");
     private static final List<String> listArgTest = Lists.newArrayList(
             "buy", "sell", "order");
     private static final List<String> listOpArg0 = Lists.newArrayList(
-            "open", "give", "test", "reload");
+            "open", "give", "refresh", "test", "reload");
     @Nullable
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
@@ -263,6 +305,9 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
             if (args[0].equalsIgnoreCase("give") && sender.isOp()) {
                 return null;
             }
+            if (args[0].equalsIgnoreCase("refresh") && sender.isOp()) {
+                return null;
+            }
         }
         if (args.length == 3) {
             if (args[0].equalsIgnoreCase("open") && listArgOpen.contains(args[1].toLowerCase())) {
@@ -273,8 +318,12 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
                     return null;
                 }
                 if (args[1].equalsIgnoreCase("custom")) {
+                    if (!sender.hasPermission("sweet.adaptive.shop.custom")) return Collections.emptyList();
                     return startsWith(CustomGuiManager.inst().keys(sender), args[2]);
                 }
+            }
+            if (args[0].equalsIgnoreCase("refresh") && sender.isOp()) {
+                return startsWith(listArgRefresh, args[2]);
             }
         }
         if (args.length == 4) {
@@ -283,13 +332,18 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
                     return null;
                 }
             }
+            if (args[0].equalsIgnoreCase("refresh") && sender.isOp()) {
+                if (args[2].equalsIgnoreCase("buy") || args[2].equalsIgnoreCase("sell")) {
+                    return startsWith(GroupManager.inst().groups(sender), args[3]);
+                }
+            }
         }
         if (args.length == 5) {
             if (args[0].equalsIgnoreCase("give") && listArgGive.contains(args[2].toLowerCase()) && sender.isOp()) {
                 return startsWith(TemplateManager.inst().itemTemplates(), args[4]);
             }
         }
-        return emptyList;
+        return Collections.emptyList();
     }
 
     public List<String> startsWith(Collection<String> list, String s) {

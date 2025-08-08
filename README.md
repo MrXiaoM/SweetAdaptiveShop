@@ -35,6 +35,8 @@
 | C  | `/sashop open order [玩家]`                    | 为玩家打开收购订单菜单                                                                                                                                                               |
 | C  | `/sashop open custom <菜单> [玩家]`              | 为玩家打开自定义固定商店菜单，需要目标玩家有相应权限                                                                                                                                                |
 | C  | `/sashop give <玩家> <物品模板> <数量> <物品类型> <时间…>` | 给予玩家特定道具。其中，物品模板可到 template.yml 添加，物品类型可填 buy, sell 或 order。时间计算操作与[我的变量扩展](https://www.minebbs.com/resources/9883)基本一致，只不过多个计算操作是用空格而不是下划线隔开。时间填写 `0` 或 `infinite` 代表永久。 |
+| C  | `/sashop refresh <玩家> <类型> [分组]`             | 刷新在线玩家的商店/订单。类型可填 buy, sell 或 order，其中只有 buy, sell 可以填写分组。                                                                                                                |
+| C  | `/sashop test <玩家> <类型>`                     | 获取在线/离线玩家的商店/订单列表，其中包括ID、到期时间等数据，用于调试。类型可填 buy, sell 或 order。                                                                                                             |
 | C  | `/sashop reload database`                    | 重新连接数据库                                                                                                                                                                   |
 | C  | `/sashop reload`                             | 重载配置文件，不重连数据库                                                                                                                                                             |
 
@@ -44,9 +46,11 @@
 
 ## 权限
 
-+ `sweet.adaptive.shop.group.分组ID` 允许通过 `/sashop open buy [分组]` 命令打开某个分组的收购商店菜单
++ `sweet.adaptive.shop.group.分组ID` 允许通过 `/sashop open <buy/sell> [分组]` 命令打开某个分组的收购商店菜单
 + `sweet.adaptive.shop.order` 允许打开收购订单菜单
++ `sweet.adaptive.shop.custom` 允许打开自定义商店菜单
 + `sweet.adaptive.shop.buy.商品ID` 允许随机抽到某个收购商品的权限，该权限可在商品配置里修改
++ `sweet.adaptive.shop.sell.商品ID` 允许随机抽到某个出售商品的权限，该权限可在商品配置里修改
 + `sweet.adaptive.shop.order.订单ID` 允许随机抽到某个订单的权限，该权限可在订单配置里修改
 
 ## 变量
