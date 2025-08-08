@@ -34,6 +34,10 @@
 |  C  | `/sashop reload database`                     | 重新连接数据库                                                                                                                                                                   |
 |  C  | `/sashop reload`                              | 重载配置文件，不重连数据库                                                                                                                                                             |
 
+示例
++ 打开收购菜单 `/sashop open buy`
++ 给予玩家收购刷新券 `/sashop give 玩家 buy-refresh 数量 buy infinite`
+
 ## 权限
 
 + `sweet.adaptive.shop.group.分组ID` 允许通过 `/sashop open buy [分组]` 命令打开某个分组的收购商店菜单

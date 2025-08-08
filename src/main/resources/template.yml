@@ -4,7 +4,7 @@ datetime:
 # 物品模板
 templates:
   # 模板名称，自定
-  buy:
+  buy-refresh:
     material: PAPER
     custom-model-data: 10001
     # 名字和 lore 支持 PAPI (不支持动态变化) 和 mini message
@@ -18,7 +18,18 @@ templates:
     glow: true
     # 物品是否唯一（禁止堆叠）
     unique: true
-  order:
+  sell-refresh:
+    material: PAPER
+    custom-model-data: 10002
+    display: '&b&l商品刷新券'
+    lore:
+      - '&7此道具可以用于'
+      - '&7刷新出售订单列表'
+      - '&f有效期至:'
+      - '&e%datetime%'
+    glow: true
+    unique: true
+  order-refresh:
     material: PAPER
     custom-model-data: 10002
     display: '&e&l订单刷新券'
@@ -27,7 +38,5 @@ templates:
       - '&7刷新收购订单列表'
       - '&f有效期至:'
       - '&e%datetime%'
-    # 是否有附魔光泽
     glow: true
-    # 物品是否唯一（禁止堆叠）
     unique: true
