@@ -210,7 +210,7 @@ public class GuiOrders extends AbstractGuiModule {
                 }
                 LoadedIcon icon = otherIcons.get(id);
                 if (icon != null) {
-                    icon.click(player, click);
+                    plugin.getScheduler().runTask(() -> icon.click(player, click));
                 }
             }
         }
