@@ -72,15 +72,22 @@ public class CustomGui implements IModel {
                         }
                         break;
                     }
-                    case "sell":
+                    case "sell": {
+                        ShopIconSell loaded = ShopIconSell.load(manager, id, icon, itemId);
+                        if (loaded != null) {
+                            this.mainIcons.put(iconId, loaded);
+                        }
+                        break;
+                    }
                     case "order": {
-                        // TODO: ShopIconSell, ShopIconOrder
+                        // TODO: ShopIconOrder
                         manager.warn("[gui/custom/" + id + "] main-icons." + key + " 的商品类型 " + type + " 正在计划加入插件，敬请期待");
                         break;
                     }
-                    default:
+                    default: {
                         manager.warn("[gui/custom/" + id + "] main-icons." + key + " 的商品类型无效");
                         break;
+                    }
                 }
             } else {
                 manager.warn("[gui/custom/" + id + "] main-icons." + key + " 的图标ID过长");
