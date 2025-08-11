@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "top.mrxiaom.sweet.adaptiveshop"
-version = "1.0.7"
+version = "1.1.0"
 val targetJavaVersion = 8
 val shadowGroup = "top.mrxiaom.sweet.adaptiveshop.libs"
 val pluginBaseVersion = "1.5.8"
