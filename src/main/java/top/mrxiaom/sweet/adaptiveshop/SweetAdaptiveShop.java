@@ -15,6 +15,7 @@ import top.mrxiaom.pluginbase.resolver.DefaultLibraryResolver;
 import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.pluginbase.utils.scheduler.FoliaLibScheduler;
 import top.mrxiaom.sweet.adaptiveshop.actions.ActionGive;
+import top.mrxiaom.sweet.adaptiveshop.actions.ActionRefresh;
 import top.mrxiaom.sweet.adaptiveshop.database.BuyCountDatabase;
 import top.mrxiaom.sweet.adaptiveshop.database.BuyShopDatabase;
 import top.mrxiaom.sweet.adaptiveshop.database.OrderDatabase;
@@ -152,6 +153,7 @@ public class SweetAdaptiveShop extends BukkitPlugin {
                 this.buyCountDatabase = new BuyCountDatabase(this)
         );
         ActionProviders.registerActionProvider(ActionGive.PROVIDER);
+        ActionProviders.registerActionProvider(ActionRefresh.PROVIDER);
     }
 
     @Override

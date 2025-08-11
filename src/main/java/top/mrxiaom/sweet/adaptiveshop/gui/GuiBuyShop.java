@@ -9,6 +9,8 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -122,13 +124,31 @@ public class GuiBuyShop extends AbstractGuiModule {
         return self.new Impl(player, self.guiTitle, self.guiInventory, group);
     }
 
-    public class Impl extends Gui {
+    public class Impl extends Gui implements Refreshable, InventoryHolder {
         Group group;
         List<Pair<BuyShop, PlayerItem>> items;
+        private Inventory inventory;
         protected Impl(@NotNull Player player, String title, char[] inventory, @NotNull Group group) {
             super(player, PAPI.setPlaceholders(player, title.replace("%type%", group.display)), inventory);
             this.group = group;
             this.items = BuyShopManager.inst().getPlayerItems(player, group.id);
+        }
+
+        @Override
+        protected Inventory create(InventoryHolder holder, int size, String title) {
+            return inventory = super.create(this, size, title);
+        }
+
+        @NotNull
+        @Override
+        public Inventory getInventory() {
+            return inventory;
+        }
+
+        @Override
+        public void refreshGui() {
+            updateInventory(inventory);
+            Util.submitInvUpdate(player);
         }
 
         @Override

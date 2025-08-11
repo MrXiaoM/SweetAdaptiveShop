@@ -18,6 +18,7 @@ import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractGuisModule;
 import top.mrxiaom.sweet.adaptiveshop.func.config.customgui.CustomGui;
 import top.mrxiaom.sweet.adaptiveshop.func.config.customgui.ShopIcon;
+import top.mrxiaom.sweet.adaptiveshop.gui.Refreshable;
 
 import java.io.File;
 
@@ -54,20 +55,19 @@ public class CustomGuiManager extends AbstractGuisModule<CustomGui> {
         return new Impl(player, model);
     }
 
-    public class Impl extends Gui<CustomGui> {
+    public class Impl extends Gui<CustomGui> implements Refreshable {
         private Impl(@NotNull Player player, @NotNull CustomGui model) {
             super(player, model);
         }
 
-        public CustomGuiManager manager() {
-            return CustomGuiManager.this;
+        @Override
+        public void refreshGui() {
+            updateInventory(getInventory());
+            Util.submitInvUpdate(player);
         }
 
-        public void updateInventory() {
-            plugin.getScheduler().runTask(() -> {
-                updateInventory(getInventory());
-                Util.submitInvUpdate(player);
-            });
+        public CustomGuiManager manager() {
+            return CustomGuiManager.this;
         }
 
         @Override
@@ -98,7 +98,7 @@ public class CustomGuiManager extends AbstractGuisModule<CustomGui> {
                     player.closeInventory();
                     Util.submitInvUpdate(player);
                 } else {
-                    updateInventory();
+                    refreshGui();
                 }
             }, 1L);
         }

@@ -9,8 +9,11 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import top.mrxiaom.pluginbase.func.AutoRegister;
 import top.mrxiaom.pluginbase.func.gui.LoadedIcon;
 import top.mrxiaom.pluginbase.gui.IGui;
@@ -115,11 +118,29 @@ public class GuiOrders extends AbstractGuiModule {
         return self.new Impl(player, self.guiTitle, self.guiInventory);
     }
 
-    public class Impl extends Gui {
+    public class Impl extends Gui implements Refreshable, InventoryHolder {
         List<Pair<Order, PlayerOrder>> orders;
+        private Inventory inventory;
         protected Impl(Player player, String title, char[] inventory) {
             super(player, PAPI.setPlaceholders(player, title), inventory);
             this.orders = OrderManager.inst().getPlayerOrders(player);
+        }
+
+        @Override
+        protected Inventory create(InventoryHolder holder, int size, String title) {
+            return inventory = super.create(this, size, title);
+        }
+
+        @NotNull
+        @Override
+        public Inventory getInventory() {
+            return inventory;
+        }
+
+        @Override
+        public void refreshGui() {
+            updateInventory(inventory);
+            Util.submitInvUpdate(player);
         }
 
         @Override
