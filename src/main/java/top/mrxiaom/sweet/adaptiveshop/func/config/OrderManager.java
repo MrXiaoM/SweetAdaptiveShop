@@ -1,6 +1,7 @@
 package top.mrxiaom.sweet.adaptiveshop.func.config;
 
 import com.google.common.collect.Lists;
+import dev.lone.itemsadder.api.ItemsAdder;
 import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -27,11 +28,24 @@ public class OrderManager extends AbstractModule {
     }
 
     @Override
-    public void reloadConfig(MemoryConfiguration config) {
-        ordersCount = config.getInt("orders-count");
+    public int priority() {
+        return 1002;
     }
 
-    protected void realReloadConfig(MemoryConfiguration config) {
+    @Override
+    public void reloadConfig(MemoryConfiguration config) {
+        ordersCount = config.getInt("orders-count");
+
+        if (!plugin.isSupportItemsAdder()) {
+            reloadOrders(config);
+        } else {
+            if (ItemsAdder.areItemsLoaded()) {
+                reloadOrders(config);
+            }
+        }
+    }
+
+    public void reloadOrders(MemoryConfiguration config) {
         String path = config.getString("path.order", "./order");
         folder = path.startsWith("./") ? new File(plugin.getDataFolder(), path) : new File(path);
         if (!folder.exists()) {

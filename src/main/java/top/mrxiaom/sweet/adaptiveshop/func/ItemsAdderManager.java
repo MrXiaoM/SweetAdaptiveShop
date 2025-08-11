@@ -8,6 +8,7 @@ import org.bukkit.event.Listener;
 import top.mrxiaom.pluginbase.func.AutoRegister;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.func.config.BuyShopManager;
+import top.mrxiaom.sweet.adaptiveshop.func.config.OrderManager;
 import top.mrxiaom.sweet.adaptiveshop.func.config.SellShopManager;
 
 @AutoRegister(requirePlugins = "ItemsAdder")
@@ -42,6 +43,7 @@ public class ItemsAdderManager extends AbstractModule implements Listener {
             scheduleReload = false;
             BuyShopManager.inst().reloadBuyShops();
             SellShopManager.inst().reloadSellShops();
+            OrderManager.inst().reloadOrders(plugin.getConfig());
         }
     }
 

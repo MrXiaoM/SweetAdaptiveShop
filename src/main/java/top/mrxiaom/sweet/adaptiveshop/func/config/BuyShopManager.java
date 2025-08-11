@@ -71,7 +71,6 @@ public class BuyShopManager extends AbstractModule {
             }
             group.buyShop.put(entry.getKey(), entry.getValue());
         }
-        OrderManager.inst().realReloadConfig(plugin.getConfig()); // 确保加载顺序正确
     }
 
     private void reloadConfig(File folder) {
