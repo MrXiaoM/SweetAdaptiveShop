@@ -9,7 +9,7 @@ inventory:
 permission: sweet.example
 # 是否在提交订单后关闭界面
 # 关闭此项，则提交订单后刷新界面
-close-after-submit: true
+close-after-submit: false
 # 默认图标配置，可用 buy, sell, order
 # 默认配置仅提供 buy 的默认配置，其余请自行到各自界面配置里复制
 default-icons:
@@ -45,7 +45,7 @@ main-icons:
     # 商品类型
     # buy - 收购
     # sell - 出售
-    # order - 订单
+    # order - 订单 (出于数据表限制，暂不支持订单)
     type: buy
     # 商品/订单ID
     item-id: wheat

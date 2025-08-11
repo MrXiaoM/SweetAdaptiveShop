@@ -6,7 +6,7 @@ inventory:
   - '框框框框框原副刷框'
 # 是否在购买物品后关闭界面
 # 关闭此项，则购买物品后刷新界面
-close-after-submit: true
+close-after-submit: false
 main-icons:
   物:
     material: PAPER
