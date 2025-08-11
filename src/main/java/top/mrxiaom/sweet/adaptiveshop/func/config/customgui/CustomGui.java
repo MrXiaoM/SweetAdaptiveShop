@@ -82,6 +82,10 @@ public class CustomGui implements IModel {
                     case "order": {
                         // TODO: ShopIconOrder
                         manager.warn("[gui/custom/" + id + "] main-icons." + key + " 的商品类型 " + type + " 正在计划加入插件，敬请期待");
+                        // ShopIconOrder loaded = ShopIconOrder.load(manager, id, icon, itemId);
+                        // if (loaded != null) {
+                        //     this.mainIcons.put(iconId, loaded);
+                        // }
                         break;
                     }
                     default: {

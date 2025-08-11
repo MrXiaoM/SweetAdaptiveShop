@@ -62,6 +62,11 @@ public class OrderManager extends AbstractModule {
         return list.isEmpty() ? null : list.get(new Random().nextInt(list.size()));
     }
 
+    @Nullable
+    public Order get(String id) {
+        return map.get(id);
+    }
+
     /**
      * 获取玩家订单列表，并自动刷新已过期商品
      */

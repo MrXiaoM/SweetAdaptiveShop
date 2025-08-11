@@ -1,6 +1,5 @@
 package top.mrxiaom.sweet.adaptiveshop.gui;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
@@ -14,9 +13,7 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import top.mrxiaom.pluginbase.func.AutoRegister;
 import top.mrxiaom.pluginbase.func.gui.LoadedIcon;
-import top.mrxiaom.pluginbase.api.IAction;
 import top.mrxiaom.pluginbase.gui.IGui;
-import top.mrxiaom.pluginbase.utils.AdventureItemStack;
 import top.mrxiaom.pluginbase.utils.PAPI;
 import top.mrxiaom.pluginbase.utils.Pair;
 import top.mrxiaom.pluginbase.utils.Util;
@@ -25,6 +22,7 @@ import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerOrder;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractGuiModule;
 import top.mrxiaom.sweet.adaptiveshop.func.config.OrderManager;
+import top.mrxiaom.sweet.adaptiveshop.func.config.customgui.ShopIconOrder;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.Order;
 
 import java.io.File;
@@ -88,36 +86,7 @@ public class GuiOrders extends AbstractGuiModule {
                     return emptySlot.generateIcon(player);
                 }
                 Pair<Order, PlayerOrder> pair = gui.orders.get(i);
-                Order order = pair.getKey();
-                int doneCount = pair.getValue().getDoneCount();
-                String doneCountStr = String.valueOf(doneCount);
-                boolean hasDone = order.isAllDone(doneCount);
-                ItemStack item = order.icon.clone();
-                String display = order.display;
-                List<String> lore = new ArrayList<>();
-                for (String s : order.lore) {
-                    if (s.equals("needs")) {
-                        for (Order.Need need : order.needs) {
-                            int count = hasDone ? need.amount : Math.min(need.amount, need.item.getCount(player));
-                            lore.add(orderLine.replace("%name%", need.item.displayName)
-                                    .replace("%count%", String.valueOf(count))
-                                    .replace("%require%", String.valueOf(need.amount)));
-                        }
-                        continue;
-                    }
-                    if (s.equals("operation")) {
-                        if (hasDone) {
-                            lore.add(order.opDone);
-                        } else {
-                            lore.add(order.match(player) ? order.opApply : order.opCannot);
-                        }
-                        continue;
-                    }
-                    lore.add(s.replace("%done_count%", doneCountStr));
-                }
-                AdventureItemStack.setItemDisplayName(item, PAPI.setPlaceholders(player, display));
-                AdventureItemStack.setItemLoreMiniMessage(item, PAPI.setPlaceholders(player, lore));
-                return item;
+                return ShopIconOrder.generateIcon(pair.key(), pair.value(), player, orderLine);
             }
             case '刷': {
                 int count = resolveRefreshCount(player, REFRESH_ITEM);
@@ -175,28 +144,7 @@ public class GuiOrders extends AbstractGuiModule {
                     int i = getAppearTimes(id, slot) - 1;
                     if (i >= orders.size()) return;
                     Pair<Order, PlayerOrder> pair = orders.get(i);
-                    Order order = pair.getKey();
-                    if (click.equals(ClickType.LEFT)) {
-                        PlayerOrder data = pair.getValue();
-                        if (data.isOutdate()) {
-                            Messages.gui__order__outdate.tm(player);
-                            return;
-                        }
-                        if (order.isAllDone(data.getDoneCount())) {
-                            Messages.gui__order__has_done.tm(player);
-                            return;
-                        }
-                        if (!order.match(player)) {
-                            Messages.gui__order__not_enough.tm(player);
-                            return;
-                        }
-                        player.closeInventory();
-                        order.takeAll(player);
-                        plugin.getOrderDatabase().markOrderDone(player, order.id, data.getDoneCount() + 1);
-                        Messages.gui__order__success.tm(player, order.display);
-                        for (IAction reward : order.rewards) {
-                            reward.run(player);
-                        }
+                    if (ShopIconOrder.click(plugin, click, pair.key(), pair.value(), player)) {
                         plugin.getScheduler().runTaskLater(() -> {
                             if (closeAfterSubmit) {
                                 player.closeInventory();
