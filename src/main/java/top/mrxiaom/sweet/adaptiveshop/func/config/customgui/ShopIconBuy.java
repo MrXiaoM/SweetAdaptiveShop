@@ -51,10 +51,10 @@ public class ShopIconBuy extends ShopIcon {
         }
         boolean noCut = shop.dynamicValueMaximum == 0 || !shop.dynamicValueCutWhenMaximum;
         int count = shop.getCount(player);
-        double price = bypass ? shop.priceBase : shop.getPrice(dynamic);
+        double price = bypass ? shop.priceBase : shop.getPrice(player, dynamic);
 
         String priceString = String.format("%.2f", price).replace(".00", "");
-        String dynamicDisplay = bypass ? "" : shop.getDisplayDynamic(dynamic);
+        String dynamicDisplay = bypass ? "" : shop.getDisplayDynamic(player, dynamic);
         String dynamicPlaceholder = bypass ? "" : shop.getDynamicValuePlaceholder(dynamic);
         String limitation;
         int maxLimit;
@@ -200,7 +200,7 @@ public class ShopIconBuy extends ShopIcon {
         if (shop.hasBypass(player)) {
             price = shop.priceBase;
         } else {
-            price = shop.getPrice(dynamic);
+            price = shop.getPrice(player, dynamic);
         }
         String money = String.format("%.2f", price * countToBuy).replace(".00", "");
         plugin.getEconomy().giveMoney(player, Double.parseDouble(money));

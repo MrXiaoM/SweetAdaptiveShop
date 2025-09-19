@@ -2,6 +2,7 @@ package top.mrxiaom.sweet.adaptiveshop.func.entry.shop;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -18,6 +19,7 @@ import top.mrxiaom.sweet.adaptiveshop.enums.PermMode;
 import top.mrxiaom.sweet.adaptiveshop.enums.Routine;
 import top.mrxiaom.sweet.adaptiveshop.enums.Strategy;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractModule;
+import top.mrxiaom.sweet.adaptiveshop.func.entry.ValueFormula;
 import top.mrxiaom.sweet.adaptiveshop.mythic.IMythic;
 import top.mrxiaom.sweet.adaptiveshop.utils.DoubleRange;
 import top.mrxiaom.sweet.adaptiveshop.utils.Utils;
@@ -43,7 +45,7 @@ public class SellShop implements IShop {
     public final double priceBase;
     public final DoubleRange scaleRange;
     public final double scaleWhenDynamicLargeThan;
-    public final String scaleFormula;
+    public final List<ValueFormula> scaleFormula;
     public final String scalePermission;
     public final PermMode scalePermissionMode;
     public final boolean dynamicValuePerPlayer;
@@ -53,18 +55,18 @@ public class SellShop implements IShop {
     public final Strategy dynamicValueStrategy;
     public final DoubleRange dynamicValueRecover;
     public final Routine routine;
-    public final String dynamicValueDisplayFormula;
+    public final List<ValueFormula> dynamicValueDisplayFormula;
     public final DecimalFormat dynamicValueDisplayFormat;
     public final Map<Double, String> dynamicValuePlaceholders;
     public final String dynamicValuePlaceholderMin;
 
     SellShop(String group, String id, String permission, ItemStack displayItem, String displayName,
              int maxCount, List<IAction> commands, double priceBase,
-             DoubleRange scaleRange, double scaleWhenDynamicLargeThan, String scaleFormula,
+             DoubleRange scaleRange, double scaleWhenDynamicLargeThan, List<ValueFormula> scaleFormula,
              String scalePermission, PermMode scalePermissionMode, boolean dynamicValuePerPlayer,
              double dynamicValueAdd, double dynamicValueMaximum, boolean dynamicValueCutWhenMaximum,
              Strategy dynamicValueStrategy, DoubleRange dynamicValueRecover, Routine routine,
-             String dynamicValueDisplayFormula, DecimalFormat dynamicValueDisplayFormat, Map<Double, String> dynamicValuePlaceholders) {
+             List<ValueFormula> dynamicValueDisplayFormula, DecimalFormat dynamicValueDisplayFormat, Map<Double, String> dynamicValuePlaceholders) {
         this.group = group;
         this.id = id;
         this.permission = permission;
@@ -105,9 +107,18 @@ public class SellShop implements IShop {
     }
 
     public double getPrice(double dynamic) {
+        return getPrice(null, dynamic);
+    }
+
+    @Deprecated
+    public String getDisplayDynamic(double dynamic) {
+        return getDisplayDynamic(null, dynamic);
+    }
+
+    public double getPrice(@Nullable OfflinePlayer player, double dynamic) {
         if (dynamic <= scaleWhenDynamicLargeThan) return priceBase;
         BigDecimal value = BigDecimal.valueOf(dynamic - scaleWhenDynamicLargeThan);
-        BigDecimal scaleValue = Utils.eval(scaleFormula, e -> e.with("value", value));
+        BigDecimal scaleValue = ValueFormula.eval(scaleFormula, player, value);
         if (scaleValue == null) return priceBase;
         double min = scaleRange.minimum() / 100.0;
         double max = scaleRange.maximum() / 100.0;
@@ -116,9 +127,9 @@ public class SellShop implements IShop {
         return Double.parseDouble(String.format("%.2f", price));
     }
 
-    public String getDisplayDynamic(double dynamic) {
+    public String getDisplayDynamic(@Nullable OfflinePlayer player, double dynamic) {
         BigDecimal value = BigDecimal.valueOf(dynamic);
-        BigDecimal dynamicValue = Utils.eval(dynamicValueDisplayFormula, e -> e.with("value", value));
+        BigDecimal dynamicValue = ValueFormula.eval(dynamicValueDisplayFormula, player, value);
         double displayValue = dynamicValue == null ? dynamic : dynamicValue.doubleValue();
         return dynamicValueDisplayFormat.format(displayValue);
     }
@@ -272,8 +283,8 @@ public class SellShop implements IShop {
             return null;
         }
         double scaleWhenDynamicLargeThan = config.getDouble("price/scale/when-dynamic-value/large-than");
-        String scaleFormula = config.getString("price/scale/when-dynamic-value/scale-formula");
-        if (testFormulaFail(scaleFormula)) {
+        List<ValueFormula> scaleFormula = ValueFormula.load(config, "price/scale/when-dynamic-value/scale-formula");
+        if (scaleFormula == null) {
             holder.warn("[sell] 读取 " + id + " 时出错，scale-formula 表达式测试出错");
             return null;
         }
@@ -298,8 +309,8 @@ public class SellShop implements IShop {
             holder.warn("[sell] 读取 " + id + " 时出错，dynamic-value.routine 的值无效");
             return null;
         }
-        String dynamicValueDisplayFormula = config.getString("dynamic-value/display-formula");
-        if (testFormulaFail(dynamicValueDisplayFormula)) {
+        List<ValueFormula> dynamicValueDisplayFormula = ValueFormula.load(config, "dynamic-value/display-formula");
+        if (dynamicValueDisplayFormula == null) {
             holder.warn("[sell] 读取 " + id + " 时出错，display-formula 表达式测试出错");
             return null;
         }
@@ -328,9 +339,5 @@ public class SellShop implements IShop {
                 dynamicValueAdd, dynamicValueMaximum, dynamicValueCutWhenMaximum,
                 dynamicValueStrategy, dynamicValueRecover, routine,
                 dynamicValueDisplayFormula, dynamicValueDisplayFormat, dynamicValuePlaceholders);
-    }
-    private static boolean testFormulaFail(String formula) {
-        BigDecimal result = Utils.eval(formula, e -> e.and("value", BigDecimal.valueOf(1.23)));
-        return result == null;
     }
 }

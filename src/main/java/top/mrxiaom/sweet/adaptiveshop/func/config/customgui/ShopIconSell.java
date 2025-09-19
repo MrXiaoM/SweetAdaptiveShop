@@ -51,10 +51,10 @@ public class ShopIconSell extends ShopIcon {
             dynamic = dyn == null ? 0.0 : dyn;
         }
         boolean noCut = shop.dynamicValueMaximum == 0 || !shop.dynamicValueCutWhenMaximum;
-        double price = bypass ? shop.priceBase : shop.getPrice(dynamic);
+        double price = bypass ? shop.priceBase : shop.getPrice(player, dynamic);
         int count = (int) Math.floor(plugin.getEconomy().get(player) / price);
         String priceString = String.format("%.2f", price).replace(".00", "");
-        String dynamicDisplay = bypass ? "" : shop.getDisplayDynamic(dynamic);
+        String dynamicDisplay = bypass ? "" : shop.getDisplayDynamic(player, dynamic);
         String dynamicPlaceholder = bypass ? "" : shop.getDynamicValuePlaceholder(dynamic);
 
         ItemStack item = shop.displayItem.clone();
@@ -130,7 +130,7 @@ public class ShopIconSell extends ShopIcon {
             if (shop.hasBypass(player)) {
                 price = shop.priceBase;
             } else {
-                price = shop.getPrice(dynamic);
+                price = shop.getPrice(player, dynamic);
             }
             String money = String.format("%.2f", price).replace(".00", "");
             if (!plugin.getEconomy().has(player, price)) {
@@ -157,7 +157,7 @@ public class ShopIconSell extends ShopIcon {
             if (shop.hasBypass(player)) {
                 price = shop.priceBase;
             } else {
-                price = shop.getPrice(dynamic);
+                price = shop.getPrice(player, dynamic);
             }
             String money = String.format("%.2f", price * stackSize).replace(".00", "");
             double total = Double.parseDouble(money);

@@ -1,8 +1,10 @@
 package top.mrxiaom.sweet.adaptiveshop.utils;
 
-import com.udojava.evalex.Expression;
+import com.ezylang.evalex.BaseException;
+import com.ezylang.evalex.Expression;
 import de.tr7zw.changeme.nbtapi.NBT;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -10,6 +12,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.utils.ItemStackUtil;
+import top.mrxiaom.pluginbase.utils.PAPI;
 import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.Messages;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
@@ -171,16 +174,25 @@ public class Utils {
 
     @Nullable
     public static BigDecimal eval(String formula, Consumer<Expression> variables) {
-        if (formula == null) {
+        return eval(null, formula, variables);
+    }
+    @Nullable
+    public static BigDecimal eval(@Nullable OfflinePlayer player, String formula, Consumer<Expression> variables) {
+        String parsed = PAPI.setPlaceholders(player, formula);
+        if (parsed == null) {
             SweetAdaptiveShop.getInstance().warn("无法计算空表达式", new RuntimeException());
             return null;
         }
         try {
-            Expression expression = new Expression(formula);
+            Expression expression = new Expression(parsed);
             variables.accept(expression);
-            return expression.eval();
-        } catch (RuntimeException e) {
-            SweetAdaptiveShop.getInstance().warn("计算表达式 " + formula + " 时出现一个异常", e);
+            return expression.evaluate().getNumberValue();
+        } catch (BaseException e) {
+            if (formula.equals(parsed)) {
+                SweetAdaptiveShop.getInstance().warn("计算表达式 " + formula + " 时出现一个异常", e);
+            } else {
+                SweetAdaptiveShop.getInstance().warn("计算表达式 " + parsed + " (原: " + formula + ") 时出现一个异常", e);
+            }
             return null;
         }
     }

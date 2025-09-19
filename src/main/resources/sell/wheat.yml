@@ -41,8 +41,15 @@ price:
       large-than: 100
       # 价格缩放公式，此处 value 为动态值变量减去 large-than 的值
       # 此处为动态值大于 100 后，基础缩放为 100%，每增加1点动态值，缩放增加 1%
-      # 文档：https://github.com/ezylang/EvalEx/tree/2.x?tab=readme-ov-file#supported-functions
+      # 文档：https://ezylang.github.io/EvalEx/references/functions.html
+      # 可以使用 PAPI 变量，但只能使用玩家为 null 的变量。
+      # 如果你使用了 PAPI 变量，重载配置时将不会检查这个公式是否可以正常运行。
       scale-formula: '1 + value / 100'
+      # 除此之外，公式还可以用列表的形式编写，如下所示。
+      # 上一个公式的计算结果，将会作为 value 传入下一个公式进行计算
+      #scale-formula:
+      #- '1 - value / 100'
+      #- 'value * 2'
     when-has-permission:
       # 当拥有某权限时
       permission: 'none'
@@ -72,7 +79,9 @@ dynamic-value:
   # 具体指定的时间请见 config.yml
   routine: weekly
   # 显示该数值的公式，value 为动态值变量
-  # 文档：https://github.com/ezylang/EvalEx/tree/2.x?tab=readme-ov-file#supported-functions
+  # 文档：https://ezylang.github.io/EvalEx/references/functions.html
+  # 可以使用 PAPI 变量，但只能使用玩家为 null 的变量。
+  # 如果你使用了 PAPI 变量，重载配置时将不会检查这个公式是否可以正常运行。
   display-formula: value
   # 动态值变量显示格式
   display-format: '0.00'
