@@ -7,7 +7,7 @@ import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.func.gui.IModel;
 import top.mrxiaom.pluginbase.func.gui.LoadedIcon;
-import top.mrxiaom.pluginbase.gui.IGui;
+import top.mrxiaom.pluginbase.gui.IGuiHolder;
 import top.mrxiaom.sweet.adaptiveshop.func.config.CustomGuiManager;
 
 import java.util.HashMap;
@@ -135,7 +135,7 @@ public class CustomGui implements IModel {
     }
 
     @Override
-    public ItemStack applyMainIcon(IGui instance, Player player, char id, int index, int appearTimes) {
+    public ItemStack applyMainIcon(IGuiHolder instance, Player player, char id, int index, int appearTimes) {
         CustomGuiManager.Impl gui = (CustomGuiManager.Impl) instance;
         ShopIcon shopIcon = mainIcons.get(id);
         if (shopIcon != null) {

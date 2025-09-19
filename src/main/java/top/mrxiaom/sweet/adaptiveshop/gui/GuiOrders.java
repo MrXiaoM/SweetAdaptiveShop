@@ -16,7 +16,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import top.mrxiaom.pluginbase.func.AutoRegister;
 import top.mrxiaom.pluginbase.func.gui.LoadedIcon;
-import top.mrxiaom.pluginbase.gui.IGui;
+import top.mrxiaom.pluginbase.gui.IGuiHolder;
 import top.mrxiaom.pluginbase.utils.PAPI;
 import top.mrxiaom.pluginbase.utils.Pair;
 import top.mrxiaom.pluginbase.utils.Util;
@@ -79,7 +79,7 @@ public class GuiOrders extends AbstractGuiModule {
     }
 
     @Override
-    protected ItemStack applyMainIcon(IGui instance, Player player, char id, int index, int appearTimes) {
+    protected ItemStack applyMainIcon(IGuiHolder instance, Player player, char id, int index, int appearTimes) {
         Impl gui = (Impl) instance;
         switch (id) {
             case '订': {
@@ -124,11 +124,6 @@ public class GuiOrders extends AbstractGuiModule {
         protected Impl(Player player, String title, char[] inventory) {
             super(player, PAPI.setPlaceholders(player, title), inventory);
             this.orders = OrderManager.inst().getPlayerOrders(player);
-        }
-
-        @Override
-        protected Inventory create(InventoryHolder holder, int size, String title) {
-            return inventory = super.create(this, size, title);
         }
 
         @NotNull

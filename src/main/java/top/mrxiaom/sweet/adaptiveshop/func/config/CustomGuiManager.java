@@ -55,7 +55,7 @@ public class CustomGuiManager extends AbstractGuisModule<CustomGui> {
         return new Impl(player, model);
     }
 
-    public class Impl extends Gui<CustomGui> implements Refreshable {
+    public class Impl extends Gui implements Refreshable {
         private Impl(@NotNull Player player, @NotNull CustomGui model) {
             super(player, model);
         }

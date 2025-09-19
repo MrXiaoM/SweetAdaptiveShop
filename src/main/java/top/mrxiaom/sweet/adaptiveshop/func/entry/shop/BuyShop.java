@@ -105,6 +105,11 @@ public class BuyShop implements IShop {
         this.dynamicValuePlaceholderMin = minPlaceholder;
     }
 
+    @Override
+    public String type() {
+        return "buy";
+    }
+
     public boolean match(@NotNull ItemStack item) {
         if (item.getType().equals(Material.AIR) || item.getAmount() == 0) return false;
         return matcher.apply(item);

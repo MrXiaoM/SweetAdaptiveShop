@@ -9,7 +9,7 @@ group = "top.mrxiaom.sweet.adaptiveshop"
 version = "1.1.0"
 val targetJavaVersion = 8
 val shadowGroup = "top.mrxiaom.sweet.adaptiveshop.libs"
-val pluginBaseVersion = "1.5.8"
+val pluginBaseVersion = "1.6.4"
 val libraries = arrayListOf<String>()
 fun DependencyHandlerScope.library(dependencyNotation: String) {
     compileOnly(dependencyNotation)
@@ -45,9 +45,10 @@ dependencies {
     library("com.zaxxer:HikariCP:4.0.3")
     library("com.udojava:EvalEx:2.7")
     library("org.jetbrains:annotations:24.0.0")
-    implementation("de.tr7zw:item-nbt-api:2.15.2-SNAPSHOT")
+    implementation("de.tr7zw:item-nbt-api:2.15.2")
     implementation("com.github.technicallycoded:FoliaLib:0.4.4") { isTransitive = false }
-    implementation("top.mrxiaom:PluginBase:$pluginBaseVersion")
+    implementation("top.mrxiaom.pluginbase:library:$pluginBaseVersion")
+    implementation("top.mrxiaom.pluginbase:paper:${pluginBaseVersion}")
     implementation("top.mrxiaom:LibrariesResolver:$pluginBaseVersion:all")
 }
 buildConfig {

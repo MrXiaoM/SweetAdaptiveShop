@@ -99,6 +99,11 @@ public class SellShop implements IShop {
         this.dynamicValuePlaceholderMin = minPlaceholder;
     }
 
+    @Override
+    public String type() {
+        return "sell";
+    }
+
     public double getPrice(double dynamic) {
         if (dynamic <= scaleWhenDynamicLargeThan) return priceBase;
         BigDecimal value = BigDecimal.valueOf(dynamic - scaleWhenDynamicLargeThan);

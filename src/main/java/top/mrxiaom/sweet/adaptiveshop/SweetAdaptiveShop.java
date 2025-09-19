@@ -11,8 +11,11 @@ import top.mrxiaom.pluginbase.actions.ActionProviders;
 import top.mrxiaom.pluginbase.economy.EnumEconomy;
 import top.mrxiaom.pluginbase.economy.IEconomy;
 import top.mrxiaom.pluginbase.func.LanguageManager;
+import top.mrxiaom.pluginbase.paper.PaperFactory;
 import top.mrxiaom.pluginbase.resolver.DefaultLibraryResolver;
 import top.mrxiaom.pluginbase.utils.Util;
+import top.mrxiaom.pluginbase.utils.inventory.InventoryFactory;
+import top.mrxiaom.pluginbase.utils.item.ItemEditor;
 import top.mrxiaom.pluginbase.utils.scheduler.FoliaLibScheduler;
 import top.mrxiaom.sweet.adaptiveshop.actions.ActionGive;
 import top.mrxiaom.sweet.adaptiveshop.actions.ActionRefresh;
@@ -59,6 +62,16 @@ public class SweetAdaptiveShop extends BukkitPlugin {
     @NotNull
     public IEconomy getEconomy() {
         return options.economy();
+    }
+
+    @Override
+    public @NotNull InventoryFactory initInventoryFactory() {
+        return PaperFactory.createInventoryFactory();
+    }
+
+    @Override
+    public @NotNull ItemEditor initItemEditor() {
+        return PaperFactory.createItemEditor();
     }
 
     private IMythic mythic;
