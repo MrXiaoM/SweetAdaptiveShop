@@ -133,11 +133,10 @@ public class ShopIconSell extends ShopIcon {
                 price = shop.getPrice(player, dynamic);
             }
             String money = String.format("%.2f", price).replace(".00", "");
-            if (!plugin.getEconomy().has(player, price)) {
+            if (!plugin.getEconomy().takeMoney(player, price)) {
                 Messages.gui__sell__no_money.tm(player);
                 return false;
             }
-            plugin.getEconomy().takeMoney(player, price);
             shop.give(player, 1);
             Messages.gui__sell__success.tm(player, money, 1, shop.displayName);
             return true;
@@ -161,11 +160,10 @@ public class ShopIconSell extends ShopIcon {
             }
             String money = String.format("%.2f", price * stackSize).replace(".00", "");
             double total = Double.parseDouble(money);
-            if (!plugin.getEconomy().has(player, total)) {
+            if (!plugin.getEconomy().takeMoney(player, total)) {
                 Messages.gui__sell__no_money.tm(player);
                 return false;
             }
-            plugin.getEconomy().takeMoney(player, total);
             shop.give(player, stackSize);
             Messages.gui__sell__success.tm(player, money, stackSize, shop.displayName);
             return true;
