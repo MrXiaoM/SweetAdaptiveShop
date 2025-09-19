@@ -56,5 +56,6 @@
 ## 变量
 
 ```
-%sashop_dynamic_<商品ID>% - 获取某个商品的动态值
+%sashop_buy_dynamic_<商品ID>% - 获取某个收购商品的动态值
+%sashop_sell_dynamic_<商品ID>% - 获取某个出售商品的动态值
 ```
