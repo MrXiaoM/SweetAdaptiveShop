@@ -77,7 +77,7 @@ public class ShopIconSell extends ShopIcon {
                 if (count >= stackSize) {
                     if (noCut || dynamic + shop.dynamicValueAdd * stackSize <= shop.dynamicValueMaximum) {
                         for(int i=0;i<stackSize;i++){
-                            showprice += shop.getPrice(player, dynamic+shop.dynamicValueAdd*i);
+                            showprice += shop.getPrice(player, Math.min(dynamic+shop.dynamicValueAdd*i,shop.dynamicValueMaximum));
                         }
                         lore.add(sellStack.replace("%price%", String.format("%.2f", showprice).replace(".00", ""))
                                 .replace("%count%", String.valueOf(stackSize)));
@@ -161,7 +161,7 @@ public class ShopIconSell extends ShopIcon {
                 price = shop.priceBase * stackSize;
             } else {
                 for(int i=0;i<stackSize;i++){
-                    price += shop.getPrice(player, dynamic+shop.dynamicValueAdd*i);
+                    price += shop.getPrice(player, Math.min(dynamic+shop.dynamicValueAdd*i,shop.dynamicValueMaximum));
                 }
             }
             String money = String.format("%.2f", price).replace(".00", "");
