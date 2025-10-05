@@ -73,9 +73,13 @@ public class ShopIconSell extends ShopIcon {
                     }
                 }
                 int stackSize = item.getType().getMaxStackSize();
+                double showprice=0;
                 if (count >= stackSize) {
                     if (noCut || dynamic + shop.dynamicValueAdd * stackSize <= shop.dynamicValueMaximum) {
-                        lore.add(sellStack.replace("%price%", String.format("%.2f", price * stackSize).replace(".00", ""))
+                        for(int i=0;i<stackSize;i++){
+                            showprice += shop.getPrice(player, dynamic+shop.dynamicValueAdd*i);
+                        }
+                        lore.add(sellStack.replace("%price%", String.format("%.2f", showprice).replace(".00", ""))
                                 .replace("%count%", String.valueOf(stackSize)));
                     }
                 }
@@ -152,13 +156,15 @@ public class ShopIconSell extends ShopIcon {
                     return false;
                 }
             }
-            double price;
+            double price=0;
             if (shop.hasBypass(player)) {
-                price = shop.priceBase;
+                price = shop.priceBase * stackSize;
             } else {
-                price = shop.getPrice(player, dynamic);
+                for(int i=0;i<stackSize;i++){
+                    price += shop.getPrice(player, dynamic+shop.dynamicValueAdd*i);
+                }
             }
-            String money = String.format("%.2f", price * stackSize).replace(".00", "");
+            String money = String.format("%.2f", price).replace(".00", "");
             double total = Double.parseDouble(money);
             if (!plugin.getEconomy().takeMoney(player, total)) {
                 Messages.gui__sell__no_money.tm(player);
