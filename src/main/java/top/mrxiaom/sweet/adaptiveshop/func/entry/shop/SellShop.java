@@ -152,6 +152,8 @@ public class SellShop implements IShop {
         SweetAdaptiveShop plugin = SweetAdaptiveShop.getInstance();
         double value = dynamicValueAdd * count;
         plugin.getScheduler().runTaskAsync(() -> addDynamicValue(player, value));
+        ItemStack sellitem = new ItemStack(displayItem.getType(), count);
+        ItemStackUtil.giveItemToPlayer(player,sellitem);
         try {
             for (IAction action : commands) {
                 action.run(player);

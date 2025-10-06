@@ -100,7 +100,7 @@ public class ShopIconBuy extends ShopIcon {
                         // 预先计算出售多个物品按照动态价格累加的总价
                         showprice=0;
                         for(int i=0;i<stackSize;i++){
-                            showprice += shop.getPrice(player, dynamic+shop.dynamicValueAdd*i);
+                            showprice += shop.getPrice(player, Math.min(dynamic+shop.dynamicValueAdd*i,shop.dynamicValueMaximum));
                         }
                         String priceStr = String.format("%.2f", showprice).replace(".00", "");
                         lore.add(buyStack.replace("%price%", priceStr)
@@ -113,7 +113,7 @@ public class ShopIconBuy extends ShopIcon {
                         // 预先计算出售多个物品按照动态价格累加的总价
                         showprice=0;
                         for(int i=0;i<count;i++){
-                            showprice += shop.getPrice(player, dynamic+shop.dynamicValueAdd*i);
+                            showprice += shop.getPrice(player, Math.min(dynamic+shop.dynamicValueAdd*i,shop.dynamicValueMaximum));
                         }
                         String priceStr = String.format("%.2f", showprice).replace(".00", "");
                         lore.add(buyAll.replace("%price%", priceStr)
@@ -213,7 +213,7 @@ public class ShopIconBuy extends ShopIcon {
             price = shop.priceBase * countToBuy;
         } else {
             for(int i=0;i<countToBuy;i++){
-                price += shop.getPrice(player, dynamic+shop.dynamicValueAdd*i);
+                price += shop.getPrice(player, Math.min(dynamic+shop.dynamicValueAdd*i,shop.dynamicValueMaximum));
             }
         }
         String money = String.format("%.2f", price).replace(".00", "");
