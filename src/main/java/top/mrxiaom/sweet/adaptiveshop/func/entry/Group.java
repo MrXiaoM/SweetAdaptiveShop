@@ -7,6 +7,7 @@ import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.database.BuyShopDatabase;
+import top.mrxiaom.sweet.adaptiveshop.database.SellShopDatabase;
 import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerItem;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.shop.BuyShop;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.shop.IShop;
@@ -75,12 +76,13 @@ public class Group {
     public void refreshSellShop(Player player) {
         if (dailySellCount <= 0) return;
         SweetAdaptiveShop plugin = SweetAdaptiveShop.getInstance();
-        BuyShopDatabase db = plugin.getBuyShopDatabase();
+        //复制粘贴代码忘了改成sell
+        SellShopDatabase db = plugin.getSellShopDatabase();
         List<PlayerItem> items = db.getPlayerItems(player);
-        items.removeIf(it -> it.isOutdate() || buyShop.containsKey(it.getItem()));
+        items.removeIf(it -> it.isOutdate() || sellShop.containsKey(it.getItem()));
         LocalDateTime tomorrow = Utils.nextOutdate();
         for (int i = 0; i < dailySellCount; i++) {
-            BuyShop shop = randomNewBuyShop(player, items);
+            SellShop shop = randomNewSellShop(player, items);
             if (shop == null) continue;
             items.add(new PlayerItem(shop.id, tomorrow));
         }
