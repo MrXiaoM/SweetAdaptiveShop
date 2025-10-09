@@ -15,7 +15,7 @@ material: WHEAT
 # 药水和附魔的ID，1.13+ 使用原版ID，低版本使用以下链接指定的ID
 # 【药水】https://javadoc.mcio.dev/spigot/1.12.2/org/bukkit/potion/PotionEffectType.html
 # 【附魔】https://javadoc.mcio.dev/spigot/1.12.2/org/bukkit/enchantments/Enchantment.html
-# 等级使用 * 代表任意等级均可
+# 等级使用 '*' 代表任意等级均可
 #potion:
 #  type: 'minecraft:instant_health'
 #  # 支持的药水变体 (普通、喷溅、滞留)
@@ -25,6 +25,12 @@ material: WHEAT
 #enchanted-book:
 #  type: 'minecraft:sharpness'
 #  level: 1
+# 额外要求物品有指定附魔，且等级匹配才收
+#enchantments:
+#  # 任意等级锋利附魔
+#  'minecraft:sharpness': []
+#  # 1-3级耐久附魔
+#  'minecraft:unbreaking': [ 1, 2, 3 ]
 
 # 展示名，可不输入，不输入则自动获取，仅 1.19.4 及以上可以自动获取原版物品名
 # display-name: '名字'
