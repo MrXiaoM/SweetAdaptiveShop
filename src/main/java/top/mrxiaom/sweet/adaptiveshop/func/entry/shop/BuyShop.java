@@ -8,9 +8,17 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.Potion;
+import org.bukkit.potion.PotionData;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.utils.IA;
@@ -31,19 +39,21 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.logging.Level;
+
+import static top.mrxiaom.sweet.adaptiveshop.func.entry.shop.ItemMatcher.create;
 
 public class BuyShop implements IShop {
     public final String group, id, permission;
     public final ItemStack displayItem;
     public final String displayName;
     public final List<String> footer;
-    public final int matchPriority;
-    public final Function<ItemStack, Boolean> matcher;
+    private final ItemMatcher itemMatcher;
+    private final Map<Enchantment, List<Integer>> enchantments;
     public final double priceBase;
     public final DoubleRange scaleRange;
     public final double scaleWhenDynamicLargeThan;
@@ -64,7 +74,7 @@ public class BuyShop implements IShop {
     public final String dynamicValuePlaceholderMin;
 
     BuyShop(String group, String id, String permission, ItemStack displayItem, String displayName,
-            List<String> footer, int matchPriority, Function<ItemStack, Boolean> matcher, double priceBase,
+            List<String> footer, ItemMatcher matcher, Map<Enchantment, List<Integer>> enchantments, double priceBase,
             DoubleRange scaleRange, double scaleWhenDynamicLargeThan, List<ValueFormula> scaleFormula,
             String scalePermission, PermMode scalePermissionMode, boolean dynamicValuePerPlayer,
             int dynamicValueLimitationPlayer,
@@ -77,8 +87,8 @@ public class BuyShop implements IShop {
         this.displayItem = displayItem;
         this.displayName = displayName;
         this.footer = footer;
-        this.matchPriority = matchPriority;
-        this.matcher = matcher;
+        this.itemMatcher = matcher;
+        this.enchantments = enchantments;
         this.priceBase = priceBase;
         this.scaleRange = scaleRange;
         this.scaleWhenDynamicLargeThan = scaleWhenDynamicLargeThan;
@@ -114,9 +124,26 @@ public class BuyShop implements IShop {
 
     public boolean match(@NotNull ItemStack item) {
         if (item.getType().equals(Material.AIR) || item.getAmount() == 0) return false;
-        return matcher.apply(item);
+        boolean match = itemMatcher.match(item);
+        if (match) {
+            ItemMeta meta = item.getItemMeta();
+            if (meta == null && !enchantments.isEmpty()) return false;
+            for (Map.Entry<Enchantment, List<Integer>> entry : enchantments.entrySet()) {
+                Enchantment enchant = entry.getKey();
+                List<Integer> levels = entry.getValue();
+                int enchantLevel = meta.getEnchantLevel(enchant);
+                if (enchantLevel == 0) return false;
+                if (levels.isEmpty()) continue;
+                if (!levels.contains(enchantLevel)) return false;
+            }
+            return true;
+        }
+        return false;
     }
 
+    public int getMatcherPriority() {
+        return itemMatcher.priority();
+    }
 
     @Deprecated
     public double getPrice(double dynamic) {
@@ -256,7 +283,22 @@ public class BuyShop implements IShop {
 
     @Nullable
     @SuppressWarnings({"deprecation"})
+    private static Enchantment matchEnchant(@Nullable String keyOrName) {
+        if (keyOrName == null) return null;
+        for (Enchantment value : Enchantment.values()) {
+            String key = value.getKey().toString();
+            String name = value.getName();
+            if (key.equals(keyOrName) || name.equalsIgnoreCase(keyOrName)) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    @SuppressWarnings({"deprecation"})
     public static BuyShop load(AbstractModule holder, File file, String id) {
+        ConfigurationSection section;
         YamlConfiguration config = new YamlConfiguration();
         config.options().pathSeparator('/');
         try {
@@ -270,8 +312,7 @@ public class BuyShop implements IShop {
         String type = config.getString("type");
         String displayName = config.getString("display-name", null);
         ItemStack displayItem;
-        int matchPriority;
-        Function<ItemStack, Boolean> matcher;
+        ItemMatcher matcher;
         if ("vanilla".equals(type)) {
             String raw = config.getString("material", "");
             String[] s = raw.contains(":") ? raw.split(":", 2) : new String[]{raw};
@@ -285,10 +326,152 @@ public class BuyShop implements IShop {
             }
             Integer data = s.length > 1 ? Util.parseInt(s[1]).orElse(null) : null;
             displayItem = data == null ? new ItemStack(material) : new ItemStack(material, 1, data.shortValue());
-            matchPriority = 1000;
             Material finalMaterial = material;
-            matcher = item -> item.getType().equals(finalMaterial)
-                    && (data == null || item.getDurability() == data.shortValue());
+            matcher = create(1000, item -> item.getType().equals(finalMaterial)
+                    && (data == null || item.getDurability() == data.shortValue()));
+            if (displayName == null) {
+                if (holder.plugin.isSupportTranslatable()) {
+                    displayName = "<translate:" + displayItem.getType().getTranslationKey() + ">";
+                } else {
+                    displayName = displayItem.getType().name().toLowerCase().replace("_", "");
+                }
+            }
+        } else if ("potion".equals(type)) {
+            String potionType = config.getString("potion.type");
+            PotionEffectType potion = null;
+            for (PotionEffectType value : PotionEffectType.values()) {
+                String key = value.getKey().toString();
+                String name = value.getName();
+                if (key.equals(potionType) || name.equalsIgnoreCase(potionType)) {
+                    potion = value;
+                    break;
+                }
+            }
+            if (potion == null) {
+                holder.warn("[buy] 读取 " + id + " 时，找不到 potion.type 对应药水效果");
+                return null;
+            }
+            String levelStr = config.getString("potion.level");
+            Integer level;
+            if ("*".equals(levelStr)) {
+                level = null;
+            } else {
+                level = Util.parseInt(levelStr).orElse(null);
+                if (level == null) {
+                    holder.warn("[buy] 读取 " + id + " 时，potion.level 指定的药水等级不正确");
+                    return null;
+                }
+            }
+            List<EnumPotionVariation> variations = new ArrayList<>();
+            for (String s : config.getStringList("potion.variations")) {
+                EnumPotionVariation value = Util.valueOr(EnumPotionVariation.class, s, null);
+                if (value != null) {
+                    variations.add(value);
+                }
+            }
+            if (variations.isEmpty()) {
+                holder.warn("[buy] 读取 " + id + " 时，potion.variations 为空");
+                return null;
+            }
+            PotionEffectType finalPotion = potion;
+            displayItem = variations.get(0).createItem();
+            matcher = create(999, item -> {
+                boolean firstMatch = false;
+                for (EnumPotionVariation variation : variations) {
+                    if (variation.isMatch(item)) {
+                        firstMatch = true;
+                        break;
+                    }
+                }
+                if (!firstMatch) return false;
+                if (EnumPotionVariation.useDataValue) {
+                    // 兼容 1.8
+                    if (!item.getType().equals(Material.POTION)) return false;
+                    Potion potionMeta = Potion.fromDamage(item.getDurability());
+                    PotionEffectType effectType = potionMeta.getType().getEffectType();
+                    if (!finalPotion.equals(effectType)) return false;
+                    if (level == null) return true;
+                    return level == potionMeta.getLevel();
+                } else {
+                    ItemMeta meta = item.getItemMeta();
+                    if (!(meta instanceof PotionMeta)) return false;
+                    PotionMeta potionMeta = (PotionMeta) meta;
+                    PotionData data = potionMeta.getBasePotionData();
+                    PotionEffectType effectType = data.getType().getEffectType();
+                    if (!finalPotion.equals(effectType)) return false;
+                    if (level == null) return true;
+                    int potionLevel = potionMeta.getBasePotionData().isUpgraded() ? 2 : 1;
+                    return level == potionLevel;
+                }
+            });
+            ItemMeta meta = displayItem.getItemMeta();
+            if (!(meta instanceof PotionMeta)) {
+                holder.warn("[buy] 读取 " + id + " 时，无法生成药水展示图标物品");
+                return null;
+            }
+            PotionType potionType1 = null;
+            for (PotionType value : PotionType.values()) {
+                if (finalPotion.equals(value.getEffectType())) {
+                    potionType1 = value;
+                    break;
+                }
+            }
+            if (potionType1 == null) {
+                holder.warn("[buy] 读取 " + id + " 时，无法获取药水类型");
+                return null;
+            }
+            if (EnumPotionVariation.useDataValue) {
+                // 兼容 1.8
+                Potion potionMeta = Potion.fromDamage(0);
+                potionMeta.setSplash(variations.get(0).isSplash() == Boolean.TRUE);
+                potionMeta.setType(potionType1);
+                potionMeta.apply(displayItem);
+            } else {
+                PotionMeta potionMeta = (PotionMeta) meta;
+                potionMeta.setBasePotionData(new PotionData(potionType1));
+                displayItem.setItemMeta(potionMeta);
+            }
+            if (displayName == null) {
+                if (holder.plugin.isSupportTranslatable()) {
+                    displayName = "<translate:" + displayItem.getType().getTranslationKey() + ">";
+                } else {
+                    displayName = displayItem.getType().name().toLowerCase().replace("_", "");
+                }
+            }
+        } else if ("enchanted-book".equals(type)) {
+            String enchantType = config.getString("enchanted-book.type");
+            Enchantment enchant = matchEnchant(enchantType);
+            if (enchant == null) {
+                holder.warn("[buy] 读取 " + id + " 时，找不到 enchanted-book.type 对应药水效果");
+                return null;
+            }
+            String levelStr = config.getString("enchanted-book.level");
+            Integer level;
+            if ("*".equals(levelStr)) {
+                level = null;
+            } else {
+                level = Util.parseInt(levelStr).orElse(null);
+                if (level == null) {
+                    holder.warn("[buy] 读取 " + id + " 时，enchanted-book.level 指定的附魔等级不正确");
+                    return null;
+                }
+            }
+            displayItem = new ItemStack(Material.ENCHANTED_BOOK);
+            matcher = create(999, item -> {
+                ItemMeta meta = item.getItemMeta();
+                if (!(meta instanceof EnchantmentStorageMeta)) return false;
+                EnchantmentStorageMeta enchantmentStorageMeta = (EnchantmentStorageMeta) meta;
+                if (!enchantmentStorageMeta.hasStoredEnchant(enchant)) return false;
+                return level == null || enchantmentStorageMeta.getStoredEnchantLevel(enchant) == level;
+            });
+            ItemMeta meta = displayItem.getItemMeta();
+            if (!(meta instanceof EnchantmentStorageMeta)) {
+                holder.warn("[buy] 读取 " + id + " 时，无法生成附魔书展示图标物品");
+                return null;
+            }
+            EnchantmentStorageMeta enchantmentStorageMeta = (EnchantmentStorageMeta) meta;
+            enchantmentStorageMeta.addStoredEnchant(enchant, level == null ? 1 : level, true);
+            displayItem.setItemMeta(enchantmentStorageMeta);
             if (displayName == null) {
                 if (holder.plugin.isSupportTranslatable()) {
                     displayName = "<translate:" + displayItem.getType().getTranslationKey() + ">";
@@ -308,8 +491,7 @@ public class BuyShop implements IShop {
                 holder.warn("[buy] 获取 " + id + " 时出错，找不到相应的 MythicMobs 物品");
                 return null;
             }
-            matchPriority = 999;
-            matcher = item -> mythicId.equals(IMythic.getId(item));
+            matcher = create(999, item -> mythicId.equals(IMythic.getId(item)));
             if (displayName == null) {
                 displayName = ItemStackUtil.getItemDisplayName(displayItem);
             }
@@ -324,18 +506,28 @@ public class BuyShop implements IShop {
                 holder.warn("[buy] 获取 " + id + " 时出错，找不到相应的 ItemsAdder 物品");
                 return null;
             }
-            matchPriority = 999;
-            matcher = item -> NBT.get(item, nbt -> {
+            matcher = create(999, item -> NBT.get(item, nbt -> {
                 ReadableNBT itemsadder = nbt.getCompound("itemsadder");
                 if (itemsadder == null) return false;
                 String realId = itemsadder.getString("namespace") + ":" + itemsadder.getString("id");
                 return realId.equals(itemsAdderId);
-            });
+            }));
             if (displayName == null) {
                 displayName = ItemStackUtil.getItemDisplayName(displayItem);
             }
         } else {
             return null;
+        }
+        Map<Enchantment, List<Integer>> enchantments = new HashMap<>();
+        section = config.getConfigurationSection("enchantments");
+        if (section != null) for (String key : section.getKeys(false)) {
+            Enchantment enchant = matchEnchant(key);
+            if (enchant == null) {
+                holder.warn("[buy] 读取 " + id + " 时，无法找到附魔类型 " + key);
+                continue;
+            }
+            List<Integer> levels = section.getIntegerList(key);
+            enchantments.put(enchant, levels);
         }
         List<String> extraDescription = config.getStringList("extra-description");
         if (!extraDescription.isEmpty()) {
@@ -391,7 +583,7 @@ public class BuyShop implements IShop {
             dynamicValueDisplayFormat = new DecimalFormat("0.00");
         }
         Map<Double, String> dynamicValuePlaceholders = new HashMap<>();
-        ConfigurationSection section = config.getConfigurationSection("dynamic-value/placeholders");
+        section = config.getConfigurationSection("dynamic-value/placeholders");
         if (section != null) for (String s : section.getKeys(false)) {
             Double value = Util.parseDouble(s).orElse(null);
             if (value == null) {
@@ -402,7 +594,7 @@ public class BuyShop implements IShop {
             dynamicValuePlaceholders.put(value, placeholder);
         }
         return new BuyShop(group, id, permission, displayItem, displayName,
-                footer, matchPriority, matcher, priceBase,
+                footer, matcher, enchantments, priceBase,
                 scaleRange, scaleWhenDynamicLargeThan, scaleFormula,
                 scalePermission, scalePermissionMode, dynamicValuePerPlayer,
                 dynamicValueLimitationPlayer,

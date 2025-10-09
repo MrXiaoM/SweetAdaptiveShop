@@ -174,7 +174,7 @@ public class Order {
             }
             needs.add(new Need(item, amount, affectDynamicValue));
         }
-        needs.sort(Comparator.comparingInt(it -> it.item.matchPriority)); // 确保 mythic 在前面
+        needs.sort(Comparator.comparingInt(it -> it.item.getMatcherPriority())); // 确保 mythic 在前面
         List<IAction> rewards = loadActions(config, "rewards");
         return new Order(id, permission, icon, name, limit, display, lore, opApply, opCannot, opDone, needs, rewards);
     }
