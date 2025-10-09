@@ -1,15 +1,30 @@
 # 商品属于哪个分组
 group: default
-# 商品类型
+# 收购的物品，以及商品类型
 # vanilla 为原版物品，使用参数 material
+# potion 为原版药水，使用参数 potion
+# enchanted-book 为原版附魔书，使用参数 enchanted-book
 # mythic 为MythicMobs物品，使用参数 mythic
 # itemsadder 为ItemsAdder物品，使用参数 itemsadder
 type: vanilla
 # 旧版本可使用 '物品ID:子ID' 格式，如 'WOOL:3'
 # 在旧版本，不输入冒号添加子ID，则代表这一物品ID下任意子ID的物品都可以匹配
 material: WHEAT
-# mythic: ExampleItem
-# itemsadder: '_iainternal:icon_arrow_chest'
+#mythic: ExampleItem
+#itemsadder: '_iainternal:icon_arrow_chest'
+# 药水和附魔的ID，1.13+ 使用原版ID，低版本使用以下链接指定的ID
+# 【药水】https://javadoc.mcio.dev/spigot/1.12.2/org/bukkit/potion/PotionEffectType.html
+# 【附魔】https://javadoc.mcio.dev/spigot/1.12.2/org/bukkit/enchantments/Enchantment.html
+# 等级使用 * 代表任意等级均可
+#potion:
+#  type: 'minecraft:instant_health'
+#  # 支持的药水变体 (普通、喷溅、滞留)
+#  variations: [ NORMAL, SPLASH, LINGERING ]
+#  # 仅支持原版药水等级1和等级2，叠加多个效果、超出2级的自定义药水不受支持
+#  level: 1
+#enchanted-book:
+#  type: 'minecraft:sharpness'
+#  level: 1
 
 # 展示名，可不输入，不输入则自动获取，仅 1.19.4 及以上可以自动获取原版物品名
 # display-name: '名字'
