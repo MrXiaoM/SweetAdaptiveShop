@@ -179,7 +179,7 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
                 }, nbt -> nbt.setLong(nbtKey, outdate)));
             }
             Collection<ItemStack> last = player.getInventory().addItem(items.toArray(new ItemStack[0])).values();
-            Messages.give__player.tm(player);
+            Messages.give__player.tm(player, amount, template.display);
             if (!last.isEmpty()) {
                 Messages.give__full.tm(player);
                 for (ItemStack item : last) {
