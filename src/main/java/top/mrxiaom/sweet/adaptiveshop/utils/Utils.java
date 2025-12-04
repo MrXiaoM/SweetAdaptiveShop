@@ -12,13 +12,12 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.utils.ItemStackUtil;
-import top.mrxiaom.pluginbase.utils.PAPI;
+import top.mrxiaom.pluginbase.utils.depend.PAPI;
 import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.Messages;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.mythic.IMythic;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,9 +29,6 @@ import static top.mrxiaom.pluginbase.utils.ItemStackUtil.getItemMeta;
 
 public class Utils {
     public static int outdateHour, outdateMinute, outdateSecond;
-    public static boolean mkdirs(File file) {
-        return file.mkdirs();
-    }
 
     public static long now() {
         return LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
@@ -178,8 +174,8 @@ public class Utils {
     }
     @Nullable
     public static BigDecimal eval(@Nullable OfflinePlayer player, String formula, Consumer<Expression> variables) {
-        String parsed = PAPI.setPlaceholders(player, formula);
-        if (parsed == null) {
+        String parsed = formula == null ? "" : PAPI.setPlaceholders(player, formula).trim();
+        if (parsed.isEmpty()) {
             SweetAdaptiveShop.getInstance().warn("无法计算空表达式", new RuntimeException());
             return null;
         }

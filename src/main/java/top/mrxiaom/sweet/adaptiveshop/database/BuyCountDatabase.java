@@ -11,7 +11,7 @@ import top.mrxiaom.pluginbase.database.IDatabase;
 import top.mrxiaom.pluginbase.temporary.TemporaryInteger;
 import top.mrxiaom.pluginbase.temporary.period.EveryDay;
 import top.mrxiaom.pluginbase.temporary.period.Period;
-import top.mrxiaom.pluginbase.utils.Util;
+import top.mrxiaom.pluginbase.utils.CollectionUtils;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractPluginHolder;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.shop.BuyShop;
@@ -79,7 +79,7 @@ public class BuyCountDatabase extends AbstractPluginHolder implements IDatabase,
 
     @NotNull
     public TemporaryInteger getCount(@NotNull String player, @NotNull BuyShop shop, boolean update) {
-        Map<String, TemporaryInteger> map = Util.getOrPut(caches, player, () -> new HashMap<>());
+        Map<String, TemporaryInteger> map = CollectionUtils.getOrPut(caches, player, () -> new HashMap<>());
         TemporaryInteger cache = map.get(shop.id);
         if (cache != null) {
             if (!update) {

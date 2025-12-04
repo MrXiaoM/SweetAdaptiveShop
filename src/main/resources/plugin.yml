@@ -10,6 +10,8 @@ softdepend:
   - ItemsAdder
 authors: [ MrXiaoM ]
 folia-supported: true
+libraries:
+  - "org.jetbrains:annotations:24.0.0"
 commands:
   sweetadaptiveshop:
     description: 'The main command of SweetAdaptiveShop'

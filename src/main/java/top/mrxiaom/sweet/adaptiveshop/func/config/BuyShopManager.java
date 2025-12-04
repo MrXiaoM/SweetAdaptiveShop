@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.func.AutoRegister;
 import top.mrxiaom.pluginbase.utils.Pair;
+import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.database.BuyShopDatabase;
 import top.mrxiaom.sweet.adaptiveshop.database.entry.PlayerItem;
@@ -43,7 +44,7 @@ public class BuyShopManager extends AbstractModule {
         String path = config.getString("path.buy", "./buy");
         folder = path.startsWith("./") ? new File(plugin.getDataFolder(), path) : new File(path);
         if (!folder.exists()) {
-            Utils.mkdirs(folder);
+            Util.mkdirs(folder);
             plugin.saveResource("buy/wheat.yml", new File(folder, "wheat.yml"));
         }
         if (!plugin.isSupportItemsAdder()) {
