@@ -126,22 +126,20 @@ public class GuiSellShop extends AbstractGuiModule {
     public class Impl extends Gui implements Refreshable, InventoryHolder {
         Group group;
         List<Pair<SellShop, PlayerItem>> items;
-        private Inventory inventory;
         protected Impl(@NotNull Player player, String title, char[] inventory, @NotNull Group group) {
             super(player, PAPI.setPlaceholders(player, title.replace("%type%", group.display)), inventory);
             this.group = group;
             this.items = SellShopManager.inst().getPlayerItems(player, group.id);
         }
 
-        @NotNull
         @Override
-        public Inventory getInventory() {
-            return inventory;
+        protected Inventory create(int size, String title) {
+            return super.create(size, PAPI.setPlaceholders(player, title));
         }
 
         @Override
         public void refreshGui() {
-            updateInventory(inventory);
+            updateInventory(created);
             Util.submitInvUpdate(player);
         }
 

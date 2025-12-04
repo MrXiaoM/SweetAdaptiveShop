@@ -120,21 +120,19 @@ public class GuiOrders extends AbstractGuiModule {
 
     public class Impl extends Gui implements Refreshable, InventoryHolder {
         List<Pair<Order, PlayerOrder>> orders;
-        private Inventory inventory;
         protected Impl(Player player, String title, char[] inventory) {
             super(player, PAPI.setPlaceholders(player, title), inventory);
             this.orders = OrderManager.inst().getPlayerOrders(player);
         }
 
-        @NotNull
         @Override
-        public Inventory getInventory() {
-            return inventory;
+        protected Inventory create(int size, String title) {
+            return super.create(size, PAPI.setPlaceholders(player, title));
         }
 
         @Override
         public void refreshGui() {
-            updateInventory(inventory);
+            updateInventory(created);
             Util.submitInvUpdate(player);
         }
 
