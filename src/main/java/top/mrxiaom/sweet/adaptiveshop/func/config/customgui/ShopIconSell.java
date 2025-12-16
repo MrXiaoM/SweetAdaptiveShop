@@ -51,9 +51,9 @@ public class ShopIconSell extends ShopIcon {
             dynamic = dyn == null ? 0.0 : dyn;
         }
         boolean noCut = shop.dynamicValueMaximum == 0 || !shop.dynamicValueCutWhenMaximum;
-        double price = bypass ? shop.priceBase : shop.getPrice(player, dynamic);
-        int count = (int) Math.floor(plugin.getEconomy().get(player) / price);
-        String priceString = String.format("%.2f", price).replace(".00", "");
+        double currentPrice = bypass ? shop.priceBase : shop.getPrice(player, dynamic);
+        int count = (int) Math.floor(plugin.getEconomy().get(player) / currentPrice);
+        String currentPriceString = String.format("%.2f", currentPrice).replace(".00", "");
         String dynamicDisplay = bypass ? "" : shop.getDisplayDynamic(player, dynamic);
         String dynamicPlaceholder = bypass ? "" : shop.getDynamicValuePlaceholder(dynamic);
 
@@ -68,24 +68,23 @@ public class ShopIconSell extends ShopIcon {
             }
             if (s.equals("operation")) {
                 if (count >= 1) {
+                    // 购买1个
                     if (noCut || dynamic + shop.dynamicValueAdd <= shop.dynamicValueMaximum) {
-                        lore.add(sellOne.replace("%price%", priceString));
+                        lore.add(sellOne.replace("%price%", currentPriceString));
                     }
                 }
                 int stackSize = item.getType().getMaxStackSize();
-                double showprice=0;
                 if (count >= stackSize) {
+                    // 购买1组
                     if (noCut || dynamic + shop.dynamicValueAdd * stackSize <= shop.dynamicValueMaximum) {
-                        for(int i=0;i<stackSize;i++){
-                            showprice += shop.getPrice(player, Math.min(dynamic+shop.dynamicValueAdd*i,shop.dynamicValueMaximum));
-                        }
-                        lore.add(sellStack.replace("%price%", String.format("%.2f", showprice).replace(".00", ""))
+                        double showPrice = calculatePrice(shop, player, dynamic, stackSize);
+                        lore.add(sellStack.replace("%price%", String.format("%.2f", showPrice).replace(".00", ""))
                                 .replace("%count%", String.valueOf(stackSize)));
                     }
                 }
                 continue;
             }
-            lore.add(s.replace("%price%", priceString)
+            lore.add(s.replace("%price%", currentPriceString)
                     .replace("%dynamic%", dynamicDisplay)
                     .replace("%dynamic_placeholder%", dynamicPlaceholder));
         }
@@ -130,12 +129,7 @@ public class ShopIconSell extends ShopIcon {
                     return false;
                 }
             }
-            double price;
-            if (shop.hasBypass(player)) {
-                price = shop.priceBase;
-            } else {
-                price = shop.getPrice(player, dynamic);
-            }
+            double price = calculatePrice(shop, player, dynamic, 1);
             String money = String.format("%.2f", price).replace(".00", "");
             if (!plugin.getEconomy().takeMoney(player, price)) {
                 Messages.gui__sell__no_money.tm(player);
@@ -145,7 +139,7 @@ public class ShopIconSell extends ShopIcon {
             Messages.gui__sell__success.tm(player, money, 1, shop.displayName);
             return true;
         }
-        if (click.equals(ClickType.RIGHT)) { // 提交1组
+        if (click.equals(ClickType.RIGHT)) { // 购买1组
             int stackSize = shop.displayItem.getType().getMaxStackSize();
             Double dyn = plugin.getSellShopDatabase().getDynamicValue(shop, player);
             double dynamic = dyn == null ? 0.0 : dyn;
@@ -156,14 +150,7 @@ public class ShopIconSell extends ShopIcon {
                     return false;
                 }
             }
-            double price=0;
-            if (shop.hasBypass(player)) {
-                price = shop.priceBase * stackSize;
-            } else {
-                for(int i=0;i<stackSize;i++){
-                    price += shop.getPrice(player, Math.min(dynamic+shop.dynamicValueAdd*i,shop.dynamicValueMaximum));
-                }
-            }
+            double price = calculatePrice(shop, player, dynamic, stackSize);
             String money = String.format("%.2f", price).replace(".00", "");
             double total = Double.parseDouble(money);
             if (!plugin.getEconomy().takeMoney(player, total)) {
@@ -175,6 +162,21 @@ public class ShopIconSell extends ShopIcon {
             return true;
         }
         return false;
+    }
+
+    /**
+     * 预先计算购买多个物品按照动态价格累加的总价
+     */
+    private static double calculatePrice(SellShop shop, Player player, double dynamic, int stackSize) {
+        if (shop.hasBypass(player)) {
+            return shop.priceBase * stackSize;
+        }
+        double price = 0;
+        for (int i = 0; i < stackSize; i++) {
+            double newDynamic = Math.min(dynamic + shop.dynamicValueAdd * i, shop.dynamicValueMaximum);
+            price += shop.getPrice(player, newDynamic);
+        }
+        return price;
     }
 
     @Nullable
