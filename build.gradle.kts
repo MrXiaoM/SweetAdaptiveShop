@@ -48,7 +48,7 @@ dependencies {
     base.library("com.zaxxer:HikariCP:4.0.3")
     base.library("top.mrxiaom:EvalEx-j8:3.4.0")
 
-    implementation("de.tr7zw:item-nbt-api:2.15.3")
+    implementation("de.tr7zw:item-nbt-api:2.15.5")
     implementation("com.github.technicallycoded:FoliaLib:0.4.4") { isTransitive = false }
     for (artifact in pluginBaseModules) {
         implementation(artifact)
