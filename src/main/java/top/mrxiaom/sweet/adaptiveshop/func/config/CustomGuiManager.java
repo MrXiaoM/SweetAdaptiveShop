@@ -80,7 +80,8 @@ public class CustomGuiManager extends AbstractGuisModule<CustomGui> {
             event.setCancelled(true);
             Character clickedId = getClickedId(slot);
             if (clickedId != null) {
-                ShopIcon shopIcon = model.mainIcons.get(clickedId);
+                int appearTimes = getAppearTimes(clickedId, slot);
+                ShopIcon shopIcon = model.getMainIcon(clickedId, appearTimes);
                 if (shopIcon != null) {
                     shopIcon.onClick(this, player, click);
                     return;

@@ -49,6 +49,9 @@ main-icons:
     type: buy
     # 商品/订单ID
     item-id: wheat
+    # 更推荐使用这种格式，添加多个相同类型的不同商品。
+    # 可以在 inventory 中添加多个相同图标来节省图标ID，多个商品会显示在不同位置的相同图标ID位置上
+    #item-ids: [ wheat, dirt, diamond ]
     # 下面还可以添加诸如 display, lore 之类的覆盖掉上面默认的配置
 # 其它图标
 other-icons:
