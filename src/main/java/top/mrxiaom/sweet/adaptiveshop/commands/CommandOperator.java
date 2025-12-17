@@ -6,6 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import top.mrxiaom.pluginbase.utils.Pair;
 import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.Messages;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
@@ -150,15 +151,18 @@ public class CommandOperator extends AbstractPluginHolder {
             if ("buy".equalsIgnoreCase(args[1])) {
                 BuyShop item = BuyShopManager.inst().get(args[2]);
                 if (item == null) {
-                    return t(sender, "&e找不到收购商品&b " + args[2]);
+                    return Messages.dynamic__buy__not_found.tm(sender, Pair.of("%item%", args[2]));
                 }
                 String operation = args[3].toLowerCase();
                 Double operateValue = Util.parseDouble(args[4]).orElse(null);
                 if (operateValue == null) {
-                    return Messages.int__invalid.tm(sender);
+                    return Messages.dynamic__number_invalid.tm(sender);
                 }
                 if (item.dynamicValuePerPlayer && player == null) {
-                    return t(sender, "&e这个收购商品要求每个玩家的动态值独立，但你未输入玩家参数");
+                    return Messages.dynamic__buy__player_required.tm(sender, Pair.of("%item%", args[2]));
+                }
+                if (!item.dynamicValuePerPlayer && player != null) {
+                    return Messages.dynamic__buy__player_not_required.tm(sender, Pair.of("%item%", args[2]));
                 }
                 BuyShopDatabase db = plugin.getBuyShopDatabase();
                 switch (operation) {
@@ -166,9 +170,14 @@ public class CommandOperator extends AbstractPluginHolder {
                         double newDynamic = Util.between(operateValue, 0, item.dynamicValueMaximum);
                         db.setDynamicValue(item, player, newDynamic);
                         if (player == null) {
-                            return t(sender, "&a已设置收购商品&e " + item.id + " &a的动态值为&e " + newDynamic);
+                            return Messages.dynamic__buy__set__global.tm(sender,
+                                    Pair.of("%item%", item.id),
+                                    Pair.of("%dynamic%", newDynamic));
                         } else {
-                            return t(sender, "&a已设置玩家&e " + player.getName() + " &a的收购商品&e " + item.id + " &a的动态值为&e " + newDynamic);
+                            return Messages.dynamic__buy__set__player.tm(sender,
+                                    Pair.of("%player%", player.getName()),
+                                    Pair.of("%item%", item.id),
+                                    Pair.of("%dynamic%", newDynamic));
                         }
                     }
                     case "plus": {
@@ -177,9 +186,16 @@ public class CommandOperator extends AbstractPluginHolder {
                         double newDynamic = Util.between(dynamic + operateValue, 0, item.dynamicValueMaximum);
                         db.setDynamicValue(item, player, newDynamic);
                         if (player == null) {
-                            return t(sender, "&a已为收购商品&e " + item.id + " &a的动态值增加&e " + operateValue + "&a，增加后为&e " + newDynamic);
+                            return Messages.dynamic__buy__plus__global.tm(sender,
+                                    Pair.of("%item%", item.id),
+                                    Pair.of("%value%", operateValue),
+                                    Pair.of("%dynamic%", newDynamic));
                         } else {
-                            return t(sender, "&a已为玩家&e " + player.getName() + " &a的收购商品&e " + item.id + " &a的动态值增加&e &a" + operateValue + "，增加后为&e " + newDynamic);
+                            return Messages.dynamic__buy__plus__player.tm(sender,
+                                    Pair.of("%player%", player.getName()),
+                                    Pair.of("%item%", item.id),
+                                    Pair.of("%value%", operateValue),
+                                    Pair.of("%dynamic%", newDynamic));
                         }
                     }
                     case "minus": {
@@ -188,27 +204,37 @@ public class CommandOperator extends AbstractPluginHolder {
                         double newDynamic = Util.between(dynamic - operateValue, 0, item.dynamicValueMaximum);
                         db.setDynamicValue(item, player, newDynamic);
                         if (player == null) {
-                            return t(sender, "&a已为收购商品&e " + item.id + " &a的动态值减少&e " + operateValue + "&a，减少后为&e " + newDynamic);
+                            return Messages.dynamic__buy__minus__global.tm(sender,
+                                    Pair.of("%item%", item.id),
+                                    Pair.of("%value%", operateValue),
+                                    Pair.of("%dynamic%", newDynamic));
                         } else {
-                            return t(sender, "&a已为玩家&e " + player.getName() + " &a的收购商品&e " + item.id + " &a的动态值减少&e &a" + operateValue + "，减少后为&e " + newDynamic);
+                            return Messages.dynamic__buy__minus__player.tm(sender,
+                                    Pair.of("%player%", player.getName()),
+                                    Pair.of("%item%", item.id),
+                                    Pair.of("%value%", operateValue),
+                                    Pair.of("%dynamic%", newDynamic));
                         }
                     }
                     default:
-                        return t(sender, "&e请输入正确的操作类型 &7(set, plus, minus)");
+                        return Messages.dynamic__operation__invalid.tm(sender);
                 }
             }
             if ("sell".equalsIgnoreCase(args[1])) {
                 SellShop item = SellShopManager.inst().get(args[2]);
                 if (item == null) {
-                    return t(sender, "&e找不到出售商品&b " + args[2]);
+                    return Messages.dynamic__sell__not_found.tm(sender, Pair.of("%item%", args[2]));
                 }
                 String operation = args[3].toLowerCase();
                 Double operateValue = Util.parseDouble(args[4]).orElse(null);
                 if (operateValue == null) {
-                    return Messages.int__invalid.tm(sender);
+                    return Messages.dynamic__number_invalid.tm(sender);
                 }
                 if (item.dynamicValuePerPlayer && player == null) {
-                    return t(sender, "&e这个出售商品要求每个玩家的动态值独立，但你未输入玩家参数");
+                    return Messages.dynamic__sell__player_required.tm(sender, Pair.of("%item%", args[2]));
+                }
+                if (!item.dynamicValuePerPlayer && player != null) {
+                    return Messages.dynamic__sell__player_not_required.tm(sender, Pair.of("%item%", args[2]));
                 }
                 SellShopDatabase db = plugin.getSellShopDatabase();
                 switch (operation) {
@@ -216,9 +242,14 @@ public class CommandOperator extends AbstractPluginHolder {
                         double newDynamic = Util.between(operateValue, 0, item.dynamicValueMaximum);
                         db.setDynamicValue(item, player, newDynamic);
                         if (player == null) {
-                            return t(sender, "&a已设置出售商品&e " + item.id + " &a的动态值为&e " + newDynamic);
+                            return Messages.dynamic__sell__set__global.tm(sender,
+                                    Pair.of("%item%", item.id),
+                                    Pair.of("%dynamic%", newDynamic));
                         } else {
-                            return t(sender, "&a已设置玩家&e " + player.getName() + " &a的出售商品&e " + item.id + " &a的动态值为&e " + newDynamic);
+                            return Messages.dynamic__sell__set__player.tm(sender,
+                                    Pair.of("%player%", player.getName()),
+                                    Pair.of("%item%", item.id),
+                                    Pair.of("%dynamic%", newDynamic));
                         }
                     }
                     case "plus": {
@@ -227,9 +258,16 @@ public class CommandOperator extends AbstractPluginHolder {
                         double newDynamic = Util.between(dynamic + operateValue, 0, item.dynamicValueMaximum);
                         db.setDynamicValue(item, player, newDynamic);
                         if (player == null) {
-                            return t(sender, "&a已为出售商品&e " + item.id + " &a的动态值增加&e " + operateValue + "&a，增加后为&e " + newDynamic);
+                            return Messages.dynamic__sell__plus__global.tm(sender,
+                                    Pair.of("%item%", item.id),
+                                    Pair.of("%value%", operateValue),
+                                    Pair.of("%dynamic%", newDynamic));
                         } else {
-                            return t(sender, "&a已为玩家&e " + player.getName() + " &a的出售商品&e " + item.id + " &a的动态值增加&e &a" + operateValue + "，增加后为&e " + newDynamic);
+                            return Messages.dynamic__sell__plus__player.tm(sender,
+                                    Pair.of("%player%", player.getName()),
+                                    Pair.of("%item%", item.id),
+                                    Pair.of("%value%", operateValue),
+                                    Pair.of("%dynamic%", newDynamic));
                         }
                     }
                     case "minus": {
@@ -238,16 +276,23 @@ public class CommandOperator extends AbstractPluginHolder {
                         double newDynamic = Util.between(dynamic - operateValue, 0, item.dynamicValueMaximum);
                         db.setDynamicValue(item, player, newDynamic);
                         if (player == null) {
-                            return t(sender, "&a已为出售商品&e " + item.id + " &a的动态值减少&e " + operateValue + "&a，减少后为&e " + newDynamic);
+                            return Messages.dynamic__sell__minus__global.tm(sender,
+                                    Pair.of("%item%", item.id),
+                                    Pair.of("%value%", operateValue),
+                                    Pair.of("%dynamic%", newDynamic));
                         } else {
-                            return t(sender, "&a已为玩家&e " + player.getName() + " &a的出售商品&e " + item.id + " &a的动态值减少&e &a" + operateValue + "，减少后为&e " + newDynamic);
+                            return Messages.dynamic__sell__minus__player.tm(sender,
+                                    Pair.of("%player%", player.getName()),
+                                    Pair.of("%item%", item.id),
+                                    Pair.of("%value%", operateValue),
+                                    Pair.of("%dynamic%", newDynamic));
                         }
                     }
                     default:
-                        return t(sender, "&e请输入正确的操作类型 &7(set, plus, minus)");
+                        return Messages.dynamic__operation__invalid.tm(sender);
                 }
             }
-            return true;
+            return Messages.dynamic__shop_type_invalid.tm(sender);
         }
         if (args.length == 3 && "test".equalsIgnoreCase(args[0])) {
             if ("order".equalsIgnoreCase(args[1])) {
@@ -295,8 +340,7 @@ public class CommandOperator extends AbstractPluginHolder {
     }
 
     protected final List<String> listArg0 = Lists.newArrayList(
-            "give", "refresh", "dynamic", "test"
-    );
+            "give", "refresh", "dynamic", "test");
     private static final List<String> listArgGive = Lists.newArrayList(
             "buy", "sell", "order");
     private static final List<String> listArgRefresh = Lists.newArrayList(
