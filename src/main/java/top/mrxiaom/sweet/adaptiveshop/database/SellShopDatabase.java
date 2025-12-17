@@ -152,6 +152,29 @@ public class SellShopDatabase extends AbstractPluginHolder implements IDatabase,
         }
     }
 
+    public void setDynamicValue(SellShop item, Player player, double value) {
+        try (Connection conn = plugin.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(item.dynamicValuePerPlayer ?
+                    ("SELECT * FROM `" + TABLE_SELL_SHOP_PER_PLAYER + "` WHERE `player`=? AND `item`=?;") :
+                    ("SELECT * FROM `" + TABLE_SELL_SHOP + "` WHERE `item`=?;")
+            )) {
+                if (item.dynamicValuePerPlayer) {
+                    ps.setString(1, plugin.getDBKey(player));
+                    ps.setString(2, item.id);
+                } else {
+                    ps.setString(1, item.id);
+                }
+                boolean insert;
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    insert = !resultSet.next();
+                }
+                setDynamicValue(conn, insert, item, player, value);
+            }
+        } catch (SQLException e) {
+            warn(e);
+        }
+    }
+
     public void addDynamicValue(SellShop item, @NotNull Player player, double value) {
         try (Connection conn = plugin.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(item.dynamicValuePerPlayer ?

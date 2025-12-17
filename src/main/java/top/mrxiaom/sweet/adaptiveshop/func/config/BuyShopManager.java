@@ -99,6 +99,10 @@ public class BuyShopManager extends AbstractModule {
         return map.get(id);
     }
 
+    public Set<String> keys() {
+        return map.keySet();
+    }
+
     /**
      * 获取玩家商品列表，并自动刷新已过期商品
      */
