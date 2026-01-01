@@ -145,7 +145,7 @@ public class ShopIconSell extends ShopIcon {
             double dynamic = dyn == null ? 0.0 : dyn;
             if (shop.dynamicValueMaximum > 0 && shop.dynamicValueCutWhenMaximum) {
                 double add = shop.dynamicValueAdd * stackSize;
-                if (dynamic + add > shop.dynamicValueMaximum) {
+                if (shop.hasReachDynamicValueMaximum(dynamic + add)) {
                     Messages.gui__sell__maximum.tm(player);
                     return false;
                 }
@@ -173,7 +173,7 @@ public class ShopIconSell extends ShopIcon {
         }
         double price = 0;
         for (int i = 0; i < stackSize; i++) {
-            double newDynamic = Math.min(dynamic + shop.dynamicValueAdd * i, shop.dynamicValueMaximum);
+            double newDynamic = shop.handleDynamicValueMaximum(dynamic + shop.dynamicValueAdd * i);
             price += shop.getPrice(player, newDynamic);
         }
         return price;

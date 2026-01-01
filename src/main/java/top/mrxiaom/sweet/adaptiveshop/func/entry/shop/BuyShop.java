@@ -254,6 +254,16 @@ public class BuyShop implements IShop {
         // 如果恢复策略是 recover，且设置了恢复范围
         // 动态值减少范围内随机值
         double dynamicValue = Math.max(0, old - dynamicValueRecover.random());
+        return handleDynamicValueMaximum(dynamicValue);
+    }
+
+    /**
+     * 如果有配置，对动态值应用最大值限制
+     * @param dynamicValue 输入的动态值
+     * @return 限制后的动态值
+     */
+    public double handleDynamicValueMaximum(double dynamicValue) {
+        if (dynamicValue < 0) return 0.0;
         if (dynamicValueMaximum > 0) {
             // 如果限制了最大值，进行限制
             return Math.min(dynamicValueMaximum, dynamicValue);
@@ -261,6 +271,13 @@ public class BuyShop implements IShop {
             // 如果未限制最大值，直接返回
             return dynamicValue;
         }
+    }
+
+    public boolean hasReachDynamicValueMaximum(double dynamicValue) {
+        if (dynamicValueMaximum > 0) {
+            return dynamicValue > dynamicValueMaximum;
+        }
+        return false;
     }
 
     @Override

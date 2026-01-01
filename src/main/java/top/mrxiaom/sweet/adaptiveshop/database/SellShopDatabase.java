@@ -108,12 +108,7 @@ public class SellShopDatabase extends AbstractPluginHolder implements IDatabase,
     }
 
     private void setDynamicValue(Connection conn, boolean insert, SellShop item, Player player, double value) throws SQLException {
-        double finalValue;
-        if (item.dynamicValueMaximum > 0) { // 启用限制时，限制为 [0, maximum]
-            finalValue = limit(value, 0, item.dynamicValueMaximum);
-        } else { // 未启用限制时，限制为 [0, +∞)
-            finalValue = Math.max(0, value);
-        }
+        double finalValue = item.handleDynamicValueMaximum(value);
         LocalDateTime nextOutdateTime = item.routine.nextOutdate();
         if (insert) {
             try (PreparedStatement ps1 = conn.prepareStatement(item.dynamicValuePerPlayer ?

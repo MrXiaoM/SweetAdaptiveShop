@@ -167,7 +167,7 @@ public class CommandOperator extends AbstractPluginHolder {
                 BuyShopDatabase db = plugin.getBuyShopDatabase();
                 switch (operation) {
                     case "set": {
-                        double newDynamic = Util.between(operateValue, 0, item.dynamicValueMaximum);
+                        double newDynamic = item.handleDynamicValueMaximum(operateValue);
                         db.setDynamicValue(item, player, newDynamic);
                         if (player == null) {
                             return Messages.dynamic__buy__set__global.tm(sender,
@@ -183,7 +183,7 @@ public class CommandOperator extends AbstractPluginHolder {
                     case "plus": {
                         Double dyn = db.getDynamicValue(item, player);
                         double dynamic = dyn == null ? 0 : dyn;
-                        double newDynamic = Util.between(dynamic + operateValue, 0, item.dynamicValueMaximum);
+                        double newDynamic = item.handleDynamicValueMaximum(dynamic + operateValue);
                         db.setDynamicValue(item, player, newDynamic);
                         if (player == null) {
                             return Messages.dynamic__buy__plus__global.tm(sender,
@@ -201,7 +201,7 @@ public class CommandOperator extends AbstractPluginHolder {
                     case "minus": {
                         Double dyn = db.getDynamicValue(item, player);
                         double dynamic = dyn == null ? 0 : dyn;
-                        double newDynamic = Util.between(dynamic - operateValue, 0, item.dynamicValueMaximum);
+                        double newDynamic = item.handleDynamicValueMaximum(dynamic - operateValue);
                         db.setDynamicValue(item, player, newDynamic);
                         if (player == null) {
                             return Messages.dynamic__buy__minus__global.tm(sender,
@@ -239,7 +239,7 @@ public class CommandOperator extends AbstractPluginHolder {
                 SellShopDatabase db = plugin.getSellShopDatabase();
                 switch (operation) {
                     case "set": {
-                        double newDynamic = Util.between(operateValue, 0, item.dynamicValueMaximum);
+                        double newDynamic = item.handleDynamicValueMaximum(operateValue);
                         db.setDynamicValue(item, player, newDynamic);
                         if (player == null) {
                             return Messages.dynamic__sell__set__global.tm(sender,
@@ -255,7 +255,7 @@ public class CommandOperator extends AbstractPluginHolder {
                     case "plus": {
                         Double dyn = db.getDynamicValue(item, player);
                         double dynamic = dyn == null ? 0 : dyn;
-                        double newDynamic = Util.between(dynamic + operateValue, 0, item.dynamicValueMaximum);
+                        double newDynamic = item.handleDynamicValueMaximum(dynamic + operateValue);
                         db.setDynamicValue(item, player, newDynamic);
                         if (player == null) {
                             return Messages.dynamic__sell__plus__global.tm(sender,
@@ -273,7 +273,7 @@ public class CommandOperator extends AbstractPluginHolder {
                     case "minus": {
                         Double dyn = db.getDynamicValue(item, player);
                         double dynamic = dyn == null ? 0 : dyn;
-                        double newDynamic = Util.between(dynamic - operateValue, 0, item.dynamicValueMaximum);
+                        double newDynamic = item.handleDynamicValueMaximum(dynamic - operateValue);
                         db.setDynamicValue(item, player, newDynamic);
                         if (player == null) {
                             return Messages.dynamic__sell__minus__global.tm(sender,
