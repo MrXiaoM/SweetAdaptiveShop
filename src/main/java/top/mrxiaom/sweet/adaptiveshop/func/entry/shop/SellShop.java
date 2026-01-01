@@ -1,7 +1,6 @@
 package top.mrxiaom.sweet.adaptiveshop.func.entry.shop;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -11,7 +10,6 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.api.IAction;
-import top.mrxiaom.pluginbase.utils.depend.IA;
 import top.mrxiaom.pluginbase.utils.ItemStackUtil;
 import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
@@ -20,7 +18,6 @@ import top.mrxiaom.sweet.adaptiveshop.enums.Routine;
 import top.mrxiaom.sweet.adaptiveshop.enums.Strategy;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractModule;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.ValueFormula;
-import top.mrxiaom.sweet.adaptiveshop.mythic.IMythic;
 import top.mrxiaom.sweet.adaptiveshop.utils.DoubleRange;
 import top.mrxiaom.sweet.adaptiveshop.utils.Utils;
 
@@ -60,39 +57,96 @@ public class SellShop implements IShop {
     public final Map<Double, String> dynamicValuePlaceholders;
     public final String dynamicValuePlaceholderMin;
 
-    SellShop(String group, String id, String permission, ItemStack displayItem, String displayName,
-             int maxCount, List<IAction> commands, double priceBase,
-             DoubleRange scaleRange, double scaleWhenDynamicLargeThan, List<ValueFormula> scaleFormula,
-             String scalePermission, PermMode scalePermissionMode, boolean dynamicValuePerPlayer,
-             double dynamicValueAdd, double dynamicValueMaximum, boolean dynamicValueCutWhenMaximum,
-             Strategy dynamicValueStrategy, DoubleRange dynamicValueRecover, Routine routine,
-             List<ValueFormula> dynamicValueDisplayFormula, DecimalFormat dynamicValueDisplayFormat, Map<Double, String> dynamicValuePlaceholders) {
-        this.group = group;
+    SellShop(AbstractModule holder, File file, String id) {
+        YamlConfiguration config = new YamlConfiguration();
+        config.options().pathSeparator('/');
+        try {
+            config.load(file);
+        } catch (FileNotFoundException ignored) {
+        } catch (IOException | InvalidConfigurationException ex) {
+            Bukkit.getLogger().log(Level.SEVERE, "Cannot load " + file, ex);
+        }
         this.id = id;
-        this.permission = permission;
-        this.displayItem = displayItem;
-        this.displayName = displayName;
-        this.maxCount = maxCount;
-        this.commands = commands;
-        this.priceBase = priceBase;
+        this.group = config.getString("group", "default");
+        this.permission = config.getString("permission", "sweet.adaptive.shop.sell." + id).replace("%id%", id);
+
+        ItemMatcherHelper matchItem = ItemMatcherHelper.loadForSellShop(holder, config);
+        this.displayName = matchItem.displayName;
+        this.displayItem = matchItem.displayItem;
+        this.maxCount = matchItem.maxCount;
+
+        this.commands = loadActions(config, "commands");
+        this.priceBase = config.getDouble("price/base");
+
+        DoubleRange scaleRange = Utils.getDoubleRange(config, "price/scale/range");
+        if (scaleRange == null) {
+            throw new IllegalArgumentException("price.scale.range 输入的范围无效");
+        }
         this.scaleRange = scaleRange;
-        this.scaleWhenDynamicLargeThan = scaleWhenDynamicLargeThan;
+
+        this.scaleWhenDynamicLargeThan = config.getDouble("price/scale/when-dynamic-value/large-than");
+        List<ValueFormula> scaleFormula = ValueFormula.load(config, "price/scale/when-dynamic-value/scale-formula");
+        if (scaleFormula == null) {
+            throw new IllegalArgumentException("scale-formula 表达式测试出错");
+        }
         this.scaleFormula = scaleFormula;
+
+        String scalePermission = config.getString("price/scale/when-has-permission/permission");
+        PermMode scalePermissionMode = Util.valueOr(PermMode.class, config.getString("price/scale/when-has-permission/mode"), null);
+        if (scalePermissionMode == null) {
+            throw new IllegalArgumentException("price.scale.when-has-permission.mode 的值无效");
+        }
         this.scalePermission = scalePermission;
         this.scalePermissionMode = scalePermissionMode;
-        this.dynamicValuePerPlayer = dynamicValuePerPlayer;
-        this.dynamicValueAdd = dynamicValueAdd;
-        this.dynamicValueMaximum = dynamicValueMaximum;
-        this.dynamicValueCutWhenMaximum = dynamicValueCutWhenMaximum;
+
+        this.dynamicValuePerPlayer = config.getBoolean("dynamic-value/per-player", false);
+        this.dynamicValueAdd = config.getDouble("dynamic-value/add");
+        this.dynamicValueMaximum = config.getDouble("dynamic-value/maximum", 0.0);
+        this.dynamicValueCutWhenMaximum = config.getBoolean("dynamic-value/cut-when-maximum", false);
+
+        Strategy dynamicValueStrategy = Util.valueOr(Strategy.class, config.getString("dynamic-value/strategy"), Strategy.reset);
+        DoubleRange dynamicValueRecover = Utils.getDoubleRange(config, "dynamic-value/recover");
+        if (dynamicValueStrategy.equals(Strategy.recover) && dynamicValueRecover == null) {
+            throw new IllegalArgumentException("dynamic-value.strategy 设为 recover 时，未设置 recover 的值");
+        }
         this.dynamicValueStrategy = dynamicValueStrategy;
         this.dynamicValueRecover = dynamicValueRecover;
+
+        Routine routine = Util.valueOr(Routine.class, config.getString("dynamic-value/routine"), null);
+        if (routine == null) {
+            throw new IllegalArgumentException("dynamic-value.routine 的值无效");
+        }
         this.routine = routine;
+
+        List<ValueFormula> dynamicValueDisplayFormula = ValueFormula.load(config, "dynamic-value/display-formula");
+        if (dynamicValueDisplayFormula == null) {
+            throw new IllegalArgumentException("display-formula 表达式测试出错");
+        }
         this.dynamicValueDisplayFormula = dynamicValueDisplayFormula;
+
+        DecimalFormat dynamicValueDisplayFormat;
+        try {
+            dynamicValueDisplayFormat = new DecimalFormat(config.getString("dynamic-value/display-format", "0.00"));
+        } catch (Throwable ignored) {
+            holder.warn("[sell] 读取 " + id + " 时出错，display-format 格式错误，已设为 '0.00'");
+            dynamicValueDisplayFormat = new DecimalFormat("0.00");
+        }
         this.dynamicValueDisplayFormat = dynamicValueDisplayFormat;
-        this.dynamicValuePlaceholders = dynamicValuePlaceholders;
+
+        this.dynamicValuePlaceholders = new HashMap<>();
+        ConfigurationSection section = config.getConfigurationSection("dynamic-value/placeholders");
+        if (section != null) for (String s : section.getKeys(false)) {
+            Double value = Util.parseDouble(s).orElse(null);
+            if (value == null) {
+                holder.warn("[sell] 读取 " + id + " 时出错，dynamic-value.placeholders 的一个键 " + s + " 无法转换为数字");
+                continue;
+            }
+            String placeholder = section.getString(s);
+            this.dynamicValuePlaceholders.put(value, placeholder);
+        }
         String minPlaceholder = "无";
         Double min = null;
-        for (Map.Entry<Double, String> entry : dynamicValuePlaceholders.entrySet()) {
+        for (Map.Entry<Double, String> entry : this.dynamicValuePlaceholders.entrySet()) {
             if (min == null || entry.getKey() < min) {
                 min = entry.getKey();
                 minPlaceholder = entry.getValue();
@@ -106,6 +160,7 @@ public class SellShop implements IShop {
         return "sell";
     }
 
+    @Deprecated
     public double getPrice(double dynamic) {
         return getPrice(null, dynamic);
     }
@@ -218,148 +273,12 @@ public class SellShop implements IShop {
     }
 
     @Nullable
-    @SuppressWarnings({"deprecation"})
     public static SellShop load(AbstractModule holder, File file, String id) {
-        YamlConfiguration config = new YamlConfiguration();
-        config.options().pathSeparator('/');
         try {
-            config.load(file);
-        } catch (FileNotFoundException ignored) {
-        } catch (IOException | InvalidConfigurationException ex) {
-            Bukkit.getLogger().log(Level.SEVERE, "Cannot load " + file, ex);
+            return new SellShop(holder, file, id);
+        } catch (Throwable t) {
+            holder.warn("[sell] 读取 " + id + " 时，" + t.getMessage());
         }
-        String group = config.getString("group", "default");
-        String permission = config.getString("permission", "sweet.adaptive.shop.sell." + id).replace("%id%", id);
-        String type = config.getString("type");
-        String displayName = config.getString("display-name", null);
-        ItemStack displayItem;
-        Integer maxCount = config.contains("max-count")
-                ? config.getInt("max-count")
-                : null;
-        List<IAction> commands = loadActions(config, "commands");
-        if ("vanilla".equals(type)) {
-            String raw = config.getString("material", "");
-            String[] s = raw.contains(":") ? raw.split(":", 2) : new String[]{raw};
-            Material material = Material.matchMaterial(s[0]);
-            if (material == null || material.equals(Material.AIR)) {
-                material = Util.valueOr(Material.class, s[0], null);
-                if (material == null || material.equals(Material.AIR)) {
-                    holder.warn("[sell] 读取 " + id + " 时，找不到 material 对应物品");
-                    return null;
-                }
-            }
-            Integer data = s.length > 1 ? Util.parseInt(s[1]).orElse(null) : null;
-            displayItem = data == null ? new ItemStack(material) : new ItemStack(material, 1, data.shortValue());
-            if (maxCount == null) {
-                maxCount = displayItem.getType().getMaxStackSize();
-            }
-            if (displayName == null) {
-                if (holder.plugin.isSupportTranslatable()) {
-                    displayName = "<translate:" + displayItem.getType().getTranslationKey() + ">";
-                } else {
-                    displayName = displayItem.getType().name().toLowerCase().replace("_", "");
-                }
-            }
-        } else if ("mythic".equals(type)) {
-            IMythic mythic = holder.plugin.getMythic();
-            if (mythic == null) {
-                holder.warn("[sell] 获取 " + id + " 时出错，未安装前置 MythicMobs");
-                return null;
-            }
-            String mythicId = config.getString("mythic");
-            displayItem = mythic.getItem(mythicId);
-            if (mythicId == null || displayItem == null) {
-                holder.warn("[sell] 获取 " + id + " 时出错，找不到相应的 MythicMobs 物品");
-                return null;
-            }
-            if (maxCount == null) {
-                maxCount = displayItem.getType().getMaxStackSize();
-            }
-            if (displayName == null) {
-                displayName = ItemStackUtil.getItemDisplayName(displayItem);
-            }
-        } else if ("itemsadder".equals(type)) {
-            if (!holder.plugin.isSupportItemsAdder()) {
-                holder.warn("[sell] 获取 " + id + " 时出错，未安装前置 ItemsAdder");
-                return null;
-            }
-            String itemsAdderId = config.getString("itemsadder");
-            displayItem = IA.get(itemsAdderId).orElse(null);
-            if (itemsAdderId == null || displayItem == null) {
-                holder.warn("[sell] 获取 " + id + " 时出错，找不到相应的 ItemsAdder 物品");
-                return null;
-            }
-            if (maxCount == null) {
-                maxCount = displayItem.getType().getMaxStackSize();
-            }
-            if (displayName == null) {
-                displayName = ItemStackUtil.getItemDisplayName(displayItem);
-            }
-        } else {
-            return null;
-        }
-        double priceBase = config.getDouble("price/base");
-        DoubleRange scaleRange = Utils.getDoubleRange(config, "price/scale/range");
-        if (scaleRange == null) {
-            holder.warn("[sell] 读取 " + id + " 时出错，price.scale.range 输入的范围无效");
-            return null;
-        }
-        double scaleWhenDynamicLargeThan = config.getDouble("price/scale/when-dynamic-value/large-than");
-        List<ValueFormula> scaleFormula = ValueFormula.load(config, "price/scale/when-dynamic-value/scale-formula");
-        if (scaleFormula == null) {
-            holder.warn("[sell] 读取 " + id + " 时出错，scale-formula 表达式测试出错");
-            return null;
-        }
-        String scalePermission = config.getString("price/scale/when-has-permission/permission");
-        PermMode scalePermissionMode = Util.valueOr(PermMode.class, config.getString("price/scale/when-has-permission/mode"), null);
-        if (scalePermissionMode == null) {
-            holder.warn("[sell] 读取 " + id + " 时出错，price.scale.when-has-permission.mode 的值无效");
-            return null;
-        }
-        boolean dynamicValuePerPlayer = config.getBoolean("dynamic-value/per-player", false);
-        double dynamicValueAdd = config.getDouble("dynamic-value/add");
-        double dynamicValueMaximum = config.getDouble("dynamic-value/maximum", 0.0);
-        boolean dynamicValueCutWhenMaximum = config.getBoolean("dynamic-value/cut-when-maximum", false);
-        Strategy dynamicValueStrategy = Util.valueOr(Strategy.class, config.getString("dynamic-value/strategy"), Strategy.reset);
-        DoubleRange dynamicValueRecover = Utils.getDoubleRange(config, "dynamic-value/recover");
-        if (dynamicValueStrategy.equals(Strategy.recover) && dynamicValueRecover == null) {
-            holder.warn("[sell] 读取 " + id + " 时出错，dynamic-value.strategy 设为 recover 时，未设置 recover 的值");
-            return null;
-        }
-        Routine routine = Util.valueOr(Routine.class, config.getString("dynamic-value/routine"), null);
-        if (routine == null) {
-            holder.warn("[sell] 读取 " + id + " 时出错，dynamic-value.routine 的值无效");
-            return null;
-        }
-        List<ValueFormula> dynamicValueDisplayFormula = ValueFormula.load(config, "dynamic-value/display-formula");
-        if (dynamicValueDisplayFormula == null) {
-            holder.warn("[sell] 读取 " + id + " 时出错，display-formula 表达式测试出错");
-            return null;
-        }
-        DecimalFormat dynamicValueDisplayFormat;
-        try {
-            dynamicValueDisplayFormat = new DecimalFormat(config.getString("dynamic-value/display-format", "0.00"));
-        } catch (Throwable ignored) {
-            holder.warn("[sell] 读取 " + id + " 时出错，display-format 格式错误，已设为 '0.00'");
-            dynamicValueDisplayFormat = new DecimalFormat("0.00");
-        }
-        Map<Double, String> dynamicValuePlaceholders = new HashMap<>();
-        ConfigurationSection section = config.getConfigurationSection("dynamic-value/placeholders");
-        if (section != null) for (String s : section.getKeys(false)) {
-            Double value = Util.parseDouble(s).orElse(null);
-            if (value == null) {
-                holder.warn("[sell] 读取 " + id + " 时出错，dynamic-value.placeholders 的一个键 " + s + " 无法转换为数字");
-                continue;
-            }
-            String placeholder = section.getString(s);
-            dynamicValuePlaceholders.put(value, placeholder);
-        }
-        return new SellShop(group, id, permission, displayItem, displayName,
-                maxCount, commands, priceBase,
-                scaleRange, scaleWhenDynamicLargeThan, scaleFormula,
-                scalePermission, scalePermissionMode, dynamicValuePerPlayer,
-                dynamicValueAdd, dynamicValueMaximum, dynamicValueCutWhenMaximum,
-                dynamicValueStrategy, dynamicValueRecover, routine,
-                dynamicValueDisplayFormula, dynamicValueDisplayFormat, dynamicValuePlaceholders);
+        return null;
     }
 }

@@ -24,13 +24,13 @@ public class Group {
     public final Map<String, BuyShop> buyShop = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     public final Map<String, SellShop> sellShop = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     public final boolean enableBuy, enableSell;
-    Group(String id, String display, int dailyBuyCount, int dailySellCount, boolean enableBuy, boolean enableSell) {
+    Group(ConfigurationSection section, String id) {
         this.id = id;
-        this.display = display;
-        this.dailyBuyCount = dailyBuyCount;
-        this.dailySellCount = dailySellCount;
-        this.enableBuy = enableBuy;
-        this.enableSell = enableSell;
+        this.dailyBuyCount = section.getInt(id + (section.contains(id + ".daily-buy-count") ? ".daily-buy-count" : ".daily-count"));
+        this.dailySellCount = section.getInt(id + (section.contains(id + ".daily-sell-count") ? ".daily-sell-count" : ".daily-count"));
+        this.display = section.getString(id + ".display", id);
+        this.enableBuy = section.getBoolean(id + ".buy", true);
+        this.enableSell = section.getBoolean(id + ".sell", true);
     }
 
     public boolean hasPermission(Permissible p) {
@@ -90,11 +90,6 @@ public class Group {
     }
 
     public static Group load(ConfigurationSection section, String id) {
-        int dailyBuyCount = section.getInt(id + (section.contains(id + ".daily-buy-count") ? ".daily-buy-count" : ".daily-count"));
-        int dailySellCount = section.getInt(id + (section.contains(id + ".daily-sell-count") ? ".daily-sell-count" : ".daily-count"));
-        String display = section.getString(id + ".display", id);
-        boolean enableBuy = section.getBoolean(id + ".buy", true);
-        boolean enableSell = section.getBoolean(id + ".sell", true);
-        return new Group(id, display, dailyBuyCount, dailySellCount, enableBuy, enableSell);
+        return new Group(section, id);
     }
 }

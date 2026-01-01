@@ -44,19 +44,60 @@ public class Order {
     public final List<Need> needs;
     public final List<IAction> rewards;
 
-    Order(String id, String permission, ItemStack icon, String name, Integer limit, String display, List<String> lore, String opApply, String opCannot, String opDone, List<Need> needs, List<IAction> rewards) {
+    Order(AbstractModule holder, File file, String id) {
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
         this.id = id;
-        this.permission = permission;
-        this.icon = icon;
-        this.name = name;
+        this.icon = Utils.getItem(config.getString("icon", ""));
+        this.name = config.getString("name", id);
+        String limitString = config.getString("limit", "1");
+        Integer limit;
+        if (limitString.equalsIgnoreCase("unlimited")) {
+            limit = null;
+        } else {
+            limit = Util.parseInt(limitString).orElse(null);
+            if (limit == null) {
+                throw new IllegalArgumentException("limit 的值无效");
+            }
+        }
         this.limit = limit;
+        this.permission = config.getString("permission", "sweet.adaptive.shop.order." + id).replace("%id%", id);
+        String display = config.getString("display");
+        if (display == null) {
+            throw new IllegalArgumentException("未输入物品显示名");
+        }
         this.display = display;
-        this.lore = lore;
-        this.opApply = opApply;
-        this.opCannot = opCannot;
-        this.opDone = opDone;
-        this.needs = needs;
-        this.rewards = rewards;
+        this.lore = config.getStringList("lore");
+        if (lore.isEmpty()) {
+            throw new IllegalArgumentException("未输入物品显示Lore");
+        }
+        this.opApply = config.getString("operations.apply", "");
+        this.opCannot = config.getString("operations.cannot", "");
+        this.opDone = config.getString("operations.done", "");
+        List<String> needsRaw = config.getStringList("needs");
+        this.needs = new ArrayList<>();
+        BuyShopManager manager = BuyShopManager.inst();
+        for (String s : needsRaw) {
+            String[] split = s.split(" ", 2);
+            boolean affectDynamicValue = split.length == 2 && split[1].equals("true");
+            split = split[0].split(":", 2);
+            if (split.length != 2) {
+                holder.warn("[order] 无法读取 " + id + " 中的需求商品 " + s);
+                continue;
+            }
+            BuyShop item = manager.get(split[0]);
+            if (item == null) {
+                holder.warn("[order] 订单 " + id + " 中的需求商品 " + split[0] + " 不存在");
+                continue;
+            }
+            Integer amount = Util.parseInt(split[1]).orElse(null);
+            if (amount == null) {
+                holder.warn("[order] 订单 " + id + " 中的需求物品数量 " + split[1] + " 不正确");
+                continue;
+            }
+            this.needs.add(new Need(item, amount, affectDynamicValue));
+        }
+        this.needs.sort(Comparator.comparingInt(it -> it.item.getMatcherPriority())); // 确保 mythic 在前面
+        this.rewards = loadActions(config, "rewards");
     }
 
     public boolean hasPermission(Player player) {
@@ -117,65 +158,11 @@ public class Order {
 
     @Nullable
     public static Order load(AbstractModule holder, File file, String id) {
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-        ItemStack icon;
         try {
-            icon = Utils.getItem(config.getString("icon", ""));
-        } catch (IllegalStateException e) {
-            holder.warn("[order] 读取 " + id + " 错误，" + e.getMessage());
-            return null;
+            return new Order(holder, file, id);
+        } catch (Throwable t) {
+            holder.warn("[order] 读取 " + id + " 错误，" + t.getMessage());
         }
-        String name = config.getString("name", id);
-        String limitString = config.getString("limit", "1");
-        Integer limit;
-        if (limitString.equalsIgnoreCase("unlimited")) {
-            limit = null;
-        } else {
-            limit = Util.parseInt(limitString).orElse(null);
-            if (limit == null) {
-                holder.warn("[order] 读取 " + id + " 错误，limit 的值无效");
-                return null;
-            }
-        }
-        String permission = config.getString("permission", "sweet.adaptive.shop.order." + id).replace("%id%", id);
-        String display = config.getString("display");
-        if (display == null) {
-            holder.warn("[order] 读取 " + id + " 错误，未输入物品显示名");
-            return null;
-        }
-        List<String> lore = config.getStringList("lore");
-        if (lore.isEmpty()) {
-            holder.warn("[order] 读取 " + id + " 错误，未输入物品显示Lore");
-            return null;
-        }
-        String opApply = config.getString("operations.apply", "");
-        String opCannot = config.getString("operations.cannot", "");
-        String opDone = config.getString("operations.done", "");
-        List<String> needsRaw = config.getStringList("needs");
-        List<Need> needs = new ArrayList<>();
-        BuyShopManager manager = BuyShopManager.inst();
-        for (String s : needsRaw) {
-            String[] split = s.split(" ", 2);
-            boolean affectDynamicValue = split.length == 2 && split[1].equals("true");
-            split = split[0].split(":", 2);
-            if (split.length != 2) {
-                holder.warn("[order] 无法读取 " + id + " 中的需求商品 " + s);
-                continue;
-            }
-            BuyShop item = manager.get(split[0]);
-            if (item == null) {
-                holder.warn("[order] 订单 " + id + " 中的需求商品 " + split[0] + " 不存在");
-                continue;
-            }
-            Integer amount = Util.parseInt(split[1]).orElse(null);
-            if (amount == null) {
-                holder.warn("[order] 订单 " + id + " 中的需求物品数量 " + split[1] + " 不正确");
-                continue;
-            }
-            needs.add(new Need(item, amount, affectDynamicValue));
-        }
-        needs.sort(Comparator.comparingInt(it -> it.item.getMatcherPriority())); // 确保 mythic 在前面
-        List<IAction> rewards = loadActions(config, "rewards");
-        return new Order(id, permission, icon, name, limit, display, lore, opApply, opCannot, opDone, needs, rewards);
+        return null;
     }
 }

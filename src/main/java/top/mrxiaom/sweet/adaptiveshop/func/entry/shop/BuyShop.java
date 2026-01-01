@@ -1,7 +1,5 @@
 package top.mrxiaom.sweet.adaptiveshop.func.entry.shop;
 
-import de.tr7zw.changeme.nbtapi.NBT;
-import de.tr7zw.changeme.nbtapi.iface.ReadableNBT;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -12,16 +10,9 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.Potion;
-import org.bukkit.potion.PotionData;
-import org.bukkit.potion.PotionEffectType;
-import org.bukkit.potion.PotionType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import top.mrxiaom.pluginbase.utils.depend.IA;
 import top.mrxiaom.pluginbase.utils.ItemStackUtil;
 import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
@@ -30,7 +21,6 @@ import top.mrxiaom.sweet.adaptiveshop.enums.Routine;
 import top.mrxiaom.sweet.adaptiveshop.enums.Strategy;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractModule;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.ValueFormula;
-import top.mrxiaom.sweet.adaptiveshop.mythic.IMythic;
 import top.mrxiaom.sweet.adaptiveshop.utils.DoubleRange;
 import top.mrxiaom.sweet.adaptiveshop.utils.Utils;
 
@@ -39,13 +29,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-
-import static top.mrxiaom.sweet.adaptiveshop.func.entry.shop.ItemMatcher.create;
 
 public class BuyShop implements IShop {
     public final String group, id, permission;
@@ -73,42 +60,114 @@ public class BuyShop implements IShop {
     public final Map<Double, String> dynamicValuePlaceholders;
     public final String dynamicValuePlaceholderMin;
 
-    BuyShop(String group, String id, String permission, ItemStack displayItem, String displayName,
-            List<String> footer, ItemMatcher matcher, Map<Enchantment, List<Integer>> enchantments, double priceBase,
-            DoubleRange scaleRange, double scaleWhenDynamicLargeThan, List<ValueFormula> scaleFormula,
-            String scalePermission, PermMode scalePermissionMode, boolean dynamicValuePerPlayer,
-            int dynamicValueLimitationPlayer,
-            double dynamicValueAdd, double dynamicValueMaximum, boolean dynamicValueCutWhenMaximum,
-            Strategy dynamicValueStrategy, DoubleRange dynamicValueRecover, Routine routine,
-            List<ValueFormula> dynamicValueDisplayFormula, DecimalFormat dynamicValueDisplayFormat, Map<Double, String> dynamicValuePlaceholders) {
-        this.group = group;
+    BuyShop(AbstractModule holder, File file, String id) {
+        ConfigurationSection section;
+        YamlConfiguration config = new YamlConfiguration();
+        config.options().pathSeparator('/');
+        try {
+            config.load(file);
+        } catch (FileNotFoundException ignored) {
+        } catch (IOException | InvalidConfigurationException ex) {
+            Bukkit.getLogger().log(Level.SEVERE, "Cannot load " + file, ex);
+        }
         this.id = id;
-        this.permission = permission;
-        this.displayItem = displayItem;
-        this.displayName = displayName;
-        this.footer = footer;
-        this.itemMatcher = matcher;
-        this.enchantments = enchantments;
-        this.priceBase = priceBase;
+        this.group = config.getString("group", "default");
+        this.permission = config.getString("permission", "sweet.adaptive.shop.buy." + id).replace("%id%", id);
+
+        ItemMatcherHelper matchItem = ItemMatcherHelper.loadForBuyShop(holder, config);
+        this.displayName = matchItem.displayName;
+        this.displayItem = matchItem.displayItem;
+        this.itemMatcher = matchItem.matcher;
+
+        this.enchantments = new HashMap<>();
+        section = config.getConfigurationSection("enchantments");
+        if (section != null) for (String key : section.getKeys(false)) {
+            Enchantment enchant = ItemMatcherHelper.matchEnchant(key);
+            if (enchant == null) {
+                holder.warn("[buy] 读取 " + id + " 时，无法找到附魔类型 " + key);
+                continue;
+            }
+            List<Integer> levels = section.getIntegerList(key);
+            this.enchantments.put(enchant, levels);
+        }
+        List<String> extraDescription = config.getStringList("extra-description");
+        if (!extraDescription.isEmpty()) {
+            List<String> lore = ItemStackUtil.getItemLore(displayItem);
+            lore.addAll(extraDescription);
+            ItemStackUtil.setItemLore(displayItem, lore);
+        }
+        this.footer = config.getStringList("footer");
+        this.priceBase = config.getDouble("price/base");
+        DoubleRange scaleRange = Utils.getDoubleRange(config, "price/scale/range");
+        if (scaleRange == null) {
+            throw new IllegalArgumentException("price.scale.range 输入的范围无效");
+        }
         this.scaleRange = scaleRange;
-        this.scaleWhenDynamicLargeThan = scaleWhenDynamicLargeThan;
+
+        this.scaleWhenDynamicLargeThan = config.getDouble("price/scale/when-dynamic-value/large-than");
+        List<ValueFormula> scaleFormula = ValueFormula.load(config, "price/scale/when-dynamic-value/scale-formula");
+        if (scaleFormula == null) {
+            throw new IllegalArgumentException("scale-formula 表达式测试出错");
+        }
         this.scaleFormula = scaleFormula;
+
+        String scalePermission = config.getString("price/scale/when-has-permission/permission");
+        PermMode scalePermissionMode = Util.valueOr(PermMode.class, config.getString("price/scale/when-has-permission/mode"), null);
+        if (scalePermissionMode == null) {
+            throw new IllegalArgumentException("price.scale.when-has-permission.mode 的值无效");
+        }
         this.scalePermission = scalePermission;
         this.scalePermissionMode = scalePermissionMode;
-        this.dynamicValuePerPlayer = dynamicValuePerPlayer;
-        this.dynamicValueLimitationPlayer = dynamicValueLimitationPlayer;
-        this.dynamicValueAdd = dynamicValueAdd;
-        this.dynamicValueMaximum = dynamicValueMaximum;
-        this.dynamicValueCutWhenMaximum = dynamicValueCutWhenMaximum;
+
+        this.dynamicValuePerPlayer = config.getBoolean("dynamic-value/per-player", false);
+        this.dynamicValueLimitationPlayer = config.getInt("dynamic-value/limitation/player", 0);
+        this.dynamicValueAdd = config.getDouble("dynamic-value/add");
+        this.dynamicValueMaximum = config.getDouble("dynamic-value/maximum", 0.0);
+        this.dynamicValueCutWhenMaximum = config.getBoolean("dynamic-value/cut-when-maximum", false);
+
+        Strategy dynamicValueStrategy = Util.valueOr(Strategy.class, config.getString("dynamic-value/strategy"), Strategy.reset);
+        DoubleRange dynamicValueRecover = Utils.getDoubleRange(config, "dynamic-value/recover");
+        if (dynamicValueStrategy.equals(Strategy.recover) && dynamicValueRecover == null) {
+            throw new IllegalArgumentException("dynamic-value.strategy 设为 recover 时，未设置 recover 的值");
+        }
         this.dynamicValueStrategy = dynamicValueStrategy;
         this.dynamicValueRecover = dynamicValueRecover;
+
+        Routine routine = Util.valueOr(Routine.class, config.getString("dynamic-value/routine"), null);
+        if (routine == null) {
+            throw new IllegalArgumentException("dynamic-value.routine 的值无效");
+        }
         this.routine = routine;
+
+        List<ValueFormula> dynamicValueDisplayFormula = ValueFormula.load(config, "dynamic-value/display-formula");
+        if (dynamicValueDisplayFormula == null) {
+            throw new IllegalArgumentException("display-formula 表达式测试出错");
+        }
         this.dynamicValueDisplayFormula = dynamicValueDisplayFormula;
+
+        DecimalFormat dynamicValueDisplayFormat;
+        try {
+            dynamicValueDisplayFormat = new DecimalFormat(config.getString("dynamic-value/display-format", "0.00"));
+        } catch (Throwable ignored) {
+            holder.warn("[buy] 读取 " + id + " 时出错，display-format 格式错误，已设为 '0.00'");
+            dynamicValueDisplayFormat = new DecimalFormat("0.00");
+        }
         this.dynamicValueDisplayFormat = dynamicValueDisplayFormat;
-        this.dynamicValuePlaceholders = dynamicValuePlaceholders;
+
+        this.dynamicValuePlaceholders = new HashMap<>();
+        section = config.getConfigurationSection("dynamic-value/placeholders");
+        if (section != null) for (String s : section.getKeys(false)) {
+            Double value = Util.parseDouble(s).orElse(null);
+            if (value == null) {
+                holder.warn("[buy] 读取 " + id + " 时出错，dynamic-value.placeholders 的一个键 " + s + " 无法转换为数字");
+                continue;
+            }
+            String placeholder = section.getString(s);
+            this.dynamicValuePlaceholders.put(value, placeholder);
+        }
         String minPlaceholder = "无";
         Double min = null;
-        for (Map.Entry<Double, String> entry : dynamicValuePlaceholders.entrySet()) {
+        for (Map.Entry<Double, String> entry : this.dynamicValuePlaceholders.entrySet()) {
             if (min == null || entry.getKey() < min) {
                 min = entry.getKey();
                 minPlaceholder = entry.getValue();
@@ -299,324 +358,12 @@ public class BuyShop implements IShop {
     }
 
     @Nullable
-    @SuppressWarnings({"deprecation"})
-    private static Enchantment matchEnchant(@Nullable String keyOrName) {
-        if (keyOrName == null) return null;
-        for (Enchantment value : Enchantment.values()) {
-            String key = value.getKey().toString();
-            String name = value.getName();
-            if (key.equals(keyOrName) || name.equalsIgnoreCase(keyOrName)) {
-                return value;
-            }
+    public static BuyShop load(AbstractModule holder, File file, String id) {
+        try {
+            return new BuyShop(holder, file, id);
+        } catch (Throwable t) {
+            holder.warn("[buy] 读取 " + id + " 时，" + t.getMessage());
         }
         return null;
-    }
-
-    @Nullable
-    @SuppressWarnings({"deprecation"})
-    public static BuyShop load(AbstractModule holder, File file, String id) {
-        ConfigurationSection section;
-        YamlConfiguration config = new YamlConfiguration();
-        config.options().pathSeparator('/');
-        try {
-            config.load(file);
-        } catch (FileNotFoundException ignored) {
-        } catch (IOException | InvalidConfigurationException ex) {
-            Bukkit.getLogger().log(Level.SEVERE, "Cannot load " + file, ex);
-        }
-        String group = config.getString("group", "default");
-        String permission = config.getString("permission", "sweet.adaptive.shop.buy." + id).replace("%id%", id);
-        String type = config.getString("type");
-        String displayName = config.getString("display-name", null);
-        ItemStack displayItem;
-        ItemMatcher matcher;
-        if ("vanilla".equals(type)) {
-            String raw = config.getString("material", "");
-            String[] s = raw.contains(":") ? raw.split(":", 2) : new String[]{raw};
-            Material material = Material.matchMaterial(s[0]);
-            if (material == null || material.equals(Material.AIR)) {
-                material = Util.valueOr(Material.class, s[0], null);
-                if (material == null || material.equals(Material.AIR)) {
-                    holder.warn("[buy] 读取 " + id + " 时，找不到 material 对应物品");
-                    return null;
-                }
-            }
-            Integer data = s.length > 1 ? Util.parseInt(s[1]).orElse(null) : null;
-            displayItem = data == null ? new ItemStack(material) : new ItemStack(material, 1, data.shortValue());
-            Material finalMaterial = material;
-            matcher = create(1000, item -> item.getType().equals(finalMaterial)
-                    && (data == null || item.getDurability() == data.shortValue()));
-            if (displayName == null) {
-                if (holder.plugin.isSupportTranslatable()) {
-                    displayName = "<translate:" + displayItem.getType().getTranslationKey() + ">";
-                } else {
-                    displayName = displayItem.getType().name().toLowerCase().replace("_", "");
-                }
-            }
-        } else if ("potion".equals(type)) {
-            String potionType = config.getString("potion.type");
-            PotionEffectType potion = null;
-            for (PotionEffectType value : PotionEffectType.values()) {
-                String key = value.getKey().toString();
-                String name = value.getName();
-                if (key.equals(potionType) || name.equalsIgnoreCase(potionType)) {
-                    potion = value;
-                    break;
-                }
-            }
-            if (potion == null) {
-                holder.warn("[buy] 读取 " + id + " 时，找不到 potion.type 对应药水效果");
-                return null;
-            }
-            String levelStr = config.getString("potion.level");
-            Integer level;
-            if ("*".equals(levelStr)) {
-                level = null;
-            } else {
-                level = Util.parseInt(levelStr).orElse(null);
-                if (level == null) {
-                    holder.warn("[buy] 读取 " + id + " 时，potion.level 指定的药水等级不正确");
-                    return null;
-                }
-            }
-            List<EnumPotionVariation> variations = new ArrayList<>();
-            for (String s : config.getStringList("potion.variations")) {
-                EnumPotionVariation value = Util.valueOr(EnumPotionVariation.class, s, null);
-                if (value != null) {
-                    variations.add(value);
-                }
-            }
-            if (variations.isEmpty()) {
-                holder.warn("[buy] 读取 " + id + " 时，potion.variations 为空");
-                return null;
-            }
-            PotionEffectType finalPotion = potion;
-            displayItem = variations.get(0).createItem();
-            matcher = create(999, item -> {
-                boolean firstMatch = false;
-                for (EnumPotionVariation variation : variations) {
-                    if (variation.isMatch(item)) {
-                        firstMatch = true;
-                        break;
-                    }
-                }
-                if (!firstMatch) return false;
-                if (EnumPotionVariation.useDataValue) {
-                    // 兼容 1.8
-                    if (!item.getType().equals(Material.POTION)) return false;
-                    Potion potionMeta = Potion.fromDamage(item.getDurability());
-                    PotionEffectType effectType = potionMeta.getType().getEffectType();
-                    if (!finalPotion.equals(effectType)) return false;
-                    if (level == null) return true;
-                    return level == potionMeta.getLevel();
-                } else {
-                    ItemMeta meta = item.getItemMeta();
-                    if (!(meta instanceof PotionMeta)) return false;
-                    PotionMeta potionMeta = (PotionMeta) meta;
-                    PotionData data = potionMeta.getBasePotionData();
-                    PotionEffectType effectType = data.getType().getEffectType();
-                    if (!finalPotion.equals(effectType)) return false;
-                    if (level == null) return true;
-                    int potionLevel = potionMeta.getBasePotionData().isUpgraded() ? 2 : 1;
-                    return level == potionLevel;
-                }
-            });
-            ItemMeta meta = displayItem.getItemMeta();
-            if (!(meta instanceof PotionMeta)) {
-                holder.warn("[buy] 读取 " + id + " 时，无法生成药水展示图标物品");
-                return null;
-            }
-            PotionType potionType1 = null;
-            for (PotionType value : PotionType.values()) {
-                if (finalPotion.equals(value.getEffectType())) {
-                    potionType1 = value;
-                    break;
-                }
-            }
-            if (potionType1 == null) {
-                holder.warn("[buy] 读取 " + id + " 时，无法获取药水类型");
-                return null;
-            }
-            if (EnumPotionVariation.useDataValue) {
-                // 兼容 1.8
-                Potion potionMeta = Potion.fromDamage(0);
-                potionMeta.setSplash(variations.get(0).isSplash() == Boolean.TRUE);
-                potionMeta.setType(potionType1);
-                potionMeta.apply(displayItem);
-            } else {
-                PotionMeta potionMeta = (PotionMeta) meta;
-                potionMeta.setBasePotionData(new PotionData(potionType1));
-                displayItem.setItemMeta(potionMeta);
-            }
-            if (displayName == null) {
-                if (holder.plugin.isSupportTranslatable()) {
-                    displayName = "<translate:" + displayItem.getType().getTranslationKey() + ">";
-                } else {
-                    displayName = displayItem.getType().name().toLowerCase().replace("_", "");
-                }
-            }
-        } else if ("enchanted-book".equals(type)) {
-            String enchantType = config.getString("enchanted-book.type");
-            Enchantment enchant = matchEnchant(enchantType);
-            if (enchant == null) {
-                holder.warn("[buy] 读取 " + id + " 时，找不到 enchanted-book.type 对应药水效果");
-                return null;
-            }
-            String levelStr = config.getString("enchanted-book.level");
-            Integer level;
-            if ("*".equals(levelStr)) {
-                level = null;
-            } else {
-                level = Util.parseInt(levelStr).orElse(null);
-                if (level == null) {
-                    holder.warn("[buy] 读取 " + id + " 时，enchanted-book.level 指定的附魔等级不正确");
-                    return null;
-                }
-            }
-            displayItem = new ItemStack(Material.ENCHANTED_BOOK);
-            matcher = create(999, item -> {
-                ItemMeta meta = item.getItemMeta();
-                if (!(meta instanceof EnchantmentStorageMeta)) return false;
-                EnchantmentStorageMeta enchantmentStorageMeta = (EnchantmentStorageMeta) meta;
-                if (!enchantmentStorageMeta.hasStoredEnchant(enchant)) return false;
-                return level == null || enchantmentStorageMeta.getStoredEnchantLevel(enchant) == level;
-            });
-            ItemMeta meta = displayItem.getItemMeta();
-            if (!(meta instanceof EnchantmentStorageMeta)) {
-                holder.warn("[buy] 读取 " + id + " 时，无法生成附魔书展示图标物品");
-                return null;
-            }
-            EnchantmentStorageMeta enchantmentStorageMeta = (EnchantmentStorageMeta) meta;
-            enchantmentStorageMeta.addStoredEnchant(enchant, level == null ? 1 : level, true);
-            displayItem.setItemMeta(enchantmentStorageMeta);
-            if (displayName == null) {
-                if (holder.plugin.isSupportTranslatable()) {
-                    displayName = "<translate:" + displayItem.getType().getTranslationKey() + ">";
-                } else {
-                    displayName = displayItem.getType().name().toLowerCase().replace("_", "");
-                }
-            }
-        } else if ("mythic".equals(type)) {
-            IMythic mythic = holder.plugin.getMythic();
-            if (mythic == null) {
-                holder.warn("[buy] 获取 " + id + " 时出错，未安装前置 MythicMobs");
-                return null;
-            }
-            String mythicId = config.getString("mythic");
-            displayItem = mythic.getItem(mythicId);
-            if (mythicId == null || displayItem == null) {
-                holder.warn("[buy] 获取 " + id + " 时出错，找不到相应的 MythicMobs 物品");
-                return null;
-            }
-            matcher = create(999, item -> mythicId.equals(IMythic.getId(item)));
-            if (displayName == null) {
-                displayName = ItemStackUtil.getItemDisplayName(displayItem);
-            }
-        } else if ("itemsadder".equals(type)) {
-            if (!holder.plugin.isSupportItemsAdder()) {
-                holder.warn("[buy] 获取 " + id + " 时出错，未安装前置 ItemsAdder");
-                return null;
-            }
-            String itemsAdderId = config.getString("itemsadder");
-            displayItem = IA.get(itemsAdderId).orElse(null);
-            if (itemsAdderId == null || displayItem == null) {
-                holder.warn("[buy] 获取 " + id + " 时出错，找不到相应的 ItemsAdder 物品");
-                return null;
-            }
-            matcher = create(999, item -> NBT.get(item, nbt -> {
-                ReadableNBT itemsadder = nbt.getCompound("itemsadder");
-                if (itemsadder == null) return false;
-                String realId = itemsadder.getString("namespace") + ":" + itemsadder.getString("id");
-                return realId.equals(itemsAdderId);
-            }));
-            if (displayName == null) {
-                displayName = ItemStackUtil.getItemDisplayName(displayItem);
-            }
-        } else {
-            return null;
-        }
-        Map<Enchantment, List<Integer>> enchantments = new HashMap<>();
-        section = config.getConfigurationSection("enchantments");
-        if (section != null) for (String key : section.getKeys(false)) {
-            Enchantment enchant = matchEnchant(key);
-            if (enchant == null) {
-                holder.warn("[buy] 读取 " + id + " 时，无法找到附魔类型 " + key);
-                continue;
-            }
-            List<Integer> levels = section.getIntegerList(key);
-            enchantments.put(enchant, levels);
-        }
-        List<String> extraDescription = config.getStringList("extra-description");
-        if (!extraDescription.isEmpty()) {
-            List<String> lore = ItemStackUtil.getItemLore(displayItem);
-            lore.addAll(extraDescription);
-            ItemStackUtil.setItemLore(displayItem, lore);
-        }
-        List<String> footer = config.getStringList("footer");
-        double priceBase = config.getDouble("price/base");
-        DoubleRange scaleRange = Utils.getDoubleRange(config, "price/scale/range");
-        if (scaleRange == null) {
-            holder.warn("[buy] 读取 " + id + " 时出错，price.scale.range 输入的范围无效");
-            return null;
-        }
-        double scaleWhenDynamicLargeThan = config.getDouble("price/scale/when-dynamic-value/large-than");
-        List<ValueFormula> scaleFormula = ValueFormula.load(config, "price/scale/when-dynamic-value/scale-formula");
-        if (scaleFormula == null) {
-            holder.warn("[buy] 读取 " + id + " 时出错，scale-formula 表达式测试出错");
-            return null;
-        }
-        String scalePermission = config.getString("price/scale/when-has-permission/permission");
-        PermMode scalePermissionMode = Util.valueOr(PermMode.class, config.getString("price/scale/when-has-permission/mode"), null);
-        if (scalePermissionMode == null) {
-            holder.warn("[buy] 读取 " + id + " 时出错，price.scale.when-has-permission.mode 的值无效");
-            return null;
-        }
-        boolean dynamicValuePerPlayer = config.getBoolean("dynamic-value/per-player", false);
-        int dynamicValueLimitationPlayer = config.getInt("dynamic-value/limitation/player", 0);
-        double dynamicValueAdd = config.getDouble("dynamic-value/add");
-        double dynamicValueMaximum = config.getDouble("dynamic-value/maximum", 0.0);
-        boolean dynamicValueCutWhenMaximum = config.getBoolean("dynamic-value/cut-when-maximum", false);
-        Strategy dynamicValueStrategy = Util.valueOr(Strategy.class, config.getString("dynamic-value/strategy"), Strategy.reset);
-        DoubleRange dynamicValueRecover = Utils.getDoubleRange(config, "dynamic-value/recover");
-        if (dynamicValueStrategy.equals(Strategy.recover) && dynamicValueRecover == null) {
-            holder.warn("[buy] 读取 " + id + " 时出错，dynamic-value.strategy 设为 recover 时，未设置 recover 的值");
-            return null;
-        }
-        Routine routine = Util.valueOr(Routine.class, config.getString("dynamic-value/routine"), null);
-        if (routine == null) {
-            holder.warn("[buy] 读取 " + id + " 时出错，dynamic-value.routine 的值无效");
-            return null;
-        }
-        List<ValueFormula> dynamicValueDisplayFormula = ValueFormula.load(config, "dynamic-value/display-formula");
-        if (dynamicValueDisplayFormula == null) {
-            holder.warn("[buy] 读取 " + id + " 时出错，display-formula 表达式测试出错");
-            return null;
-        }
-        DecimalFormat dynamicValueDisplayFormat;
-        try {
-            dynamicValueDisplayFormat = new DecimalFormat(config.getString("dynamic-value/display-format", "0.00"));
-        } catch (Throwable ignored) {
-            holder.warn("[buy] 读取 " + id + " 时出错，display-format 格式错误，已设为 '0.00'");
-            dynamicValueDisplayFormat = new DecimalFormat("0.00");
-        }
-        Map<Double, String> dynamicValuePlaceholders = new HashMap<>();
-        section = config.getConfigurationSection("dynamic-value/placeholders");
-        if (section != null) for (String s : section.getKeys(false)) {
-            Double value = Util.parseDouble(s).orElse(null);
-            if (value == null) {
-                holder.warn("[buy] 读取 " + id + " 时出错，dynamic-value.placeholders 的一个键 " + s + " 无法转换为数字");
-                continue;
-            }
-            String placeholder = section.getString(s);
-            dynamicValuePlaceholders.put(value, placeholder);
-        }
-        return new BuyShop(group, id, permission, displayItem, displayName,
-                footer, matcher, enchantments, priceBase,
-                scaleRange, scaleWhenDynamicLargeThan, scaleFormula,
-                scalePermission, scalePermissionMode, dynamicValuePerPlayer,
-                dynamicValueLimitationPlayer,
-                dynamicValueAdd, dynamicValueMaximum, dynamicValueCutWhenMaximum,
-                dynamicValueStrategy, dynamicValueRecover, routine,
-                dynamicValueDisplayFormula, dynamicValueDisplayFormat, dynamicValuePlaceholders);
     }
 }
