@@ -7,7 +7,7 @@ plugins {
 
 buildscript {
     repositories.mavenCentral()
-    dependencies.classpath("top.mrxiaom:LibrariesResolver-Gradle:1.7.1")
+    dependencies.classpath("top.mrxiaom:LibrariesResolver-Gradle:1.7.3")
 }
 
 group = "top.mrxiaom.sweet.adaptiveshop"

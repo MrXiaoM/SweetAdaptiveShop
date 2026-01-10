@@ -64,7 +64,7 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
                 String name = args.length >= 3 ? args[2] : "default";
                 group = GroupManager.inst().get(name);
                 if (group == null || (buy && !group.enableBuy) || (!buy && !group.enableSell)) {
-                    return Messages.group__not_found.tm(sender, name);
+                    return Messages.group__not_found.tmf(sender, name);
                 }
                 model = null;
                 playerCheckIndex = 3;
@@ -75,11 +75,11 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
                     return Messages.custom_gui__not_input.tm(sender);
                 }
                 if (!sender.hasPermission("sweet.adaptive.shop.custom")) {
-                    return Messages.custom_gui__not_found.tm(sender, name);
+                    return Messages.custom_gui__not_found.tmf(sender, name);
                 } else {
                     model = CustomGuiManager.inst().get(name);
                     if (model == null) {
-                        return Messages.custom_gui__not_found.tm(sender, name);
+                        return Messages.custom_gui__not_found.tmf(sender, name);
                     }
                 }
                 playerCheckIndex = 3;
@@ -92,7 +92,7 @@ public class CommandMain extends AbstractModule implements CommandExecutor, TabC
                 if (sender.isOp()) {
                     player = Util.getOnlinePlayer(args[playerCheckIndex]).orElse(null);
                     if (player == null) {
-                        return Messages.player__not_online.tm(sender, args[playerCheckIndex]);
+                        return Messages.player__not_online.tmf(sender, args[playerCheckIndex]);
                     }
                 } else {
                     return Messages.player__no_permission.tm(sender);

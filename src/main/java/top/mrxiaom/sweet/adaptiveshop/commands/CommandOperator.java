@@ -52,7 +52,7 @@ public class CommandOperator extends AbstractPluginHolder {
             TemplateManager manager = TemplateManager.inst();
             ItemTemplate template = manager.getTemplate(templateId);
             if (template == null) {
-                return Messages.template__not_found.tm(sender, templateId);
+                return Messages.template__not_found.tmf(sender, templateId);
             }
             int amount = Util.parseInt(args[3]).orElse(0);
             if (amount < 1) {
@@ -69,7 +69,7 @@ public class CommandOperator extends AbstractPluginHolder {
             } else if (args[4].equalsIgnoreCase("order")) {
                 nbtKey = GuiOrders.REFRESH_ITEM;
             } else {
-                return Messages.give__type_not_found.tm(sender, args[4]);
+                return Messages.give__type_not_found.tmf(sender, args[4]);
             }
             String formatted;
             long outdate;
@@ -94,19 +94,19 @@ public class CommandOperator extends AbstractPluginHolder {
                 }, nbt -> nbt.setLong(nbtKey, outdate)));
             }
             Collection<ItemStack> last = player.getInventory().addItem(items.toArray(new ItemStack[0])).values();
-            Messages.give__player.tm(player, amount, template.display);
+            Messages.give__player.tmf(player, amount, template.display);
             if (!last.isEmpty()) {
                 Messages.give__full.tm(player);
                 for (ItemStack item : last) {
                     player.getWorld().dropItem(player.getLocation(), item);
                 }
             }
-            return Messages.give__success.tm(sender, player.getName(), amount, template.display);
+            return Messages.give__success.tmf(sender, player.getName(), amount, template.display);
         }
         if (args.length >= 3 && "refresh".equalsIgnoreCase(args[0])) {
             Player player = Util.getOnlinePlayer(args[1]).orElse(null);
             if (player == null) {
-                return Messages.player__not_online.tm(sender, args[1]);
+                return Messages.player__not_online.tmf(sender, args[1]);
             }
             switch (args[2]) {
                 case "buy": {
@@ -115,10 +115,10 @@ public class CommandOperator extends AbstractPluginHolder {
                     }
                     Group group = GroupManager.inst().get(args[3]);
                     if (group == null) {
-                        return Messages.group__not_found.tm(sender, args[3]);
+                        return Messages.group__not_found.tmf(sender, args[3]);
                     }
                     group.refreshBuyShop(player);
-                    return Messages.refresh__buy__success_other.tm(sender, player.getName(), group.display);
+                    return Messages.refresh__buy__success_other.tmf(sender, player.getName(), group.display);
                 }
                 case "sell": {
                     if (args.length < 4) {
@@ -126,17 +126,17 @@ public class CommandOperator extends AbstractPluginHolder {
                     }
                     Group group = GroupManager.inst().get(args[3]);
                     if (group == null) {
-                        return Messages.group__not_found.tm(sender, args[3]);
+                        return Messages.group__not_found.tmf(sender, args[3]);
                     }
                     group.refreshSellShop(player);
-                    return Messages.refresh__sell__success_other.tm(sender, player.getName(), group.display);
+                    return Messages.refresh__sell__success_other.tmf(sender, player.getName(), group.display);
                 }
                 case "order": {
                     OrderManager.inst().refresh(player);
-                    return Messages.refresh__order__success_other.tm(sender, player.getName());
+                    return Messages.refresh__order__success_other.tmf(sender, player.getName());
                 }
             }
-            return Messages.refresh__type_invalid.tm(sender, args[2]);
+            return Messages.refresh__type_invalid.tmf(sender, args[2]);
         }
         if (args.length > 4 && "dynamic".equalsIgnoreCase(args[0])) {
             Player player;
@@ -298,7 +298,7 @@ public class CommandOperator extends AbstractPluginHolder {
             if ("order".equalsIgnoreCase(args[1])) {
                 OfflinePlayer p = Util.getOfflinePlayer(args[2]).orElse(null);
                 if (p == null) {
-                    return Messages.player__not_found.tm(sender, args[2]);
+                    return Messages.player__not_found.tmf(sender, args[2]);
                 }
                 String key = plugin.getDBKey(p);
                 List<PlayerOrder> orders = plugin.getOrderDatabase().getPlayerOrders(key);
@@ -311,7 +311,7 @@ public class CommandOperator extends AbstractPluginHolder {
             if ("buy".equalsIgnoreCase(args[1])) {
                 OfflinePlayer p = Util.getOfflinePlayer(args[2]).orElse(null);
                 if (p == null) {
-                    return Messages.player__not_found.tm(sender, args[2]);
+                    return Messages.player__not_found.tmf(sender, args[2]);
                 }
                 String key = plugin.getDBKey(p);
                 List<PlayerItem> items = plugin.getBuyShopDatabase().getPlayerItems(key);
@@ -324,7 +324,7 @@ public class CommandOperator extends AbstractPluginHolder {
             if ("sell".equalsIgnoreCase(args[1])) {
                 OfflinePlayer p = Util.getOfflinePlayer(args[2]).orElse(null);
                 if (p == null) {
-                    return Messages.player__not_found.tm(sender, args[2]);
+                    return Messages.player__not_found.tmf(sender, args[2]);
                 }
                 String key = plugin.getDBKey(p);
                 List<PlayerItem> items = plugin.getSellShopDatabase().getPlayerItems(key);

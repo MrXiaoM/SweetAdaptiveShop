@@ -136,7 +136,7 @@ public class ShopIconSell extends ShopIcon {
                 return false;
             }
             shop.give(player, 1);
-            Messages.gui__sell__success.tm(player, money, 1, shop.displayName);
+            Messages.gui__sell__success.tmf(player, money, 1, shop.displayName);
             return true;
         }
         if (click.equals(ClickType.RIGHT)) { // 购买1组
@@ -158,7 +158,7 @@ public class ShopIconSell extends ShopIcon {
                 return false;
             }
             shop.give(player, stackSize);
-            Messages.gui__sell__success.tm(player, money, stackSize, shop.displayName);
+            Messages.gui__sell__success.tmf(player, money, stackSize, shop.displayName);
             return true;
         }
         return false;

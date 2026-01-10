@@ -209,7 +209,7 @@ public class ShopIconBuy extends ShopIcon {
         double price = calculatePrice(shop, player, dynamic, countToBuy);
         String money = String.format("%.2f", price).replace(".00", "");
         plugin.getEconomy().giveMoney(player, Double.parseDouble(money));
-        Messages.gui__buy__success.tm(player, countToBuy, shop.displayName, money);
+        Messages.gui__buy__success.tmf(player, countToBuy, shop.displayName, money);
         return true;
     }
 

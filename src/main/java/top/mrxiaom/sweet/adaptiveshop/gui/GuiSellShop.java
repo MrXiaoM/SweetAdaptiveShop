@@ -156,7 +156,7 @@ public class GuiSellShop extends AbstractGuiModule {
                         return;
                     }
                     group.refreshSellShop(player);
-                    Messages.refresh__sell__success.tm(player, group.display);
+                    Messages.refresh__sell__success.tmf(player, group.display);
                     this.items = SellShopManager.inst().getPlayerItems(player, group.id);
                     open();
                     return;

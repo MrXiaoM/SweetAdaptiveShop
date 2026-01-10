@@ -94,7 +94,7 @@ public class ShopIconOrder extends ShopIcon {
             player.closeInventory();
             order.takeAll(player);
             plugin.getOrderDatabase().markOrderDone(player, order.id, data.getDoneCount() + 1);
-            Messages.gui__order__success.tm(player, order.display);
+            Messages.gui__order__success.tmf(player, order.display);
             for (IAction reward : order.rewards) {
                 reward.run(player);
             }

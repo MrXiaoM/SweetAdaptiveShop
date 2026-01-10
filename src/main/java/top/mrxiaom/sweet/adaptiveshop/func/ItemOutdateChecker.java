@@ -72,7 +72,7 @@ public class ItemOutdateChecker extends AbstractModule implements Listener {
         boolean result = Utils.now() >= outdate;
         if (result) {
             String name = ItemStackUtil.getItemDisplayName(item);
-            Messages.refresh__outdate.tm(sender, name);
+            Messages.refresh__outdate.tmf(sender, name);
             item.setType(Material.AIR);
             item.setAmount(0);
             return true;
