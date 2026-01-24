@@ -95,6 +95,17 @@ tasks {
     build {
         dependsOn(copyTask)
     }
+    javadoc {
+        (options as StandardJavadocDocletOptions).apply {
+            links("https://hub.spigotmc.org/javadocs/spigot/")
+
+            locale("zh_CN")
+            encoding("UTF-8")
+            docEncoding("UTF-8")
+            addBooleanOption("keywords", true)
+            addBooleanOption("Xdoclint:none", true)
+        }
+    }
     withType<JavaCompile>().configureEach {
         options.encoding = "UTF-8"
         options.compilerArgs.add("-Xlint:-options")
