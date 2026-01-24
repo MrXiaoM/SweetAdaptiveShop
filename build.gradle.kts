@@ -11,7 +11,7 @@ buildscript {
 }
 
 group = "top.mrxiaom.sweet.adaptiveshop"
-version = "1.1.0"
+version = "1.2.0"
 
 val base = top.mrxiaom.gradle.LibraryHelper(project)
 val targetJavaVersion = 8
