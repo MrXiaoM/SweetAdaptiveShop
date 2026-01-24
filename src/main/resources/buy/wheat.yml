@@ -47,7 +47,7 @@ permission: 'sweet.adaptive.shop.buy.%id%'
 # 价格设置
 price:
   # 使用货币类型，可用自带货币插件兼容，或者自行注册货币支持
-  # 详见
+  # 详见 https://plugins.mcio.dev/docs/adaptiveshop/api/#%E7%BB%8F%E6%B5%8E%E6%8E%A5%E5%8F%A3
   currency: Vault
   # 基础价格
   base: 1.0
