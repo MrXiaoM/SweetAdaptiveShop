@@ -1,7 +1,7 @@
 plugins {
     java
     `maven-publish`
-    id ("com.github.johnrengelman.shadow") version "7.0.0"
+    id ("com.gradleup.shadow") version "8.3.0"
     id ("com.github.gmazzo.buildconfig") version "5.6.7"
 }
 
@@ -73,6 +73,8 @@ java {
     if (JavaVersion.current() < javaVersion) {
         toolchain.languageVersion.set(JavaLanguageVersion.of(targetJavaVersion))
     }
+    withJavadocJar()
+    withSourcesJar()
 }
 tasks {
     shadowJar {
@@ -95,6 +97,7 @@ tasks {
     }
     withType<JavaCompile>().configureEach {
         options.encoding = "UTF-8"
+        options.compilerArgs.add("-Xlint:-options")
         if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible) {
             options.release.set(targetJavaVersion)
         }

@@ -7,7 +7,6 @@ import su.nightexpress.coinsengine.api.CoinsEngineAPI;
 import su.nightexpress.coinsengine.api.currency.Currency;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.api.IEconomyResolver;
-import top.mrxiaom.sweet.adaptiveshop.func.config.DisplayNames;
 
 import java.util.*;
 
