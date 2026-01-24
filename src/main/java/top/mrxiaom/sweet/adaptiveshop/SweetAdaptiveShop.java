@@ -1,16 +1,19 @@
 package top.mrxiaom.sweet.adaptiveshop;
         
 import de.tr7zw.changeme.nbtapi.utils.MinecraftVersion;
+import me.yic.mpoints.MPointsAPI;
+import net.milkbowl.vault.economy.Economy;
+import org.black_ixx.playerpoints.PlayerPoints;
+import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.BukkitPlugin;
 import top.mrxiaom.pluginbase.actions.ActionProviders;
-import top.mrxiaom.pluginbase.economy.EnumEconomy;
-import top.mrxiaom.pluginbase.economy.IEconomy;
 import top.mrxiaom.pluginbase.func.LanguageManager;
 import top.mrxiaom.pluginbase.paper.PaperFactory;
 import top.mrxiaom.pluginbase.resolver.DefaultLibraryResolver;
@@ -22,16 +25,22 @@ import top.mrxiaom.pluginbase.utils.item.ItemEditor;
 import top.mrxiaom.pluginbase.utils.scheduler.FoliaLibScheduler;
 import top.mrxiaom.sweet.adaptiveshop.actions.ActionGive;
 import top.mrxiaom.sweet.adaptiveshop.actions.ActionRefresh;
+import top.mrxiaom.sweet.adaptiveshop.api.IEconomyResolver;
+import top.mrxiaom.sweet.adaptiveshop.api.economy.*;
 import top.mrxiaom.sweet.adaptiveshop.database.BuyCountDatabase;
 import top.mrxiaom.sweet.adaptiveshop.database.BuyShopDatabase;
 import top.mrxiaom.sweet.adaptiveshop.database.OrderDatabase;
 import top.mrxiaom.sweet.adaptiveshop.database.SellShopDatabase;
+import top.mrxiaom.sweet.adaptiveshop.func.config.DisplayNames;
 import top.mrxiaom.sweet.adaptiveshop.mythic.IMythic;
 import top.mrxiaom.sweet.adaptiveshop.mythic.Mythic4;
 import top.mrxiaom.sweet.adaptiveshop.mythic.Mythic5;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class SweetAdaptiveShop extends BukkitPlugin {
@@ -41,11 +50,9 @@ public class SweetAdaptiveShop extends BukkitPlugin {
 
     public SweetAdaptiveShop() throws Exception {
         super(options()
-                .bungee(false)
                 .adventure(true)
                 .database(true)
                 .reconnectDatabaseWhenReloadConfig(false)
-                .economy(EnumEconomy.VAULT)
                 .scanIgnore("top.mrxiaom.sweet.adaptiveshop.libs")
         );
         this.scheduler = new FoliaLibScheduler(this);
@@ -70,8 +77,9 @@ public class SweetAdaptiveShop extends BukkitPlugin {
     }
 
     @NotNull
-    public IEconomy getEconomy() {
-        return options.economy();
+    @Deprecated
+    public top.mrxiaom.pluginbase.economy.IEconomy getEconomy() {
+        return vault;
     }
 
     @Override
@@ -83,6 +91,13 @@ public class SweetAdaptiveShop extends BukkitPlugin {
     public @NotNull ItemEditor initItemEditor() {
         return PaperFactory.createItemEditor();
     }
+
+    private DisplayNames displayNames;
+    private final List<IEconomyResolver> economyResolvers = new ArrayList<>();
+    private IEconomy vault;
+    private IEconomy playerPoints;
+    private IEconomyWithSign mPoints;
+    private IEconomyWithSign coinsEngine;
 
     private IMythic mythic;
     private BuyShopDatabase buyShopDatabase;
@@ -104,6 +119,55 @@ public class SweetAdaptiveShop extends BukkitPlugin {
 
     public boolean isSupportItemsAdder() {
         return supportItemsAdder;
+    }
+
+    public DisplayNames displayNames() {
+        return displayNames;
+    }
+
+    @Nullable
+    public IEconomy getVault() {
+        return vault;
+    }
+    @Nullable
+    public IEconomy getPlayerPoints() {
+        return playerPoints;
+    }
+    @Nullable
+    public IEconomyWithSign getMPoints() {
+        return mPoints;
+    }
+    @Nullable
+    public IEconomyWithSign getCoinsEngine() {
+        return coinsEngine;
+    }
+
+    @Nullable
+    public IEconomy parseEconomy(@Nullable String str) {
+        if (str == null) {
+            return null;
+        }
+        for (IEconomyResolver resolver : economyResolvers) {
+            IEconomy economy = resolver.parse(str);
+            if (economy != null) {
+                return economy;
+            }
+        }
+        return null;
+    }
+
+    public List<IEconomyResolver> economyResolvers() {
+        return Collections.unmodifiableList(economyResolvers);
+    }
+
+    public void registerEconomy(IEconomyResolver resolver) {
+        economyResolvers.add(resolver);
+        economyResolvers.sort(Comparator.comparing(IEconomyResolver::priority));
+    }
+
+    public void unregisterEconomy(IEconomyResolver resolver) {
+        economyResolvers.remove(resolver);
+        economyResolvers.sort(Comparator.comparing(IEconomyResolver::priority));
     }
 
     public void setUuidMode(boolean uuidMode) {
@@ -167,8 +231,13 @@ public class SweetAdaptiveShop extends BukkitPlugin {
         } else {
             mythic = null;
         }
-        LanguageManager.inst().setLangFile("messages.yml")
-                        .register(Messages.class, Messages::holder);
+        LanguageManager.inst()
+                .setLangFile("messages.yml")
+                .register(Messages.class, Messages::holder)
+                .reload();
+
+        initEconomy();
+
         options.registerDatabase(
                 this.buyShopDatabase = new BuyShopDatabase(this),
                 this.sellShopDatabase = new SellShopDatabase(this),
@@ -179,8 +248,55 @@ public class SweetAdaptiveShop extends BukkitPlugin {
         ActionProviders.registerActionProvider(ActionRefresh.PROVIDER);
     }
 
+    private void initEconomy() {
+        List<String> loadedEconomies = new ArrayList<>();
+        try {
+            if (Util.isPresent("net.milkbowl.vault.economy.Economy")) {
+                RegisteredServiceProvider<Economy> service = Bukkit.getServicesManager().getRegistration(Economy.class);
+                Economy provider = service == null ? null : service.getProvider();
+                if (provider != null) {
+                    vault = new VaultEconomy(this, provider);
+                    economyResolvers.add(new VaultEconomy.Resolver(this));
+                    loadedEconomies.add(vault.getName());
+                } else {
+                    warn("已发现 Vault，但经济插件未加载，无法挂钩经济插件");
+                }
+            }
+        } catch (NoClassDefFoundError ignored) {
+        }
+        try {
+            if (Util.isPresent("org.black_ixx.playerpoints.PlayerPointsAPI")) {
+                PlayerPointsAPI api = PlayerPoints.getInstance().getAPI();
+                playerPoints = new PlayerPointsEconomy(this, api);
+                economyResolvers.add(new PlayerPointsEconomy.Resolver(this));
+                loadedEconomies.add(playerPoints.getName());
+            }
+        } catch (NoClassDefFoundError ignored) {
+        }
+        try {
+            if (Util.isPresent("me.yic.mpoints.MPointsAPI")) {
+                mPoints = new MPointsEconomy(this, new MPointsAPI(), null);
+                economyResolvers.add(new MPointsEconomy.Resolver(this));
+                loadedEconomies.add(mPoints.getName());
+            }
+        } catch (NoClassDefFoundError ignored) {
+        }
+        try {
+            if (Util.isPresent("su.nightexpress.coinsengine.api.CoinsEngineAPI")) {
+                coinsEngine = new CoinsEngineEconomy(null);
+                economyResolvers.add(new CoinsEngineEconomy.Resolver(this));
+                loadedEconomies.add(coinsEngine.getName());
+            }
+        } catch (LinkageError ignored) {
+        }
+        for (String name : loadedEconomies) {
+            info("已挂钩经济插件 " + name);
+        }
+    }
+
     @Override
     protected void afterEnable() {
+        this.displayNames = DisplayNames.get(DisplayNames.class).orElseThrow(IllegalStateException::new);
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             new Placeholders(this).register();
         }

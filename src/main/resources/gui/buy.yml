@@ -14,7 +14,7 @@ main-icons:
     lore:
       - description
       - ''
-      - '  &f价格: &e%price%金币'
+      - '  &f价格: &e%price%'
       - '  &f动态: &e%dynamic%'
       - '  &f趋势: &e%dynamic_placeholder%'
       - '  &f限购: &e%limitation%'
@@ -24,15 +24,15 @@ main-icons:
     lore-bypass:
       - description
       - ''
-      - '  &f价格: &e%price%金币'
+      - '  &f价格: &e%price%'
       - '  &f限购: &e%limitation%'
       - ''
       - footer
       - operation
     operations:
-      one: '&a左键&7 | &f提交1个物品 &7(获得%price%金币)'
-      stack: '&b右键&7 | &f提交一组物品 &7(%count%个，获得%price%金币)'
-      all: '&eShift+左键&7 | &f提交全部物品 &7(%count%个，获得%price%金币)'
+      one: '&a左键&7 | &f提交1个物品 &7(获得%price%)'
+      stack: '&b右键&7 | &f提交一组物品 &7(%count%个，获得%price%)'
+      all: '&eShift+左键&7 | &f提交全部物品 &7(%count%个，获得%price%)'
   物_空白:
     material: AIR
   刷:

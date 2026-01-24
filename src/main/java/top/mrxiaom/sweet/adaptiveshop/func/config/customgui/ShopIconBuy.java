@@ -54,7 +54,7 @@ public class ShopIconBuy extends ShopIcon {
         int count = shop.getCount(player);
         double currentPrice = bypass ? shop.priceBase : shop.getPrice(player, dynamic);
 
-        String currentPriceString = String.format("%.2f", currentPrice).replace(".00", "");
+        String currentPriceString = plugin.displayNames().formatMoney(currentPrice, shop.currency);
         String dynamicDisplay = bypass ? "" : shop.getDisplayDynamic(player, dynamic);
         String dynamicPlaceholder = bypass ? "" : shop.getDynamicValuePlaceholder(dynamic);
         String limitation;
@@ -100,7 +100,7 @@ public class ShopIconBuy extends ShopIcon {
                     // 卖出1组
                     if (noCut || dynamic + shop.dynamicValueAdd * stackSize <= shop.dynamicValueMaximum) {
                         double showPrice = calculatePrice(shop, player, dynamic, stackSize);
-                        String priceStr = String.format("%.2f", showPrice).replace(".00", "");
+                        String priceStr = plugin.displayNames().formatMoney(showPrice, shop.currency);
                         lore.add(buyStack.replace("%price%", priceStr)
                                 .replace("%count%", String.valueOf(stackSize)));
                     }
@@ -110,7 +110,7 @@ public class ShopIconBuy extends ShopIcon {
                     if (noCut || dynamic + shop.dynamicValueAdd * count <= shop.dynamicValueMaximum) {
                         // 个人感觉按动态值上限算可以卖的总数量很麻烦，容易出BUG，就不写了
                         double showPrice = calculatePrice(shop, player, dynamic, count);
-                        String priceStr = String.format("%.2f", showPrice).replace(".00", "");
+                        String priceStr = plugin.displayNames().formatMoney(showPrice, shop.currency);
                         lore.add(buyAll.replace("%price%", priceStr)
                                 .replace("%count%", String.valueOf(Math.min(count, maxLimit))));
                     }
@@ -207,9 +207,12 @@ public class ShopIconBuy extends ShopIcon {
         shop.take(player, countToBuy);
         // 处理多个物品按照动态价格卖出的总价
         double price = calculatePrice(shop, player, dynamic, countToBuy);
-        String money = String.format("%.2f", price).replace(".00", "");
-        plugin.getEconomy().giveMoney(player, Double.parseDouble(money));
-        Messages.gui__buy__success.tmf(player, countToBuy, shop.displayName, money);
+        String money = plugin.displayNames().formatMoney(price, shop.currency);
+        shop.currency.giveMoney(player, Double.parseDouble(money));
+        Messages.gui__buy__success_message.tm(player,
+                Pair.of("%amount%", countToBuy),
+                Pair.of("%item%", shop.displayName),
+                Pair.of("%money%", money));
         return true;
     }
 

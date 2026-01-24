@@ -33,6 +33,9 @@ dependencies {
     // compileOnly("org.spigotmc:spigot:1.20") // NMS
 
     compileOnly("net.milkbowl.vault:VaultAPI:1.7")
+    compileOnly("org.black_ixx:playerpoints:3.2.7")
+    compileOnly(files("libs/MPoints-1.2.2.jar"))
+    compileOnly("com.github.nulli0n:CoinsEngine-spigot:c32f037025")
     compileOnly("me.clip:placeholderapi:2.11.6")
 
     compileOnly(files("libs/api-itemsadder-3.6.3-beta-14.jar"))

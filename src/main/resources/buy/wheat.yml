@@ -46,6 +46,9 @@ permission: 'sweet.adaptive.shop.buy.%id%'
 
 # 价格设置
 price:
+  # 使用货币类型，可用自带货币插件兼容，或者自行注册货币支持
+  # 详见
+  currency: Vault
   # 基础价格
   base: 1.0
   # 价格缩放设置

@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.func.gui.LoadedIcon;
 import top.mrxiaom.pluginbase.utils.AdventureItemStack;
 import top.mrxiaom.pluginbase.utils.ItemStackUtil;
+import top.mrxiaom.pluginbase.utils.Pair;
 import top.mrxiaom.pluginbase.utils.depend.PAPI;
 import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.Messages;
@@ -52,8 +53,8 @@ public class ShopIconSell extends ShopIcon {
         }
         boolean noCut = shop.dynamicValueMaximum == 0 || !shop.dynamicValueCutWhenMaximum;
         double currentPrice = bypass ? shop.priceBase : shop.getPrice(player, dynamic);
-        int count = (int) Math.floor(plugin.getEconomy().get(player) / currentPrice);
-        String currentPriceString = String.format("%.2f", currentPrice).replace(".00", "");
+        int count = (int) Math.floor(shop.currency.get(player) / currentPrice);
+        String currentPriceString = plugin.displayNames().formatMoney(currentPrice, shop.currency);
         String dynamicDisplay = bypass ? "" : shop.getDisplayDynamic(player, dynamic);
         String dynamicPlaceholder = bypass ? "" : shop.getDynamicValuePlaceholder(dynamic);
 
@@ -78,7 +79,7 @@ public class ShopIconSell extends ShopIcon {
                     // 购买1组
                     if (noCut || dynamic + shop.dynamicValueAdd * stackSize <= shop.dynamicValueMaximum) {
                         double showPrice = calculatePrice(shop, player, dynamic, stackSize);
-                        lore.add(sellStack.replace("%price%", String.format("%.2f", showPrice).replace(".00", ""))
+                        lore.add(sellStack.replace("%price%", plugin.displayNames().formatMoney(showPrice, shop.currency))
                                 .replace("%count%", String.valueOf(stackSize)));
                     }
                 }
@@ -130,13 +131,16 @@ public class ShopIconSell extends ShopIcon {
                 }
             }
             double price = calculatePrice(shop, player, dynamic, 1);
-            String money = String.format("%.2f", price).replace(".00", "");
-            if (!plugin.getEconomy().takeMoney(player, price)) {
+            String money = plugin.displayNames().formatMoney(price, shop.currency);
+            if (!shop.currency.takeMoney(player, price)) {
                 Messages.gui__sell__no_money.tm(player);
                 return false;
             }
             shop.give(player, 1);
-            Messages.gui__sell__success.tmf(player, money, 1, shop.displayName);
+            Messages.gui__sell__success_message.tm(player,
+                    Pair.of("%money%", money),
+                    Pair.of("%amount%", 1),
+                    Pair.of("%item%", shop.displayName));
             return true;
         }
         if (click.equals(ClickType.RIGHT)) { // 购买1组
@@ -151,14 +155,17 @@ public class ShopIconSell extends ShopIcon {
                 }
             }
             double price = calculatePrice(shop, player, dynamic, stackSize);
-            String money = String.format("%.2f", price).replace(".00", "");
+            String money = plugin.displayNames().formatMoney(price, shop.currency);
             double total = Double.parseDouble(money);
-            if (!plugin.getEconomy().takeMoney(player, total)) {
+            if (!shop.currency.takeMoney(player, total)) {
                 Messages.gui__sell__no_money.tm(player);
                 return false;
             }
             shop.give(player, stackSize);
-            Messages.gui__sell__success.tmf(player, money, stackSize, shop.displayName);
+            Messages.gui__sell__success_message.tm(player,
+                    Pair.of("%money%", money),
+                    Pair.of("%amount%", stackSize),
+                    Pair.of("%item%", shop.displayName));
             return true;
         }
         return false;

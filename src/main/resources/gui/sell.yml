@@ -14,7 +14,7 @@ main-icons:
     lore:
       - description
       - ''
-      - '  &f价格: &e%price%金币'
+      - '  &f价格: &e%price%'
       - '  &f动态: &e%dynamic%'
       - '  &f趋势: &e%dynamic_placeholder%'
       - ''
@@ -22,12 +22,12 @@ main-icons:
     lore-bypass:
       - description
       - ''
-      - '  &f价格: &e%price%金币'
+      - '  &f价格: &e%price%'
       - ''
       - operation
     operations:
-      one: '&a左键&7 | &f购买1个物品 &7(花费%price%金币)'
-      stack: '&b右键&7 | &f购买一组物品 &7(%count%个，花费%price%金币)'
+      one: '&a左键&7 | &f购买1个物品 &7(花费%price%)'
+      stack: '&b右键&7 | &f购买一组物品 &7(%count%个，花费%price%)'
   物_空白:
     material: AIR
   刷:

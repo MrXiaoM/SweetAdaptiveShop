@@ -22,3 +22,14 @@ routine-time:
   hour: 4
   minute: 0
   second: 0
+
+display-names:
+  # 货币类型名称
+  currency-types:
+    # Vault 货币
+    vault: '&e金币'
+    # PlayerPoints 货币
+    points: '&d点券'
+    # MPoints 货币
+    m-points:
+      sign: '&b点数'

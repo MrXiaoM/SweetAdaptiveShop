@@ -13,6 +13,7 @@ import top.mrxiaom.pluginbase.api.IAction;
 import top.mrxiaom.pluginbase.utils.ItemStackUtil;
 import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
+import top.mrxiaom.sweet.adaptiveshop.api.economy.IEconomy;
 import top.mrxiaom.sweet.adaptiveshop.enums.PermMode;
 import top.mrxiaom.sweet.adaptiveshop.enums.Routine;
 import top.mrxiaom.sweet.adaptiveshop.enums.Strategy;
@@ -39,6 +40,7 @@ public class SellShop implements IShop {
     public final String displayName;
     public final int maxCount;
     public final List<IAction> commands;
+    public final IEconomy currency;
     public final double priceBase;
     public final DoubleRange scaleRange;
     public final double scaleWhenDynamicLargeThan;
@@ -76,6 +78,13 @@ public class SellShop implements IShop {
         this.maxCount = matchItem.maxCount;
 
         this.commands = loadActions(config, "commands");
+
+        String currencyId = config.getString("price/currency", "Vault");
+        IEconomy currency = holder.plugin.parseEconomy(currencyId);
+        if (currency == null) {
+            throw new IllegalArgumentException("price.currency 指定的货币类型 " + currencyId + " 无效");
+        }
+        this.currency = currency;
         this.priceBase = config.getDouble("price/base");
 
         DoubleRange scaleRange = Utils.getDoubleRange(config, "price/scale/range");

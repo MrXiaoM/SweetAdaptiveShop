@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.utils.ItemStackUtil;
 import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
+import top.mrxiaom.sweet.adaptiveshop.api.economy.IEconomy;
 import top.mrxiaom.sweet.adaptiveshop.enums.PermMode;
 import top.mrxiaom.sweet.adaptiveshop.enums.Routine;
 import top.mrxiaom.sweet.adaptiveshop.enums.Strategy;
@@ -41,6 +42,7 @@ public class BuyShop implements IShop {
     public final List<String> footer;
     private final ItemMatcher itemMatcher;
     private final Map<Enchantment, List<Integer>> enchantments;
+    public final IEconomy currency;
     public final double priceBase;
     public final DoubleRange scaleRange;
     public final double scaleWhenDynamicLargeThan;
@@ -97,6 +99,13 @@ public class BuyShop implements IShop {
             ItemStackUtil.setItemLore(displayItem, lore);
         }
         this.footer = config.getStringList("footer");
+
+        String currencyId = config.getString("price/currency", "Vault");
+        IEconomy currency = holder.plugin.parseEconomy(currencyId);
+        if (currency == null) {
+            throw new IllegalArgumentException("price.currency 指定的货币类型 " + currencyId + " 无效");
+        }
+        this.currency = currency;
         this.priceBase = config.getDouble("price/base");
         DoubleRange scaleRange = Utils.getDoubleRange(config, "price/scale/range");
         if (scaleRange == null) {
