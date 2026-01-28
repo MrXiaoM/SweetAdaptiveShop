@@ -1,6 +1,7 @@
 # 重定向路径
 path:
   buy: ./buy
+  sell: ./sell
   order: ./order
 
 # 应该用玩家名还是UUID来储存玩家数据
