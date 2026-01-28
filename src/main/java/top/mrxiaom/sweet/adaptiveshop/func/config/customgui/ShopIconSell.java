@@ -131,14 +131,14 @@ public class ShopIconSell extends ShopIcon {
                 }
             }
             double price = calculatePrice(shop, player, dynamic, 1);
-            String money = plugin.displayNames().formatMoney(price, shop.currency);
-            if (!shop.currency.takeMoney(player, price)) {
+            double total = Double.parseDouble(plugin.displayNames().formatMoney(price));
+            if (!shop.currency.takeMoney(player, total)) {
                 Messages.gui__sell__no_money.tm(player);
                 return false;
             }
             shop.give(player, 1);
             Messages.gui__sell__success_message.tm(player,
-                    Pair.of("%money%", money),
+                    Pair.of("%money%", plugin.displayNames().formatMoney(price, shop.currency)),
                     Pair.of("%amount%", 1),
                     Pair.of("%item%", shop.displayName));
             return true;
@@ -155,15 +155,14 @@ public class ShopIconSell extends ShopIcon {
                 }
             }
             double price = calculatePrice(shop, player, dynamic, stackSize);
-            String money = plugin.displayNames().formatMoney(price, shop.currency);
-            double total = Double.parseDouble(money);
+            double total = Double.parseDouble(plugin.displayNames().formatMoney(price));
             if (!shop.currency.takeMoney(player, total)) {
                 Messages.gui__sell__no_money.tm(player);
                 return false;
             }
             shop.give(player, stackSize);
             Messages.gui__sell__success_message.tm(player,
-                    Pair.of("%money%", money),
+                    Pair.of("%money%", plugin.displayNames().formatMoney(price, shop.currency)),
                     Pair.of("%amount%", stackSize),
                     Pair.of("%item%", shop.displayName));
             return true;

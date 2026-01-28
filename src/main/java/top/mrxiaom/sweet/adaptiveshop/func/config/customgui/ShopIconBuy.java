@@ -207,12 +207,12 @@ public class ShopIconBuy extends ShopIcon {
         shop.take(player, countToBuy);
         // 处理多个物品按照动态价格卖出的总价
         double price = calculatePrice(shop, player, dynamic, countToBuy);
-        String money = plugin.displayNames().formatMoney(price, shop.currency);
+        String money = plugin.displayNames().formatMoney(price);
         shop.currency.giveMoney(player, Double.parseDouble(money));
         Messages.gui__buy__success_message.tm(player,
                 Pair.of("%amount%", countToBuy),
                 Pair.of("%item%", shop.displayName),
-                Pair.of("%money%", money));
+                Pair.of("%money%", plugin.displayNames().formatMoney(price, shop.currency)));
         return true;
     }
 
