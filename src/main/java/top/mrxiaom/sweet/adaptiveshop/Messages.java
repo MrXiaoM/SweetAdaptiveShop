@@ -61,7 +61,7 @@ public enum Messages implements IHolderAccessor {
     gui__buy__outdate("&e这个商品已经过期了! 请重新打开菜单以刷新列表!"),
     gui__buy__not_enough("&e你没有足够的物品提交到商店!"),
     gui__buy__maximum("&e这个商店暂时不再接受这种物品了!"),
-    gui__buy__success_message("&a你提交了 &e%amount%&a 个 &e%item%&r&a，获得 &e%money&a!"),
+    gui__buy__success_message("&a你提交了 &e%amount%&a 个 &e%item%&r&a，获得 &e%money%&a!"),
     gui__sell__outdate("&e这个商品已经过期了! 请重新打开菜单以刷新列表!"),
     gui__sell__no_money("&e你没有足够的物品提交到商店!"),
     gui__sell__maximum("&e这个商品已经售罄了!"),
