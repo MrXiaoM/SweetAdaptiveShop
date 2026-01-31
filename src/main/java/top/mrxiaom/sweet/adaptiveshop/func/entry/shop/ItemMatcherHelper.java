@@ -16,8 +16,10 @@ import org.bukkit.potion.PotionType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.utils.ItemStackUtil;
+import top.mrxiaom.pluginbase.utils.Pair;
 import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.pluginbase.utils.depend.IA;
+import top.mrxiaom.sweet.adaptiveshop.api.ItemAdapter;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractModule;
 import top.mrxiaom.sweet.adaptiveshop.mythic.IMythic;
 
@@ -234,6 +236,19 @@ public class ItemMatcherHelper {
             if (displayName == null) {
                 displayName = ItemStackUtil.getItemDisplayName(displayItem);
             }
+        } else if ("craftengine".equals(type)) {
+            ItemAdapter adapter = holder.plugin.getItemAdapter("CraftEngine");
+            if (adapter == null) {
+                throw new IllegalArgumentException("未安装前置 CraftEngine");
+            }
+            String craftEngineId = config.getString("craftengine");
+            Pair<Object, ItemStack> pair = adapter.parseItem(craftEngineId);
+            Object key = pair.key();
+            displayItem = pair.value();
+            matcher = create(999, item -> adapter.isTheSameId(item, key));
+            if (displayName == null) {
+                displayName = ItemStackUtil.getItemDisplayName(displayItem);
+            }
         } else {
             throw new IllegalArgumentException("不支持的物品类型 " + type);
         }
@@ -296,6 +311,19 @@ public class ItemMatcherHelper {
             if (itemsAdderId == null || displayItem == null) {
                 throw new IllegalArgumentException("找不到相应的 ItemsAdder 物品");
             }
+            if (maxCount == null) {
+                maxCount = displayItem.getType().getMaxStackSize();
+            }
+            if (displayName == null) {
+                displayName = ItemStackUtil.getItemDisplayName(displayItem);
+            }
+        } else if ("craftengine".equals(type)) {
+            ItemAdapter adapter = holder.plugin.getItemAdapter("CraftEngine");
+            if (adapter == null) {
+                throw new IllegalArgumentException("未安装前置 CraftEngine");
+            }
+            String craftEngineId = config.getString("craftengine");
+            displayItem = adapter.parseItem(craftEngineId).value();
             if (maxCount == null) {
                 maxCount = displayItem.getType().getMaxStackSize();
             }

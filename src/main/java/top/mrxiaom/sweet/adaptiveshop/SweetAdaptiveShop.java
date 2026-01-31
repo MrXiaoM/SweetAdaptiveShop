@@ -26,6 +26,7 @@ import top.mrxiaom.pluginbase.utils.scheduler.FoliaLibScheduler;
 import top.mrxiaom.sweet.adaptiveshop.actions.ActionGive;
 import top.mrxiaom.sweet.adaptiveshop.actions.ActionRefresh;
 import top.mrxiaom.sweet.adaptiveshop.api.IEconomyResolver;
+import top.mrxiaom.sweet.adaptiveshop.api.ItemAdapter;
 import top.mrxiaom.sweet.adaptiveshop.api.economy.*;
 import top.mrxiaom.sweet.adaptiveshop.database.BuyCountDatabase;
 import top.mrxiaom.sweet.adaptiveshop.database.BuyShopDatabase;
@@ -38,10 +39,7 @@ import top.mrxiaom.sweet.adaptiveshop.mythic.Mythic5;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class SweetAdaptiveShop extends BukkitPlugin {
     public static SweetAdaptiveShop getInstance() {
@@ -99,6 +97,7 @@ public class SweetAdaptiveShop extends BukkitPlugin {
     private IEconomyWithSign mPoints;
     private IEconomyWithSign coinsEngine;
 
+    private final Map<String, ItemAdapter> itemAdapterRegistry = new HashMap<>();
     private IMythic mythic;
     private BuyShopDatabase buyShopDatabase;
     private SellShopDatabase sellShopDatabase;
@@ -168,6 +167,19 @@ public class SweetAdaptiveShop extends BukkitPlugin {
     public void unregisterEconomy(IEconomyResolver resolver) {
         economyResolvers.remove(resolver);
         economyResolvers.sort(Comparator.comparing(IEconomyResolver::priority));
+    }
+
+    @Nullable
+    public ItemAdapter getItemAdapter(String id) {
+        return itemAdapterRegistry.get(id.toLowerCase());
+    }
+
+    public void registerItemAdapter(String id, ItemAdapter adapter) {
+        itemAdapterRegistry.put(id.toLowerCase(), adapter);
+    }
+
+    public void unregisterItemAdapter(String id) {
+        itemAdapterRegistry.remove(id.toLowerCase());
     }
 
     public void setUuidMode(boolean uuidMode) {

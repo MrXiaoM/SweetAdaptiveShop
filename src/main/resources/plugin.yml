@@ -8,6 +8,7 @@ softdepend:
   - MythicLib
   - MythicMobs
   - ItemsAdder
+  - CraftEngine
 authors: [ MrXiaoM ]
 folia-supported: true
 libraries:

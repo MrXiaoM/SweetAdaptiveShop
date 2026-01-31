@@ -17,6 +17,7 @@ val base = top.mrxiaom.gradle.LibraryHelper(project)
 val targetJavaVersion = 8
 val shadowGroup = "top.mrxiaom.sweet.adaptiveshop.libs"
 val pluginBaseModules = base.modules.run { listOf(library, gui, actions, l10n, temporaryData, paper) }
+val shadowLink = configurations.create("shadowLink")
 
 repositories {
     mavenCentral()
@@ -57,6 +58,7 @@ dependencies {
         implementation(artifact)
     }
     implementation(base.resolver.lite)
+    shadowLink(project(":craft-engine"))
 }
 buildConfig {
     className("BuildConstants")
@@ -78,6 +80,7 @@ java {
 }
 tasks {
     shadowJar {
+        configurations.add(shadowLink)
         mapOf(
             "top.mrxiaom.pluginbase" to "base",
             "de.tr7zw.changeme.nbtapi" to "nbtapi",

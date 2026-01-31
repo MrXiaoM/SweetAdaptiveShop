@@ -4,12 +4,14 @@ group: default
 # vanilla 为原版物品，使用参数 material
 # mythic 为MythicMobs物品，使用参数 mythic
 # itemsadder 为ItemsAdder物品，使用参数 itemsadder
+# craftengine 为CraftEngine物品，使用参数 craftengine
 type: vanilla
 # 旧版本可使用 '物品ID:子ID' 格式，如 'WOOL:3'
 # 在旧版本，不输入冒号添加子ID，则代表这一物品ID下任意子ID的物品都可以匹配
 material: WHEAT
 #mythic: ExampleItem
 #itemsadder: '_iainternal:icon_arrow_chest'
+#craftenigne: 'example:item'
 
 # 展示名，可不输入，不输入则自动获取，仅 1.19.4 及以上可以自动获取原版物品名
 # display-name: '名字'

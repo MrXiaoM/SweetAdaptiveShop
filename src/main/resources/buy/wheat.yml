@@ -6,12 +6,14 @@ group: default
 # enchanted-book 为原版附魔书，使用参数 enchanted-book
 # mythic 为MythicMobs物品，使用参数 mythic
 # itemsadder 为ItemsAdder物品，使用参数 itemsadder
+# craftengine 为CraftEngine物品，使用参数 craftengine
 type: vanilla
 # 旧版本可使用 '物品ID:子ID' 格式，如 'WOOL:3'
 # 在旧版本，不输入冒号添加子ID，则代表这一物品ID下任意子ID的物品都可以匹配
 material: WHEAT
 #mythic: ExampleItem
 #itemsadder: '_iainternal:icon_arrow_chest'
+#craftenigne: 'example:item'
 # 药水和附魔的ID，1.13+ 使用原版ID，低版本使用以下链接指定的ID
 # 【药水】https://javadoc.mcio.dev/spigot/1.12.2/org/bukkit/potion/PotionEffectType.html
 # 【附魔】https://javadoc.mcio.dev/spigot/1.12.2/org/bukkit/enchantments/Enchantment.html
