@@ -121,53 +121,37 @@ public class ShopIconSell extends ShopIcon {
             return false;
         }
         if (click.equals(ClickType.LEFT)) { // 购买1个
-            Double dyn = plugin.getSellShopDatabase().getDynamicValue(shop, player);
-            double dynamic = dyn == null ? 0.0 : dyn;
-            if (shop.dynamicValueMaximum > 0 && shop.dynamicValueCutWhenMaximum) {
-                double add = shop.dynamicValueAdd;
-                if (dynamic + add > shop.dynamicValueMaximum) {
-                    Messages.gui__sell__maximum.tm(player);
-                    return false;
-                }
-            }
-            double price = calculatePrice(shop, player, dynamic, 1);
-            double total = Double.parseDouble(plugin.displayNames().formatMoney(price));
-            if (!shop.currency.takeMoney(player, total)) {
-                Messages.gui__sell__no_money.tm(player);
-                return false;
-            }
-            shop.give(player, 1);
-            Messages.gui__sell__success_message.tm(player,
-                    Pair.of("%money%", plugin.displayNames().formatMoney(price, shop.currency)),
-                    Pair.of("%amount%", 1),
-                    Pair.of("%item%", shop.displayName));
-            return true;
+            return doSell(plugin, shop, player, 1);
         }
         if (click.equals(ClickType.RIGHT)) { // 购买1组
             int stackSize = shop.displayItem.getType().getMaxStackSize();
-            Double dyn = plugin.getSellShopDatabase().getDynamicValue(shop, player);
-            double dynamic = dyn == null ? 0.0 : dyn;
-            if (shop.dynamicValueMaximum > 0 && shop.dynamicValueCutWhenMaximum) {
-                double add = shop.dynamicValueAdd * stackSize;
-                if (shop.hasReachDynamicValueMaximum(dynamic + add)) {
-                    Messages.gui__sell__maximum.tm(player);
-                    return false;
-                }
-            }
-            double price = calculatePrice(shop, player, dynamic, stackSize);
-            double total = Double.parseDouble(plugin.displayNames().formatMoney(price));
-            if (!shop.currency.takeMoney(player, total)) {
-                Messages.gui__sell__no_money.tm(player);
-                return false;
-            }
-            shop.give(player, stackSize);
-            Messages.gui__sell__success_message.tm(player,
-                    Pair.of("%money%", plugin.displayNames().formatMoney(price, shop.currency)),
-                    Pair.of("%amount%", stackSize),
-                    Pair.of("%item%", shop.displayName));
-            return true;
+            return doSell(plugin, shop, player, stackSize);
         }
         return false;
+    }
+
+    private static boolean doSell(SweetAdaptiveShop plugin, SellShop shop, Player player, int itemCount) {
+        Double dyn = plugin.getSellShopDatabase().getDynamicValue(shop, player);
+        double dynamic = dyn == null ? 0.0 : dyn;
+        if (shop.dynamicValueMaximum > 0 && shop.dynamicValueCutWhenMaximum) {
+            double add = shop.dynamicValueAdd * itemCount;
+            if (shop.hasReachDynamicValueMaximum(dynamic + add)) {
+                Messages.gui__sell__maximum.tm(player);
+                return false;
+            }
+        }
+        double price = calculatePrice(shop, player, dynamic, itemCount);
+        double total = Double.parseDouble(plugin.displayNames().formatMoney(price));
+        if (!shop.currency.takeMoney(player, total)) {
+            Messages.gui__sell__no_money.tm(player);
+            return false;
+        }
+        shop.give(player, itemCount);
+        Messages.gui__sell__success_message.tm(player,
+                Pair.of("%money%", plugin.displayNames().formatMoney(price, shop.currency)),
+                Pair.of("%amount%", itemCount),
+                Pair.of("%item%", shop.displayName));
+        return true;
     }
 
     /**
