@@ -11,8 +11,7 @@ softdepend:
   - CraftEngine
 authors: [ MrXiaoM ]
 folia-supported: true
-libraries:
-  - "org.jetbrains:annotations:24.0.0"
+# PluginBase Libraries ${libraries_config}
 commands:
   sweetadaptiveshop:
     description: 'The main command of SweetAdaptiveShop'

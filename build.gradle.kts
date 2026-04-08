@@ -1,13 +1,13 @@
 plugins {
     java
     `maven-publish`
-    id ("com.gradleup.shadow") version "8.3.0"
+    id ("com.gradleup.shadow") version "9.3.0"
     id ("com.github.gmazzo.buildconfig") version "5.6.7"
 }
 
 buildscript {
     repositories.mavenCentral()
-    dependencies.classpath("top.mrxiaom:LibrariesResolver-Gradle:1.7.5")
+    dependencies.classpath("top.mrxiaom:LibrariesResolver-Gradle:1.7.16")
 }
 
 group = "top.mrxiaom.sweet.adaptiveshop"
@@ -27,6 +27,7 @@ repositories {
     maven("https://jitpack.io")
     maven("https://repo.rosewooddev.io/repository/public/")
     maven("https://mvn.lumine.io/repository/maven/")
+    maven("https://repo.momirealms.net/releases/")
 }
 
 dependencies {
@@ -36,8 +37,11 @@ dependencies {
     compileOnly("net.milkbowl.vault:VaultAPI:1.7")
     compileOnly("org.black_ixx:playerpoints:3.2.7")
     compileOnly(files("libs/MPoints-1.2.2.jar"))
-    compileOnly("com.github.nulli0n:CoinsEngine-spigot:c32f037025")
+    compileOnly("com.github.nulli0n:ExcellentEconomy:c32f037025") // CoinsEngine
     compileOnly("me.clip:placeholderapi:2.11.6")
+
+    compileOnly("net.momirealms:craft-engine-core:0.0.67")
+    compileOnly("net.momirealms:craft-engine-bukkit:0.0.67")
 
     compileOnly(files("libs/api-itemsadder-3.6.3-beta-14.jar"))
     compileOnly("io.lumine:Mythic-Dist:4.13.0")
@@ -52,13 +56,12 @@ dependencies {
     base.library("com.zaxxer:HikariCP:4.0.3")
     base.library("top.mrxiaom:EvalEx-j8:3.4.0")
 
-    implementation("de.tr7zw:item-nbt-api:2.15.5")
+    implementation("de.tr7zw:item-nbt-api:2.15.7")
     implementation("com.github.technicallycoded:FoliaLib:0.4.4") { isTransitive = false }
     for (artifact in pluginBaseModules) {
         implementation(artifact)
     }
     implementation(base.resolver.lite)
-    shadowLink(project(":craft-engine"))
 }
 buildConfig {
     className("BuildConstants")
@@ -70,16 +73,13 @@ buildConfig {
     buildConfigField("java.time.Instant", "BUILD_TIME", "java.time.Instant.ofEpochSecond(${System.currentTimeMillis() / 1000L}L)")
     buildConfigField("String[]", "RESOLVED_LIBRARIES", base.join())
 }
-java {
-    val javaVersion = JavaVersion.toVersion(targetJavaVersion)
-    if (JavaVersion.current() < javaVersion) {
-        toolchain.languageVersion.set(JavaLanguageVersion.of(targetJavaVersion))
-    }
-    withJavadocJar()
-    withSourcesJar()
-}
+
+top.mrxiaom.gradle.LibraryHelper.initJava(project, base, targetJavaVersion, true)
+top.mrxiaom.gradle.LibraryHelper.initPublishing(project)
+
 tasks {
     shadowJar {
+        configurations.add(project.configurations.runtimeClasspath.get())
         configurations.add(shadowLink)
         mapOf(
             "top.mrxiaom.pluginbase" to "base",
@@ -87,53 +87,6 @@ tasks {
             "com.tcoded.folialib" to "folialib",
         ).forEach { (original, target) ->
             relocate(original, "$shadowGroup.$target")
-        }
-    }
-    val copyTask = create<Copy>("copyBuildArtifact") {
-        dependsOn(shadowJar)
-        from(shadowJar.get().outputs)
-        rename { "${project.name}-$version.jar" }
-        into(rootProject.file("out"))
-    }
-    build {
-        dependsOn(copyTask)
-    }
-    javadoc {
-        (options as StandardJavadocDocletOptions).apply {
-            links("https://hub.spigotmc.org/javadocs/spigot/")
-
-            locale("zh_CN")
-            encoding("UTF-8")
-            docEncoding("UTF-8")
-            addBooleanOption("keywords", true)
-            addBooleanOption("Xdoclint:none", true)
-        }
-    }
-    withType<JavaCompile>().configureEach {
-        options.encoding = "UTF-8"
-        options.compilerArgs.add("-Xlint:-options")
-        if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible) {
-            options.release.set(targetJavaVersion)
-        }
-    }
-    processResources {
-        duplicatesStrategy = DuplicatesStrategy.INCLUDE
-        from(sourceSets.main.get().resources.srcDirs) {
-            expand(mapOf("version" to version))
-            include("plugin.yml")
-        }
-    }
-}
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = project.group.toString()
-            artifactId = rootProject.name
-            version = project.version.toString()
-
-            artifact(tasks["shadowJar"]).classifier = null
-            artifact(tasks["sourcesJar"])
-            artifact(tasks["javadocJar"])
         }
     }
 }

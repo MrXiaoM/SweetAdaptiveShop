@@ -20,10 +20,22 @@ public class CraftEngineAdapter extends AbstractModule implements ItemAdapter {
         info("已挂钩 CraftEngine");
     }
 
+    private static Key of(String id) {
+        String[] strings = new String[]{"minecraft", id};
+        int i = id.indexOf(':');
+        if (i >= 0) {
+            strings[1] = id.substring(i + 1);
+            if (i >= 1) {
+                strings[0] = id.substring(0, i);
+            }
+        }
+        return new Key(strings[0], strings[1]);
+    }
+
     @Override
     public @NotNull Pair<Object, ItemStack> parseItem(String str) throws IllegalStateException {
         if (str == null) throw new IllegalStateException("未配置 CE 物品");
-        CustomItem<ItemStack> customItem = CraftEngineItems.byId(Key.of(str));
+        CustomItem<ItemStack> customItem = CraftEngineItems.byId(of(str));
         if (customItem == null) throw new IllegalStateException("找不到 CE 物品 " + str);
         return Pair.of(customItem.id(), customItem.buildItemStack());
     }

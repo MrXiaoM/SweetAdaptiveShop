@@ -1,6 +1,7 @@
 package top.mrxiaom.sweet.adaptiveshop.actions;
 
 import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import top.mrxiaom.pluginbase.api.IAction;
@@ -12,9 +13,21 @@ import top.mrxiaom.pluginbase.utils.Util;
 import java.util.List;
 
 public class ActionGive implements IAction {
-    public static final IActionProvider PROVIDER = (s) -> {
-        if (s.startsWith("[give]")) return parse(s.substring(6).split(" "));
-        if (s.startsWith("give:")) return parse(s.substring(5).split(" "));
+    public static final IActionProvider PROVIDER = (input) -> {
+        if (input instanceof ConfigurationSection) {
+            ConfigurationSection section = (ConfigurationSection) input;
+            if ("give".equals(section.getString("type"))) {
+                Material material = Util.valueOrNull(Material.class, section.getString("material"));
+                int count = section.getInt("count", 1);
+                if (material != null && count > 0) {
+                    return new ActionGive(material, count);
+                }
+            }
+        } else {
+            String s = String.valueOf(input);
+            if (s.startsWith("[give]")) return parse(s.substring(6).split(" "));
+            if (s.startsWith("give:")) return parse(s.substring(5).split(" "));
+        }
         return null;
     };
     public final Material material;
