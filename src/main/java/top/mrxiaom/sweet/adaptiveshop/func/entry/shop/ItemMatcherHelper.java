@@ -19,6 +19,7 @@ import top.mrxiaom.pluginbase.utils.ItemStackUtil;
 import top.mrxiaom.pluginbase.utils.Pair;
 import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.pluginbase.utils.depend.IA;
+import top.mrxiaom.sweet.adaptiveshop.SweetAdaptiveShop;
 import top.mrxiaom.sweet.adaptiveshop.api.ItemAdapter;
 import top.mrxiaom.sweet.adaptiveshop.func.AbstractModule;
 import top.mrxiaom.sweet.adaptiveshop.mythic.IMythic;
@@ -43,6 +44,7 @@ public class ItemMatcherHelper {
     @NotNull
     @SuppressWarnings({"deprecation"})
     public static ItemMatcherHelper loadForBuyShop(AbstractModule holder, ConfigurationSection config) {
+        SweetAdaptiveShop plugin = holder.plugin;
         String type = config.getString("type");
         String displayName = config.getString("display-name", null);
         ItemStack displayItem;
@@ -63,7 +65,7 @@ public class ItemMatcherHelper {
             matcher = create(1000, item -> item.getType().equals(finalMaterial)
                     && (data == null || item.getDurability() == data.shortValue()));
             if (displayName == null) {
-                if (holder.plugin.isSupportTranslatable()) {
+                if (plugin.isSupportTranslatable()) {
                     displayName = "<translate:" + displayItem.getType().getTranslationKey() + ">";
                 } else {
                     displayName = displayItem.getType().name().toLowerCase().replace("_", "");
@@ -160,7 +162,7 @@ public class ItemMatcherHelper {
                 displayItem.setItemMeta(potionMeta);
             }
             if (displayName == null) {
-                if (holder.plugin.isSupportTranslatable()) {
+                if (plugin.isSupportTranslatable()) {
                     displayName = "<translate:" + displayItem.getType().getTranslationKey() + ">";
                 } else {
                     displayName = displayItem.getType().name().toLowerCase().replace("_", "");
@@ -198,14 +200,14 @@ public class ItemMatcherHelper {
             enchantmentStorageMeta.addStoredEnchant(enchant, level == null ? 1 : level, true);
             displayItem.setItemMeta(enchantmentStorageMeta);
             if (displayName == null) {
-                if (holder.plugin.isSupportTranslatable()) {
+                if (plugin.isSupportTranslatable()) {
                     displayName = "<translate:" + displayItem.getType().getTranslationKey() + ">";
                 } else {
                     displayName = displayItem.getType().name().toLowerCase().replace("_", "");
                 }
             }
         } else if ("mythic".equals(type)) {
-            IMythic mythic = holder.plugin.getMythic();
+            IMythic mythic = plugin.getMythic();
             if (mythic == null) {
                 throw new IllegalArgumentException("未安装前置 MythicMobs");
             }
@@ -214,12 +216,12 @@ public class ItemMatcherHelper {
             if (mythicId == null || displayItem == null) {
                 throw new IllegalArgumentException("找不到相应的 MythicMobs 物品");
             }
-            matcher = create(999, item -> mythicId.equals(IMythic.getId(item)));
+            matcher = create(999, item -> mythicId.equals(plugin.getMythic().getItemId(item)));
             if (displayName == null) {
                 displayName = ItemStackUtil.getItemDisplayName(displayItem);
             }
         } else if ("itemsadder".equals(type)) {
-            if (!holder.plugin.isSupportItemsAdder()) {
+            if (!plugin.isSupportItemsAdder()) {
                 throw new IllegalArgumentException("未安装前置 ItemsAdder");
             }
             String itemsAdderId = config.getString("itemsadder");
@@ -237,7 +239,7 @@ public class ItemMatcherHelper {
                 displayName = ItemStackUtil.getItemDisplayName(displayItem);
             }
         } else if ("craftengine".equals(type)) {
-            ItemAdapter adapter = holder.plugin.getItemAdapter("CraftEngine");
+            ItemAdapter adapter = plugin.getItemAdapter("CraftEngine");
             if (adapter == null) {
                 throw new IllegalArgumentException("未安装前置 CraftEngine");
             }

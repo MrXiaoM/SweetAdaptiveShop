@@ -2,6 +2,7 @@ package top.mrxiaom.sweet.adaptiveshop.mythic;
 
 import io.lumine.mythic.bukkit.BukkitAdapter;
 import io.lumine.mythic.bukkit.MythicBukkit;
+import io.lumine.mythic.core.items.ItemExecutor;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,5 +16,16 @@ public class Mythic5 implements IMythic {
                 .map(it -> it.generateItemStack(1))
                 .map(BukkitAdapter::adapt)
                 .orElse(null);
+    }
+
+    @Nullable
+    @Override
+    public String getItemId(ItemStack item) {
+        ItemExecutor itemManager = plugin.getItemManager();
+        if (itemManager.isMythicItem(item)) {
+            return itemManager.getMythicTypeFromItem(item);
+        } else {
+            return null;
+        }
     }
 }
