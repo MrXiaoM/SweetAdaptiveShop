@@ -1,3 +1,5 @@
+import top.mrxiaom.gradle.LibraryHelper
+
 plugins {
     java
     `maven-publish`
@@ -7,13 +9,13 @@ plugins {
 
 buildscript {
     repositories.mavenCentral()
-    dependencies.classpath("top.mrxiaom:LibrariesResolver-Gradle:1.7.16")
+    dependencies.classpath("top.mrxiaom:LibrariesResolver-Gradle:1.7.20")
 }
 
 group = "top.mrxiaom.sweet.adaptiveshop"
 version = "1.2.2"
 
-val base = top.mrxiaom.gradle.LibraryHelper(project)
+val base = LibraryHelper(project)
 val targetJavaVersion = 8
 val shadowGroup = "top.mrxiaom.sweet.adaptiveshop.libs"
 val pluginBaseModules = base.modules.run { listOf(library, gui, actions, l10n, temporaryData, paper) }
@@ -47,16 +49,13 @@ dependencies {
     compileOnly("io.lumine:Mythic-Dist:4.13.0")
     compileOnly("io.lumine:Mythic:5.6.2")
     compileOnly("io.lumine:LumineUtils:1.20-SNAPSHOT")
-    compileOnly("org.jetbrains:annotations:24.0.0")
+    compileOnly(base.depend.annotations)
 
-    base.library("net.kyori:adventure-api:4.22.0")
-    base.library("net.kyori:adventure-platform-bukkit:4.4.0")
-    base.library("net.kyori:adventure-text-serializer-plain:4.22.0")
-    base.library("net.kyori:adventure-text-minimessage:4.22.0")
-    base.library("com.zaxxer:HikariCP:4.0.3")
-    base.library("top.mrxiaom:EvalEx-j8:3.4.0")
+    base.library(LibraryHelper.adventure("4.22.0"))
+    base.library(base.depend.HikariCP)
+    base.library(base.depend.EvalEx)
 
-    implementation("de.tr7zw:item-nbt-api:2.15.7")
+    implementation(base.depend.nbtapi)
     implementation("com.github.technicallycoded:FoliaLib:0.4.4") { isTransitive = false }
     for (artifact in pluginBaseModules) {
         implementation(artifact)
@@ -74,8 +73,8 @@ buildConfig {
     buildConfigField("String[]", "RESOLVED_LIBRARIES", base.join())
 }
 
-top.mrxiaom.gradle.LibraryHelper.initJava(project, base, targetJavaVersion, true)
-top.mrxiaom.gradle.LibraryHelper.initPublishing(project)
+LibraryHelper.initJava(project, base, targetJavaVersion, true)
+LibraryHelper.initPublishing(project)
 
 tasks {
     shadowJar {
