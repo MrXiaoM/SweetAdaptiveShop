@@ -9,7 +9,7 @@ plugins {
 
 buildscript {
     repositories.mavenCentral()
-    dependencies.classpath("top.mrxiaom:LibrariesResolver-Gradle:1.7.20")
+    dependencies.classpath("top.mrxiaom:LibrariesResolver-Gradle:1.7.21")
 }
 
 group = "top.mrxiaom.sweet.adaptiveshop"
@@ -53,9 +53,10 @@ dependencies {
 
     base.library(LibraryHelper.adventure("4.22.0"))
     base.library(base.depend.HikariCP)
-    base.library(base.depend.EvalEx)
+    base.collectPluginHolders()
 
     implementation(base.depend.nbtapi)
+    implementation(base.depend.EvalEx)
     implementation("com.github.technicallycoded:FoliaLib:0.4.4") { isTransitive = false }
     for (artifact in pluginBaseModules) {
         implementation(artifact)
@@ -83,6 +84,7 @@ tasks {
         mapOf(
             "top.mrxiaom.pluginbase" to "base",
             "de.tr7zw.changeme.nbtapi" to "nbtapi",
+            "com.ezylang.evalex" to "evalex",
             "com.tcoded.folialib" to "folialib",
         ).forEach { (original, target) ->
             relocate(original, "$shadowGroup.$target")
