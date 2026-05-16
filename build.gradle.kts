@@ -42,8 +42,8 @@ dependencies {
     compileOnly("com.github.nulli0n:ExcellentEconomy:c32f037025") // CoinsEngine
     compileOnly("me.clip:placeholderapi:2.11.6")
 
-    compileOnly("net.momirealms:craft-engine-core:0.0.67")
-    compileOnly("net.momirealms:craft-engine-bukkit:0.0.67")
+    compileOnly("net.momirealms:craft-engine-core:26.5")
+    compileOnly("net.momirealms:craft-engine-bukkit:26.5")
 
     compileOnly(files("libs/api-itemsadder-3.6.3-beta-14.jar"))
     compileOnly("io.lumine:Mythic-Dist:4.13.0")
