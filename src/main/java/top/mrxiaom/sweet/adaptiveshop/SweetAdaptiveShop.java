@@ -100,7 +100,7 @@ public class SweetAdaptiveShop extends BukkitPlugin {
     private IEconomy vault;
     private IEconomy playerPoints;
     private IEconomyWithSign mPoints;
-    private IEconomyWithSign coinsEngine;
+    private IEconomyWithSign excellentEconomy;
 
     private final Map<String, ItemAdapter> itemAdapterRegistry = new HashMap<>();
     private IMythic mythic;
@@ -142,8 +142,8 @@ public class SweetAdaptiveShop extends BukkitPlugin {
         return mPoints;
     }
     @Nullable
-    public IEconomyWithSign getCoinsEngine() {
-        return coinsEngine;
+    public IEconomyWithSign getExcellentEconomy() {
+        return excellentEconomy;
     }
 
     @Nullable
@@ -299,11 +299,19 @@ public class SweetAdaptiveShop extends BukkitPlugin {
         } catch (NoClassDefFoundError ignored) {
         }
         try {
-            if (Util.isPresent("su.nightexpress.coinsengine.api.CoinsEngineAPI")) {
-                coinsEngine = new CoinsEngineEconomy(null);
-                economyResolvers.add(new CoinsEngineEconomy.Resolver(this));
-                loadedEconomies.add(coinsEngine.getName());
+            if (Util.isPresent("su.nightexpress.excellenteconomy.api.ExcellentEconomyAPI")) {
+                Class<?> apiClass = ExcellentEconomyEconomy.apiClass();
+                RegisteredServiceProvider<?> service = Bukkit.getServicesManager().getRegistration(apiClass);
+                Object provider = service == null ? null : service.getProvider();
+                if (provider != null) {
+                    excellentEconomy = new ExcellentEconomyEconomy(provider, null);
+                    economyResolvers.add(new ExcellentEconomyEconomy.Resolver(this));
+                    loadedEconomies.add(excellentEconomy.getName());
+                } else {
+                    warn("无法挂钩 ExcellentEconomy");
+                }
             }
+        } catch (ReflectiveOperationException ignored) {
         } catch (LinkageError ignored) {
         }
         for (String name : loadedEconomies) {
