@@ -12,6 +12,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nightexpress.excellenteconomy.api.ExcellentEconomyAPI;
 import top.mrxiaom.pluginbase.BukkitPlugin;
 import top.mrxiaom.pluginbase.actions.ActionProviders;
 import top.mrxiaom.pluginbase.func.LanguageManager;
@@ -100,7 +101,7 @@ public class SweetAdaptiveShop extends BukkitPlugin {
     private IEconomy vault;
     private IEconomy playerPoints;
     private IEconomyWithSign mPoints;
-    private IEconomyWithSign coinsEngine;
+    private IEconomyWithSign excellentEconomy;
 
     private final Map<String, ItemAdapter> itemAdapterRegistry = new HashMap<>();
     private IMythic mythic;
@@ -142,8 +143,8 @@ public class SweetAdaptiveShop extends BukkitPlugin {
         return mPoints;
     }
     @Nullable
-    public IEconomyWithSign getCoinsEngine() {
-        return coinsEngine;
+    public IEconomyWithSign getExcellentEconomy() {
+        return excellentEconomy;
     }
 
     @Nullable
@@ -279,7 +280,7 @@ public class SweetAdaptiveShop extends BukkitPlugin {
                     warn("已发现 Vault，但经济插件未加载，无法挂钩经济插件");
                 }
             }
-        } catch (NoClassDefFoundError ignored) {
+        } catch (LinkageError ignored) {
         }
         try {
             if (Util.isPresent("org.black_ixx.playerpoints.PlayerPointsAPI")) {
@@ -288,7 +289,7 @@ public class SweetAdaptiveShop extends BukkitPlugin {
                 economyResolvers.add(new PlayerPointsEconomy.Resolver(this));
                 loadedEconomies.add(playerPoints.getName());
             }
-        } catch (NoClassDefFoundError ignored) {
+        } catch (LinkageError ignored) {
         }
         try {
             if (Util.isPresent("me.yic.mpoints.MPointsAPI")) {
@@ -296,13 +297,19 @@ public class SweetAdaptiveShop extends BukkitPlugin {
                 economyResolvers.add(new MPointsEconomy.Resolver(this));
                 loadedEconomies.add(mPoints.getName());
             }
-        } catch (NoClassDefFoundError ignored) {
+        } catch (LinkageError ignored) {
         }
         try {
-            if (Util.isPresent("su.nightexpress.coinsengine.api.CoinsEngineAPI")) {
-                coinsEngine = new CoinsEngineEconomy(null);
-                economyResolvers.add(new CoinsEngineEconomy.Resolver(this));
-                loadedEconomies.add(coinsEngine.getName());
+            if (Util.isPresent("su.nightexpress.excellenteconomy.api.ExcellentEconomyAPI")) {
+                RegisteredServiceProvider<ExcellentEconomyAPI> service = Bukkit.getServicesManager().getRegistration(ExcellentEconomyAPI.class);
+                ExcellentEconomyAPI provider = service == null ? null : service.getProvider();
+                if (provider != null) {
+                    excellentEconomy = new ExcellentEconomyEconomy(provider, null);
+                    economyResolvers.add(new ExcellentEconomyEconomy.Resolver(this));
+                    loadedEconomies.add(excellentEconomy.getName());
+                } else {
+                    warn("无法挂钩 ExcellentEconomy");
+                }
             }
         } catch (LinkageError ignored) {
         }

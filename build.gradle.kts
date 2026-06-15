@@ -30,6 +30,7 @@ repositories {
     maven("https://repo.rosewooddev.io/repository/public/")
     maven("https://mvn.lumine.io/repository/maven/")
     maven("https://repo.momirealms.net/releases/")
+    maven("https://repo.nightexpressdev.com/releases")
 }
 
 dependencies {
@@ -39,7 +40,8 @@ dependencies {
     compileOnly("net.milkbowl.vault:VaultAPI:1.7")
     compileOnly("org.black_ixx:playerpoints:3.2.7")
     compileOnly(files("libs/MPoints-1.2.2.jar"))
-    compileOnly("com.github.nulli0n:ExcellentEconomy:c32f037025") // CoinsEngine
+    compileOnly("su.nightexpress.nightcore:main:2.16.2")
+    compileOnly("su.nightexpress.excellenteconomy:ExcellentEconomy:2.8.0")
     compileOnly("me.clip:placeholderapi:2.11.6")
 
     compileOnly("net.momirealms:craft-engine-core:26.5")

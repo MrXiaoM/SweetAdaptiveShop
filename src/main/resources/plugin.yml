@@ -9,6 +9,7 @@ softdepend:
   - MythicMobs
   - ItemsAdder
   - CraftEngine
+  - ExcellentEconomy
 authors: [ MrXiaoM ]
 folia-supported: true
 # PluginBase Libraries ${libraries_config}
