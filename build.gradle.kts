@@ -9,7 +9,7 @@ plugins {
 
 buildscript {
     repositories.mavenCentral()
-    dependencies.classpath("top.mrxiaom:LibrariesResolver-Gradle:1.7.21")
+    dependencies.classpath("top.mrxiaom:LibrariesResolver-Gradle:1.7.24")
 }
 
 group = "top.mrxiaom.sweet.adaptiveshop"
@@ -42,10 +42,10 @@ dependencies {
     compileOnly(files("libs/MPoints-1.2.2.jar"))
     compileOnly("su.nightexpress.nightcore:main:2.16.2")
     compileOnly("su.nightexpress.excellenteconomy:ExcellentEconomy:2.8.0")
-    compileOnly("me.clip:placeholderapi:2.11.6")
+    compileOnly("me.clip:placeholderapi:2.12.2")
 
-    compileOnly("net.momirealms:craft-engine-core:26.5")
-    compileOnly("net.momirealms:craft-engine-bukkit:26.5")
+    compileOnly("net.momirealms:craft-engine-core:26.6.2")
+    compileOnly("net.momirealms:craft-engine-bukkit:26.6.2")
 
     compileOnly(files("libs/api-itemsadder-3.6.3-beta-14.jar"))
     compileOnly("io.lumine:Mythic-Dist:4.13.0")
@@ -53,7 +53,7 @@ dependencies {
     compileOnly("io.lumine:LumineUtils:1.20-SNAPSHOT")
     compileOnly(base.depend.annotations)
 
-    base.library(LibraryHelper.adventure("4.22.0"))
+    base.library(LibraryHelper.adventure("4.25.0"))
     base.library(base.depend.HikariCP)
     base.collectPluginHolders()
 
