@@ -40,6 +40,7 @@ dependencies {
     compileOnly("net.milkbowl.vault:VaultAPI:1.7")
     compileOnly("org.black_ixx:playerpoints:3.2.7")
     compileOnly(files("libs/MPoints-1.2.2.jar"))
+    compileOnly("su.nightexpress.nightcore:main:2.16.2")
     compileOnly("su.nightexpress.excellenteconomy:ExcellentEconomy:2.8.0")
     compileOnly("me.clip:placeholderapi:2.11.6")
 
