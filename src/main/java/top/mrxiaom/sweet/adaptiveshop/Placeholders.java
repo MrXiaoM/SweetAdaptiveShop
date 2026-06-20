@@ -9,6 +9,11 @@ import top.mrxiaom.sweet.adaptiveshop.func.config.BuyShopManager;
 import top.mrxiaom.sweet.adaptiveshop.func.config.SellShopManager;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.shop.BuyShop;
 import top.mrxiaom.sweet.adaptiveshop.func.entry.shop.SellShop;
+import top.mrxiaom.sweet.adaptiveshop.utils.Utils;
+
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.StringJoiner;
 
 public class Placeholders extends PlaceholderExpansion {
     SweetAdaptiveShop plugin;
@@ -53,6 +58,23 @@ public class Placeholders extends PlaceholderExpansion {
         return request(offline, params);
     }
     private String request(OfflinePlayer offline, @NotNull String params) {
+        if (params.equals("next_outdate_remaining_seconds")) {
+            LocalDateTime tomorrow = Utils.nextOutdate();
+            long totalSeconds = tomorrow.toEpochSecond(ZoneOffset.UTC) - LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+            return String.valueOf(totalSeconds);
+        }
+        if (params.equals("next_outdate_remaining")) {
+            LocalDateTime tomorrow = Utils.nextOutdate();
+            long totalSeconds = tomorrow.toEpochSecond(ZoneOffset.UTC) - LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+            long hours = totalSeconds / 3600;
+            long minutes = (totalSeconds / 60) % 60;
+            long seconds = totalSeconds % 60;
+            StringJoiner joiner = new StringJoiner(":");
+            if (hours > 0) joiner.add(String.valueOf(hours));
+            if (hours > 0 || minutes > 0) joiner.add(String.valueOf(minutes));
+            joiner.add(String.valueOf(seconds));
+            return joiner.toString();
+        }
         if (params.startsWith("buy_dynamic_")) {
             Player player = offline != null && offline.isOnline() ? offline.getPlayer() : null;
             String buyShopId = params.substring(12);
