@@ -33,7 +33,7 @@ public class CustomGuiManager extends AbstractGuisModule<CustomGui> {
         GuiManager manager = GuiManager.inst();
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (manager.getOpeningGui(player) instanceof Impl) {
-                player.closeInventory();
+                plugin.getScheduler().closeInventory(player);
             }
         }
         super.reloadConfig(cfg);
@@ -96,7 +96,7 @@ public class CustomGuiManager extends AbstractGuisModule<CustomGui> {
         public void postSubmit() {
             plugin.getScheduler().runTaskLater(() -> {
                 if (model.closeAfterSubmit) {
-                    player.closeInventory();
+                    plugin.getScheduler().closeInventory(player);
                     Util.submitInvUpdate(player);
                 } else {
                     refreshGui();

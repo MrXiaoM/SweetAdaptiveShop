@@ -181,7 +181,7 @@ public class GuiBuyShop extends AbstractGuiModule {
         private void postSubmit(InventoryView view) {
             plugin.getScheduler().runTaskLater(() -> {
                 if (closeAfterSubmit) {
-                    player.closeInventory();
+                    plugin.getScheduler().closeInventory(player);
                     Util.submitInvUpdate(player);
                 } else {
                     updateInventory(view);

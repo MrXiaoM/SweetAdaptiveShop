@@ -9,7 +9,7 @@ plugins {
 
 buildscript {
     repositories.mavenCentral()
-    dependencies.classpath("top.mrxiaom:LibrariesResolver-Gradle:1.7.27")
+    dependencies.classpath("top.mrxiaom:LibrariesResolver-Gradle:1.7.28")
 }
 
 group = "top.mrxiaom.sweet.adaptiveshop"
@@ -44,8 +44,8 @@ dependencies {
     compileOnly("su.nightexpress.excellenteconomy:ExcellentEconomy:2.8.0")
     compileOnly("me.clip:placeholderapi:2.12.2")
 
-    compileOnly("net.momirealms:craft-engine-core:26.6.2")
-    compileOnly("net.momirealms:craft-engine-bukkit:26.6.2")
+    compileOnly("net.momirealms:craft-engine-core:26.7")
+    compileOnly("net.momirealms:craft-engine-bukkit:26.7")
 
     compileOnly(files("libs/api-itemsadder-3.6.3-beta-14.jar"))
     compileOnly("io.lumine:Mythic-Dist:4.13.0")

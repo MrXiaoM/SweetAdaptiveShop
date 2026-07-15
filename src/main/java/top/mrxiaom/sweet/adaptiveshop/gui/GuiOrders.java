@@ -161,7 +161,7 @@ public class GuiOrders extends AbstractGuiModule {
                     if (ShopIconOrder.click(plugin, click, pair.key(), pair.value(), player)) {
                         plugin.getScheduler().runTaskLater(() -> {
                             if (closeAfterSubmit) {
-                                player.closeInventory();
+                                plugin.getScheduler().closeInventory(player);
                                 Util.submitInvUpdate(player);
                             } else {
                                 updateInventory(view);

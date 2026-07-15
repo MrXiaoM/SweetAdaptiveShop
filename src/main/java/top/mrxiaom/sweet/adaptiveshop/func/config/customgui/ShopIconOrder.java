@@ -91,7 +91,7 @@ public class ShopIconOrder extends ShopIcon {
                 Messages.gui__order__not_enough.tm(player);
                 return false;
             }
-            player.closeInventory();
+            plugin.getScheduler().closeInventory(player);
             order.takeAll(player);
             plugin.getOrderDatabase().markOrderDone(player, order.id, data.getDoneCount() + 1);
             Messages.gui__order__success.tmf(player, order.display);
