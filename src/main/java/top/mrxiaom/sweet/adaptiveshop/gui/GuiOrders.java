@@ -11,9 +11,9 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import top.mrxiaom.pluginbase.api.InventoryViewAccessor;
 import top.mrxiaom.pluginbase.func.AutoRegister;
 import top.mrxiaom.pluginbase.func.gui.LoadedIcon;
 import top.mrxiaom.pluginbase.gui.IGuiHolder;
@@ -139,7 +139,7 @@ public class GuiOrders extends AbstractGuiModule {
         @Override
         public void onClick(InventoryAction action, ClickType click, InventoryType.SlotType slotType,
                             int slot, ItemStack currentItem, ItemStack cursor,
-                            InventoryView view, InventoryClickEvent event) {
+                            InventoryViewAccessor view, InventoryClickEvent event) {
             event.setCancelled(true);
             Character id = getClickedId(slot);
             if (id != null) {
