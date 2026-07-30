@@ -13,7 +13,7 @@ buildscript {
 }
 
 group = "top.mrxiaom.sweet.adaptiveshop"
-version = "1.2.3"
+version = "1.2.4"
 
 val base = LibraryHelper(project)
 val targetJavaVersion = 8
@@ -57,7 +57,7 @@ dependencies {
     base.library(base.depend.HikariCP)
     base.collectPluginHolders()
 
-    implementation(base.depend.nbtapi)
+    implementation("de.tr7zw:item-nbt-api:2.16.0")
     implementation(base.depend.EvalEx)
     implementation("com.github.technicallycoded:FoliaLib:0.4.4") { isTransitive = false }
     for (artifact in pluginBaseModules) {
