@@ -23,7 +23,6 @@ import top.mrxiaom.pluginbase.utils.ConfigUtils;
 import top.mrxiaom.pluginbase.utils.Util;
 import top.mrxiaom.pluginbase.utils.inventory.InventoryFactory;
 import top.mrxiaom.pluginbase.utils.item.ItemEditor;
-import top.mrxiaom.pluginbase.utils.scheduler.FoliaLibScheduler;
 import top.mrxiaom.sweet.adaptiveshop.actions.ActionGive;
 import top.mrxiaom.sweet.adaptiveshop.actions.ActionRefresh;
 import top.mrxiaom.sweet.adaptiveshop.api.IEconomyResolver;
@@ -54,7 +53,6 @@ public class SweetAdaptiveShop extends BukkitPlugin {
                 .reconnectDatabaseWhenReloadConfig(false)
                 .scanIgnore("top.mrxiaom.sweet.adaptiveshop.libs")
         );
-        this.scheduler = new FoliaLibScheduler(this);
 
         try {
             //noinspection ResultOfMethodCallIgnored

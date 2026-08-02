@@ -9,7 +9,7 @@ plugins {
 
 buildscript {
     repositories.mavenCentral()
-    dependencies.classpath("top.mrxiaom:LibrariesResolver-Gradle:1.7.32")
+    dependencies.classpath("top.mrxiaom:LibrariesResolver-Gradle:1.7.33")
 }
 
 group = "top.mrxiaom.sweet.adaptiveshop"
@@ -18,7 +18,7 @@ version = "1.2.4"
 val base = LibraryHelper(project)
 val targetJavaVersion = 8
 val shadowGroup = "top.mrxiaom.sweet.adaptiveshop.libs"
-val pluginBaseModules = base.modules.run { listOf(library, gui, actions, l10n, temporaryData, paper) }
+val pluginBaseModules = base.modules.run { listOf(library, gui, actions, l10n, temporaryData, paper, misc) }
 val shadowLink = configurations.create("shadowLink")
 
 repositories {
@@ -59,7 +59,6 @@ dependencies {
 
     implementation("de.tr7zw:item-nbt-api:2.16.0")
     implementation(base.depend.EvalEx)
-    implementation("com.github.technicallycoded:FoliaLib:0.4.4") { isTransitive = false }
     for (artifact in pluginBaseModules) {
         implementation(artifact)
     }
@@ -87,7 +86,6 @@ tasks {
             "top.mrxiaom.pluginbase" to "base",
             "de.tr7zw.changeme.nbtapi" to "nbtapi",
             "com.ezylang.evalex" to "evalex",
-            "com.tcoded.folialib" to "folialib",
         ).forEach { (original, target) ->
             relocate(original, "$shadowGroup.$target")
         }
