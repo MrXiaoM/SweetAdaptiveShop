@@ -9,7 +9,7 @@ plugins {
 
 buildscript {
     repositories.mavenCentral()
-    dependencies.classpath("top.mrxiaom:LibrariesResolver-Gradle:1.7.33")
+    dependencies.classpath("top.mrxiaom:LibrariesResolver-Gradle:1.8.1")
 }
 
 group = "top.mrxiaom.sweet.adaptiveshop"
@@ -18,7 +18,7 @@ version = "1.2.4"
 val base = LibraryHelper(project)
 val targetJavaVersion = 8
 val shadowGroup = "top.mrxiaom.sweet.adaptiveshop.libs"
-val pluginBaseModules = base.modules.run { listOf(library, gui, actions, l10n, temporaryData, paper, misc) }
+val pluginBaseModules = base.modules.run { listOf(library, message, gui, actions, l10n, temporaryData, paper, misc) }
 val shadowLink = configurations.create("shadowLink")
 
 repositories {
